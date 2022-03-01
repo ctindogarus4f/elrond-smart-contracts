@@ -1,0 +1,14 @@
+[package]
+name = "vesting-meta"
+version = "0.0.0"
+edition = "2018"
+publish = false
+
+[dependencies.vesting]
+path = ".."
+
+[dependencies.elrond-wasm]
+version = "0.29.0"
+
+[dependencies.elrond-wasm-debug]
+version = "0.29.0"
