@@ -78,15 +78,15 @@ pub trait VestingContract {
 
     fn get_vested_tokens(&self, beneficiary: &ManagedAddress) -> BigUint {
         let beneficiary_info = self.beneficiary_info(beneficiary).get();
+
         let allocated_tokens = beneficiary_info.tokens_allocated;
-        let first_release = beneficiary_info.start + beneficiary_info.release_cliff;
         let no_of_releases_after_cliff =
             self.get_no_of_releases_after_cliff(beneficiary_info.release_percentage);
+        let first_release = beneficiary_info.start + beneficiary_info.release_cliff;
         let last_release =
             first_release + beneficiary_info.release_duration * no_of_releases_after_cliff as u64;
 
         let current_timestamp = self.blockchain().get_block_timestamp();
-
         if current_timestamp < first_release {
             return BigUint::zero();
         } else if current_timestamp >= last_release {
