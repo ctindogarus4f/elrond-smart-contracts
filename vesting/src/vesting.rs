@@ -65,7 +65,18 @@ pub trait VestingContract {
 
     // view functions
 
+    #[view(getAvailableTokens)]
     fn get_available_tokens(&self) -> BigUint {
+        let caller = self.blockchain().get_caller();
+        let claimed_tokens = self.beneficiary_info(&caller).get().tokens_claimed;
+        let vested_tokens = self.get_vested_tokens();
+
+        vested_tokens - claimed_tokens
+    }
+
+    // private functions
+
+    fn get_vested_tokens(&self) -> BigUint {
         // TODO: implement this method
         BigUint::zero()
     }

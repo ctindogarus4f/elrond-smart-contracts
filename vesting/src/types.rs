@@ -4,7 +4,7 @@ elrond_wasm::derive_imports!();
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub struct BeneficiaryInfo<M: ManagedTypeApi> {
-    pub start: u64,
+    pub start: u64, // start of the vesting scheme
     pub release_cliff: u64,
     pub release_percentage: u64,
     pub release_duration: u64,
