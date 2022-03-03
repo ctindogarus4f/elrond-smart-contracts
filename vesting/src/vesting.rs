@@ -16,7 +16,7 @@ pub trait VestingContract {
 
     // endpoints
 
-    #[endpoint]
+    #[endpoint(addBeneficiary)]
     fn add_beneficiary(
         &self,
         addr: ManagedAddress,
