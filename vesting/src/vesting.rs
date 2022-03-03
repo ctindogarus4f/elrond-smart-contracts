@@ -37,7 +37,17 @@ pub trait VestingContract {
 
     #[endpoint]
     fn claim(&self) {
-        // TODO: implement this method
+        let caller = self.blockchain().get_caller();
+        require!(
+            !self.beneficiary_info(&caller).is_empty(),
+            "non-existent beneficiary"
+        );
+
+        let available_tokens = self.get_available_tokens();
+        require!(
+            available_tokens > 0,
+            "no tokens are available to be claimed"
+        );
     }
 
     // view functions
