@@ -6,7 +6,7 @@ mod types;
 
 use types::BeneficiaryInfo;
 
-/// An empty contract. To be used as a template when starting a new contract from scratch.
+/// A vesting contract that can release its token balance gradually like a typical vesting scheme.
 #[elrond_wasm::derive::contract]
 pub trait VestingContract {
     #[init]
