@@ -9,5 +9,5 @@ pub struct BeneficiaryInfo<M: ManagedTypeApi> {
     pub release_percentage: u64,
     pub release_duration: u64,
     pub tokens_allocated: BigUint<M>,
-    pub tokens_released: BigUint<M>,
+    pub tokens_claimed: BigUint<M>,
 }

@@ -31,7 +31,7 @@ pub trait VestingContract {
             release_percentage,
             release_duration,
             tokens_allocated,
-            tokens_released: BigUint::zero(),
+            tokens_claimed: BigUint::zero(),
         };
 
         self.beneficiary_info(&addr).set(&beneficiary_info);
@@ -52,7 +52,7 @@ pub trait VestingContract {
         );
 
         self.beneficiary_info(&caller)
-            .update(|beneficiary| beneficiary.tokens_released += &available_tokens);
+            .update(|beneficiary| beneficiary.tokens_claimed += &available_tokens);
 
         self.send().direct(
             &caller,
