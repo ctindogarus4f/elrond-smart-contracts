@@ -12,6 +12,29 @@ pub trait VestingContract {
     #[init]
     fn init(&self) {}
 
+    // endpoints
+
+    #[endpoint]
+    fn add_beneficiary(
+        &self,
+        addr: ManagedAddress,
+        release_cliff: u64,
+        release_percentage: u64,
+        release_duration: u64,
+        tokens_allocated: BigUint,
+    ) {
+        let beneficiary_info = BeneficiaryInfo {
+            start: self.blockchain().get_block_timestamp(),
+            release_cliff,
+            release_percentage,
+            release_duration,
+            tokens_allocated,
+            tokens_released: BigUint::zero(),
+        };
+
+        self.beneficiary_info(&addr).set(&beneficiary_info);
+    }
+
     // storage
 
     #[view(getBeneficiaryInfo)]
