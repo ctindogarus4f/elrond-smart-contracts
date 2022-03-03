@@ -51,7 +51,8 @@ pub trait VestingContract {
             "no tokens are available to be claimed"
         );
 
-        let beneficiary_info = self.beneficiary_info(&caller).get();
+        self.beneficiary_info(&caller)
+            .update(|beneficiary| beneficiary.tokens_released += &available_tokens);
 
         self.send().direct(
             &caller,
