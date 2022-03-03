@@ -11,4 +11,13 @@ use types::BeneficiaryInfo;
 pub trait VestingContract {
     #[init]
     fn init(&self) {}
+
+    // storage
+
+    #[view(getBeneficiaryInfo)]
+    #[storage_mapper("beneficiaryInfo")]
+    fn beneficiary_info(
+        &self,
+        beneficiary: &ManagedAddress,
+    ) -> SingleValueMapper<BeneficiaryInfo<Self::Api>>;
 }
