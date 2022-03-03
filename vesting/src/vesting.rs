@@ -35,6 +35,8 @@ pub trait VestingContract {
         };
 
         self.beneficiary_info(&addr).set(&beneficiary_info);
+
+        self.beneficiary_add_event(&addr, &beneficiary_info)
     }
 
     #[endpoint]
@@ -51,6 +53,17 @@ pub trait VestingContract {
             "no tokens are available to be claimed"
         );
 
+        let esdt_balance = self.blockchain().get_esdt_balance(
+            &self.blockchain().get_sc_address(),
+            &self.token_identifier().get(),
+            0,
+        );
+
+        require!(
+            esdt_balance >= available_tokens,
+            "not enough tokens in vesting contract"
+        );
+
         self.send().direct(
             &caller,
             &self.token_identifier().get(),
@@ -61,6 +74,8 @@ pub trait VestingContract {
 
         self.beneficiary_info(&caller)
             .update(|beneficiary| beneficiary.tokens_claimed += &available_tokens);
+
+        self.claim_event(&caller, &available_tokens);
     }
 
     // view functions
@@ -100,14 +115,30 @@ pub trait VestingContract {
         }
     }
 
-    fn get_no_of_releases_after_cliff(&self, num: u64) -> u64 {
-        if 100 % num == 0 {
-            return 100 / num - 1;
+    fn get_no_of_releases_after_cliff(&self, release_percentage: u64) -> u64 {
+        require!(release_percentage > 0 && release_percentage <= 100, "release percentage should be between (0, 100]");
+
+        if 100 % release_percentage == 0 {
+            return 100 / release_percentage - 1;
         }
-        100 / num
+        100 / release_percentage
     }
 
     // storage
+
+    #[event("claim")]
+    fn claim_event(
+        &self,
+        #[indexed] to: &ManagedAddress,
+        #[indexed] amount: &BigUint,
+    );
+
+    #[event("beneficiary_add")]
+    fn beneficiary_add_event(
+        &self,
+        #[indexed] to: &ManagedAddress,
+        #[indexed] beneficiary_info: &BeneficiaryInfo<Self::Api>,
+    );
 
     #[view(getBeneficiaryInfo)]
     #[storage_mapper("beneficiaryInfo")]
