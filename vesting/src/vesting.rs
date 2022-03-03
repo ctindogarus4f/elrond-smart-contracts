@@ -10,7 +10,9 @@ use types::BeneficiaryInfo;
 #[elrond_wasm::derive::contract]
 pub trait VestingContract {
     #[init]
-    fn init(&self) {}
+    fn init(&self, token_identifier: TokenIdentifier) {
+        self.token_identifier().set_if_empty(&token_identifier);
+    }
 
     // endpoints
 
@@ -48,6 +50,16 @@ pub trait VestingContract {
             available_tokens > 0,
             "no tokens are available to be claimed"
         );
+
+        let beneficiary_info = self.beneficiary_info(&caller).get();
+
+        self.send().direct(
+            &caller,
+            &self.token_identifier().get(),
+            0,
+            &available_tokens,
+            b"successful claim",
+        );
     }
 
     // view functions
@@ -65,4 +77,8 @@ pub trait VestingContract {
         &self,
         beneficiary: &ManagedAddress,
     ) -> SingleValueMapper<BeneficiaryInfo<Self::Api>>;
+
+    #[view(getTokenIdentifier)]
+    #[storage_mapper("tokenIdentifier")]
+    fn token_identifier(&self) -> SingleValueMapper<TokenIdentifier>;
 }
