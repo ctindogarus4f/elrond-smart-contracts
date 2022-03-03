@@ -69,16 +69,39 @@ pub trait VestingContract {
     fn get_available_tokens(&self) -> BigUint {
         let caller = self.blockchain().get_caller();
         let claimed_tokens = self.beneficiary_info(&caller).get().tokens_claimed;
-        let vested_tokens = self.get_vested_tokens();
+        let vested_tokens = self.get_vested_tokens(&caller);
 
         vested_tokens - claimed_tokens
     }
 
     // private functions
 
-    fn get_vested_tokens(&self) -> BigUint {
-        // TODO: implement this method
-        BigUint::zero()
+    fn get_vested_tokens(&self, beneficiary: &ManagedAddress) -> BigUint {
+        let beneficiary_info = self.beneficiary_info(beneficiary).get();
+        let allocated_tokens = beneficiary_info.tokens_allocated;
+        let first_release = beneficiary_info.start + beneficiary_info.release_cliff;
+        let no_of_releases_after_cliff =
+            self.get_no_of_releases_after_cliff(beneficiary_info.release_percentage);
+        let last_release =
+            first_release + beneficiary_info.release_duration * no_of_releases_after_cliff as u64;
+
+        let current_timestamp = self.blockchain().get_block_timestamp();
+
+        if current_timestamp < first_release {
+            return BigUint::zero();
+        } else if current_timestamp >= last_release {
+            return allocated_tokens.clone();
+        } else {
+            // TODO: add implementation
+            return BigUint::zero();
+        }
+    }
+
+    fn get_no_of_releases_after_cliff(&self, num: u64) -> u64 {
+        if 100 % num == 0 {
+            return 100 / num - 1;
+        }
+        100 / num
     }
 
     // storage
