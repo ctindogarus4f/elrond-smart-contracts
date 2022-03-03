@@ -92,8 +92,11 @@ pub trait VestingContract {
         } else if current_timestamp >= last_release {
             return allocated_tokens.clone();
         } else {
-            // TODO: add implementation
-            return BigUint::zero();
+            let no_of_releases_until_now =
+                1 + (current_timestamp - first_release) / beneficiary_info.release_duration;
+            return allocated_tokens
+                * beneficiary_info.release_percentage
+                * no_of_releases_until_now;
         }
     }
 
