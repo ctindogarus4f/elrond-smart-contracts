@@ -35,6 +35,18 @@ pub trait VestingContract {
         self.beneficiary_info(&addr).set(&beneficiary_info);
     }
 
+    #[endpoint]
+    fn claim(&self) {
+        // TODO: implement this method
+    }
+
+    // view functions
+
+    fn get_available_tokens(&self) -> BigUint {
+        // TODO: implement this method
+        BigUint::zero()
+    }
+
     // storage
 
     #[view(getBeneficiaryInfo)]
