@@ -8,9 +8,12 @@ elrond_wasm_node::wasm_endpoints! {
     vesting
     (
         addBeneficiary
+        addGroupInfo
         claim
         getAvailableTokens
         getBeneficiaryInfo
+        getGroupInfo
+        getMultisigAddress
         getTokenIdentifier
     )
 }
