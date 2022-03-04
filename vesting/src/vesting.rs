@@ -89,7 +89,7 @@ pub trait VestingContract {
         require!(!beneficiary_info.is_revoked, "beneficiary already removed",);
         require!(group_info.can_be_revoked, "beneficiary cannot be removed",);
 
-        let available_tokens = self.get_available_tokens();
+        let available_tokens = self.get_available_tokens(&addr);
         let new_allocated_tokens = beneficiary_info.tokens_claimed + available_tokens;
         self.beneficiary_info(&addr)
             .update(|beneficiary| beneficiary.tokens_allocated = new_allocated_tokens);
@@ -103,7 +103,7 @@ pub trait VestingContract {
             "non-existent beneficiary"
         );
 
-        let available_tokens = self.get_available_tokens();
+        let available_tokens = self.get_available_tokens(&caller);
         require!(
             available_tokens > 0,
             "no tokens are available to be claimed"
@@ -136,10 +136,9 @@ pub trait VestingContract {
     // view functions
 
     #[view(getAvailableTokens)]
-    fn get_available_tokens(&self) -> BigUint {
-        let caller = self.blockchain().get_caller();
-        let claimed_tokens = self.beneficiary_info(&caller).get().tokens_claimed;
-        let vested_tokens = self.get_vested_tokens(&caller);
+    fn get_available_tokens(&self, addr: &ManagedAddress) -> BigUint {
+        let claimed_tokens = self.beneficiary_info(&addr).get().tokens_claimed;
+        let vested_tokens = self.get_vested_tokens(&addr);
 
         vested_tokens - claimed_tokens
     }
@@ -154,8 +153,8 @@ pub trait VestingContract {
         );
     }
 
-    fn get_vested_tokens(&self, beneficiary: &ManagedAddress) -> BigUint {
-        let beneficiary_info = self.beneficiary_info(beneficiary).get();
+    fn get_vested_tokens(&self, addr: &ManagedAddress) -> BigUint {
+        let beneficiary_info = self.beneficiary_info(addr).get();
         let group_info = self.group_info(&beneficiary_info.group_type).get(); // checked when set beneficiaryInfo
 
         let allocated_tokens = beneficiary_info.tokens_allocated;
