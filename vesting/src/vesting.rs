@@ -12,8 +12,9 @@ use types::GroupType;
 #[elrond_wasm::derive::contract]
 pub trait VestingContract {
     #[init]
-    fn init(&self, token_identifier: TokenIdentifier, multisig_wallet_address: ManagedAddress) {
-        self.multisig_wallet_address().set_if_empty(&self.blockchain().get_caller()); // todo: use multisig_wallet_address after full implementation
+    fn init(&self, token_identifier: TokenIdentifier, _multisig_wallet_address: ManagedAddress) {
+        self.multisig_wallet_address()
+            .set_if_empty(&self.blockchain().get_caller()); // todo: use multisig_wallet_address after full implementation
 
         self.token_identifier().set_if_empty(&token_identifier);
     }
@@ -144,8 +145,7 @@ pub trait VestingContract {
         let no_of_releases_after_cliff =
             self.get_no_of_releases_after_cliff(group_info.release_percentage);
         let first_release = beneficiary_info.start + group_info.release_cliff;
-        let last_release =
-            first_release + group_info.release_duration * no_of_releases_after_cliff as u64;
+        let last_release = first_release + group_info.release_duration * no_of_releases_after_cliff;
 
         let current_timestamp = self.blockchain().get_block_timestamp();
         if current_timestamp < first_release {
@@ -155,9 +155,8 @@ pub trait VestingContract {
         } else {
             let no_of_releases_until_now =
                 1 + (current_timestamp - first_release) / group_info.release_duration;
-            return allocated_tokens / (100 as u64)
-                * group_info.release_percentage
-                * no_of_releases_until_now;
+            return allocated_tokens * group_info.release_percentage * no_of_releases_until_now
+                / 100u64;
         }
     }
 
