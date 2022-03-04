@@ -12,9 +12,9 @@ use types::GroupType;
 #[elrond_wasm::derive::contract]
 pub trait VestingContract {
     #[init]
-    fn init(&self, token_identifier: TokenIdentifier, _multisig_wallet_address: ManagedAddress) {
-        self.multisig_wallet_address()
-            .set_if_empty(&self.blockchain().get_caller()); // todo: use multisig_wallet_address after full implementation
+    fn init(&self, token_identifier: TokenIdentifier, _multisig_address: ManagedAddress) {
+        self.multisig_address()
+            .set_if_empty(&self.blockchain().get_caller()); // todo: use multisig_address after full implementation
 
         self.token_identifier().set_if_empty(&token_identifier);
     }
@@ -43,7 +43,7 @@ pub trait VestingContract {
         };
 
         self.group_info(&group_type).set_if_empty(&group_info);
-        self.group_add_event(&group_type, &group_info);
+        self.add_group_event(&group_type, &group_info);
     }
 
     #[endpoint(addBeneficiary)]
@@ -74,8 +74,11 @@ pub trait VestingContract {
         };
 
         self.beneficiary_info(&addr).set(&beneficiary_info);
-        self.beneficiary_add_event(&addr, &beneficiary_info)
+        self.add_beneficiary_event(&addr, &beneficiary_info)
     }
+
+    #[endpoint(removeBeneficiary)]
+    fn remove_beneficiary(&self, addr: &ManagedAddress) {}
 
     #[endpoint]
     fn claim(&self) {
@@ -130,9 +133,9 @@ pub trait VestingContract {
     // private functions
 
     fn assert_multisig_wallet(&self) {
-        let multisig_wallet_address = self.multisig_wallet_address().get(); // set in constructor
+        let multisig_address = self.multisig_address().get(); // set in constructor
         require!(
-            self.blockchain().get_caller() == multisig_wallet_address,
+            self.blockchain().get_caller() == multisig_address,
             "caller not authorized",
         );
     }
@@ -177,21 +180,25 @@ pub trait VestingContract {
     #[event("claim")]
     fn claim_event(&self, #[indexed] to: &ManagedAddress, #[indexed] amount: &BigUint);
 
-    #[event("beneficiary_add")]
-    fn beneficiary_add_event(
+    #[event("add_beneficiary")]
+    fn add_beneficiary_event(
         &self,
         #[indexed] addr: &ManagedAddress,
         #[indexed] beneficiary_info: &BeneficiaryInfo<Self::Api>,
     );
 
-    #[event("beneficiary_add")]
-    fn group_add_event(&self, #[indexed] group_type: &GroupType, #[indexed] group_info: &GroupInfo);
+    #[event("add_group")]
+    fn add_group_event(&self, #[indexed] group_type: &GroupType, #[indexed] group_info: &GroupInfo);
 
     // storage
 
     #[view(getTokenIdentifier)]
     #[storage_mapper("tokenIdentifier")]
     fn token_identifier(&self) -> SingleValueMapper<TokenIdentifier>;
+
+    #[view(getMultisigAddress)]
+    #[storage_mapper("multisigAddress")]
+    fn multisig_address(&self) -> SingleValueMapper<ManagedAddress>;
 
     #[view(getBeneficiaryInfo)]
     #[storage_mapper("beneficiaryInfo")]
@@ -203,8 +210,4 @@ pub trait VestingContract {
     #[view(getGroupInfo)]
     #[storage_mapper("groupInfo")]
     fn group_info(&self, group_type: &GroupType) -> SingleValueMapper<GroupInfo>;
-
-    #[view(getMultisigAddress)]
-    #[storage_mapper("multisigAddress")]
-    fn multisig_wallet_address(&self) -> SingleValueMapper<ManagedAddress>;
 }
