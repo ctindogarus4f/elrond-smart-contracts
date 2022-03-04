@@ -4,6 +4,7 @@ elrond_wasm::derive_imports!();
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub struct BeneficiaryInfo<M: ManagedTypeApi> {
+    pub can_be_revoked: bool,
     pub is_revoked: bool,
     pub group_type: GroupType,
     pub start: u64,                   // start of the vesting scheme
@@ -13,7 +14,6 @@ pub struct BeneficiaryInfo<M: ManagedTypeApi> {
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub struct GroupInfo {
-    pub can_be_revoked: bool,
     pub release_cliff: u64,
     pub release_duration: u64,
     pub release_percentage: u8,
@@ -22,9 +22,10 @@ pub struct GroupInfo {
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub enum GroupType {
     Advisor,
-    CoreTeam,
     Marketing,
     PrivateInvestor,
     SeedInvestor,
+    Strategy,
     Team,
+    Treasury,
 }

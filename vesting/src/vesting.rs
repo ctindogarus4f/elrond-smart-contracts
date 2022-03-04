@@ -25,7 +25,6 @@ pub trait VestingContract {
     fn add_group_info(
         &self,
         group_type: GroupType,
-        can_be_revoked: bool,
         release_cliff: u64,
         release_duration: u64,
         release_percentage: u8,
@@ -38,7 +37,6 @@ pub trait VestingContract {
         );
 
         let group_info = GroupInfo {
-            can_be_revoked,
             release_cliff,
             release_percentage,
             release_duration,
@@ -52,6 +50,7 @@ pub trait VestingContract {
     fn add_beneficiary(
         &self,
         addr: &ManagedAddress,
+        can_be_revoked: bool,
         group_type: GroupType,
         start: u64,
         tokens_allocated: BigUint,
@@ -69,6 +68,7 @@ pub trait VestingContract {
         );
 
         let beneficiary_info = BeneficiaryInfo {
+            can_be_revoked,
             is_revoked: false,
             group_type,
             start,
@@ -84,10 +84,12 @@ pub trait VestingContract {
     fn remove_beneficiary(&self, addr: &ManagedAddress) {
         self.assert_multisig_wallet();
         let beneficiary_info = self.beneficiary_info(addr).get();
-        let group_info = self.group_info(&beneficiary_info.group_type).get();
 
         require!(!beneficiary_info.is_revoked, "beneficiary already removed",);
-        require!(group_info.can_be_revoked, "beneficiary cannot be removed",);
+        require!(
+            beneficiary_info.can_be_revoked,
+            "beneficiary cannot be removed",
+        );
 
         let available_tokens = self.get_available_tokens(&addr);
         let new_allocated_tokens = beneficiary_info.tokens_claimed + available_tokens;
