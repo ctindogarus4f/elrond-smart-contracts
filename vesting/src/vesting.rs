@@ -22,12 +22,13 @@ pub trait VestingContract {
     // endpoints
 
     #[endpoint(addGroupInfo)]
-    fn set_group_info(
+    fn add_group_info(
         &self,
         group_type: GroupType,
+        can_be_revoked: bool,
         release_cliff: u64,
-        release_percentage: u64,
         release_duration: u64,
+        release_percentage: u8,
     ) {
         self.assert_multisig_wallet();
 
@@ -37,6 +38,7 @@ pub trait VestingContract {
         );
 
         let group_info = GroupInfo {
+            can_be_revoked,
             release_cliff,
             release_percentage,
             release_duration,
@@ -67,6 +69,7 @@ pub trait VestingContract {
         );
 
         let beneficiary_info = BeneficiaryInfo {
+            is_revoked: false,
             group_type,
             start,
             tokens_allocated,
@@ -78,7 +81,10 @@ pub trait VestingContract {
     }
 
     #[endpoint(removeBeneficiary)]
-    fn remove_beneficiary(&self, addr: &ManagedAddress) {}
+    fn remove_beneficiary(&self, addr: &ManagedAddress) {
+        self.assert_multisig_wallet();
+        let beneficiary_info = self.beneficiary_info(addr).get();
+    }
 
     #[endpoint]
     fn claim(&self) {
@@ -148,7 +154,8 @@ pub trait VestingContract {
         let no_of_releases_after_cliff =
             self.get_no_of_releases_after_cliff(group_info.release_percentage);
         let first_release = beneficiary_info.start + group_info.release_cliff;
-        let last_release = first_release + group_info.release_duration * no_of_releases_after_cliff;
+        let last_release =
+            first_release + group_info.release_duration * no_of_releases_after_cliff as u64;
 
         let current_timestamp = self.blockchain().get_block_timestamp();
         if current_timestamp < first_release {
@@ -158,12 +165,14 @@ pub trait VestingContract {
         } else {
             let no_of_releases_until_now =
                 1 + (current_timestamp - first_release) / group_info.release_duration;
-            return allocated_tokens * group_info.release_percentage * no_of_releases_until_now
+            return allocated_tokens
+                * group_info.release_percentage as u64
+                * no_of_releases_until_now
                 / 100u64;
         }
     }
 
-    fn get_no_of_releases_after_cliff(&self, release_percentage: u64) -> u64 {
+    fn get_no_of_releases_after_cliff(&self, release_percentage: u8) -> u8 {
         require!(
             release_percentage > 0 && release_percentage <= 100,
             "release percentage should be between (0, 100]"
