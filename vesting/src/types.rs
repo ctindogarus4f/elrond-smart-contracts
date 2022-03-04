@@ -21,7 +21,9 @@ pub struct GroupInfo {
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub enum GroupType {
+    Advisor,
     CoreTeam,
+    Marketing,
     PrivateInvestor,
     SeedInvestor,
     Team,
