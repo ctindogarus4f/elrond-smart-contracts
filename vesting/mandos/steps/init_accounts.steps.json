@@ -1,0 +1,27 @@
+{
+    "name": "init_accounts",
+    "steps": [
+        {
+            "step": "setState",
+            "accounts": {
+                "address:owner": {
+                    "nonce": "0",
+                    "esdt": {
+                        "str:TOK-0001": "100,000,000,000"
+                    }
+                },
+                "sc:multisig": {
+                    "nonce": "0",
+                    "code": "file:../../../multisig/output/multisig.wasm"
+                }
+            },
+            "newAddresses": [
+                {
+                    "creatorAddress": "address:owner",
+                    "creatorNonce": "0",
+                    "newAddress": "sc:vesting"
+                }
+            ]
+        }
+    ]
+}

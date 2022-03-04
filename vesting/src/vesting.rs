@@ -12,8 +12,8 @@ use types::GroupType;
 #[elrond_wasm::derive::contract]
 pub trait VestingContract {
     #[init]
-    fn init(&self, token_identifier: TokenIdentifier, multisig_wallet_address: ManagedAddress) {
-        self.multisig_wallet_address().set_if_empty(&self.blockchain().get_caller()); // todo: use multisig_wallet_address after full implementation
+    fn init(&self, token_identifier: TokenIdentifier, multisig_wallet: ManagedAddress) {
+        self.multisig_wallet_address().set_if_empty(&multisig_wallet);
 
         self.token_identifier().set_if_empty(&token_identifier);
     }

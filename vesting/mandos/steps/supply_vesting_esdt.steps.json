@@ -1,0 +1,36 @@
+{
+    "name": "supply_vesting_esdt",
+    "steps": [
+        {
+            "step": "transfer",
+            "txId": "supply_vesting_esdt#1",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:vesting",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:TOK-0001",
+                        "value": "100,000,000,000"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            }
+        },
+        {
+            "step": "checkState",
+            "comment": "assert TOK-0001 balance",
+            "accounts": {
+                "+": "",
+                "sc:vesting": {
+                    "nonce": "0",
+                    "esdt": {
+                        "str:TOK-0001": "100,000,000,000"
+                    },
+                    "code": "file:../../output/vesting.wasm"
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "name": "init_vesting",
+    "steps": [
+        {
+            "step": "externalSteps",
+            "path": "steps/init_accounts.steps.json"
+        },
+        {
+            "step": "externalSteps",
+            "path": "steps/deploy_vesting.steps.json"
+        },
+        {
+            "step": "externalSteps",
+            "path": "steps/supply_vesting_esdt.steps.json"
+        }
+    ]
+}

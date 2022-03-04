@@ -1,0 +1,53 @@
+{
+    "name": "deploy_vesting",
+    "steps": [
+        {
+            "step": "scDeploy",
+            "txId": "deploy_vesting#1",
+            "tx": {
+                "from": "address:owner",
+                "contractCode": "file:../../output/vesting.wasm",
+                "arguments": [
+                    "str:TOK-0001",
+                    "sc:multisig"
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*"
+            }
+        },
+        {
+            "step": "scQuery",
+            "txId": "deploy_vesting#2",
+            "comment": "assert token_identifier",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getTokenIdentifier"
+            },
+            "expect": {
+                "out": [
+                    "str:TOK-0001"
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "scQuery",
+            "txId": "deploy_vesting#3",
+            "comment": "assert multisig_address",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getMultisigAddress"
+            },
+            "expect": {
+                "out": [
+                    "sc:multisig"
+                ],
+                "status": "0"
+            }
+        }
+    ]
+}
