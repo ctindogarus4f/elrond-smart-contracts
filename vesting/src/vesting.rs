@@ -84,6 +84,15 @@ pub trait VestingContract {
     fn remove_beneficiary(&self, addr: &ManagedAddress) {
         self.assert_multisig_wallet();
         let beneficiary_info = self.beneficiary_info(addr).get();
+        let group_info = self.group_info(&beneficiary_info.group_type).get();
+
+        require!(!beneficiary_info.is_revoked, "beneficiary already removed",);
+        require!(group_info.can_be_revoked, "beneficiary cannot be removed",);
+
+        let available_tokens = self.get_available_tokens();
+        let new_allocated_tokens = beneficiary_info.tokens_claimed + available_tokens;
+        self.beneficiary_info(&addr)
+            .update(|beneficiary| beneficiary.tokens_allocated = new_allocated_tokens);
     }
 
     #[endpoint]
@@ -121,7 +130,6 @@ pub trait VestingContract {
 
         self.beneficiary_info(&caller)
             .update(|beneficiary| beneficiary.tokens_claimed += &available_tokens);
-
         self.claim_event(&caller, &available_tokens);
     }
 
