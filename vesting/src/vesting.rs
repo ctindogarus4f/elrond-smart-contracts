@@ -168,7 +168,7 @@ pub trait VestingContract {
         let current_timestamp = self.blockchain().get_block_timestamp();
         if current_timestamp < first_release {
             return BigUint::zero();
-        } else if current_timestamp >= last_release {
+        } else if current_timestamp >= last_release || beneficiary_info.is_revoked {
             return allocated_tokens.clone();
         } else {
             let no_of_releases_until_now =
