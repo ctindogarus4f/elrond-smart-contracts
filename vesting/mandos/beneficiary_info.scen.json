@@ -19,7 +19,15 @@
         },
         {
             "step": "externalSteps",
-            "path": "group_info/assert_multisig.steps.json"
+            "path": "beneficiary_info/add.steps.json"
+        },
+        {
+            "step": "externalSteps",
+            "path": "beneficiary_info/assert_non_existing_group.steps.json"
+        },
+        {
+            "step": "externalSteps",
+            "path": "beneficiary_info/assert_multisig.steps.json"
         }
     ]
 }

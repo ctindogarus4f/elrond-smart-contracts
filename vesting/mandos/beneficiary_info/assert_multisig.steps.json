@@ -1,26 +1,29 @@
 {
-    "name": "group_info_assert_multisig",
+    "name": "beneficiary_info_assert_multisig",
     "steps": [
         {
             "step": "scCall",
-            "comment": "add group info using unauthorized account",
-            "txId": "group_info_assert_multisig#1",
+            "comment": "add beneficiary info using unauthorized account",
+            "txId": "beneficiary_info_assert_multisig#1",
             "tx": {
-                "from": "address:beneficiary_bob",
+                "from": "address:beneficiary_alice",
                 "to": "sc:vesting",
-                "function": "addGroupInfo",
+                "function": "addBeneficiary",
                 "arguments": [
+                    {
+                        "addr": "address:beneficiary_bob"
+                    },
+                    {
+                        "is_revoked": "false"
+                    },
                     {
                         "group_type": "1"
                     },
                     {
-                        "release_cliff": "u64:10"
+                        "start": "u64:10"
                     },
                     {
-                        "release_duration": "u64:20"
-                    },
-                    {
-                        "release_percentage": "u8:30"
+                        "tokens_allocated": "1,000,000"
                     }
                 ],
                 "gasLimit": "5,000,000",
