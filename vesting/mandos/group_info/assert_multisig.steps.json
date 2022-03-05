@@ -4,11 +4,11 @@
         {
             "step": "scCall",
             "comment": "set group info using unauthorized account",
-            "txId": "group#1",
+            "txId": "group_info_assert_multisig#1",
             "tx": {
                 "from": "address:owner",
                 "to": "sc:vesting",
-                "function": "setGroupInfo",
+                "function": "addGroupInfo",
                 "arguments": [
                     "1",
                     "0",

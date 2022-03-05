@@ -8,12 +8,12 @@
             "tx": {
                 "from": "sc:multisig",
                 "to": "sc:vesting",
-                "function": "setGroupInfo",
+                "function": "addGroupInfo",
                 "arguments": [
                     "1",
                     "u64:10",
                     "u64:20",
-                    "u64:30"
+                    "u8:30"
                 ],
                 "gasLimit": "5,000,000",
                 "gasPrice": "0"
@@ -24,11 +24,11 @@
                 "logs": [
                     {
                         "address": "sc:vesting",
-                        "endpoint": "str:setGroupInfo",
+                        "endpoint": "str:addGroupInfo",
                         "topics": [
                             "str:addGroup",
                             "1",
-                            "u64:10|u64:20|u64:30"
+                            "u64:10|u64:20|u8:30"
                         ]
                     }
                 ]
@@ -47,7 +47,7 @@
             },
             "expect": {
                 "out": [
-                    "u64:10|u64:20|u64:30"
+                    "u64:10|u64:20|u8:30"
                 ],
                 "status": "0"
             }
@@ -59,7 +59,7 @@
             "tx": {
                 "from": "sc:multisig",
                 "to": "sc:vesting",
-                "function": "setGroupInfo",
+                "function": "addGroupInfo",
                 "arguments": [
                     "1",
                     "20",
