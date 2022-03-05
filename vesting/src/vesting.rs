@@ -49,7 +49,7 @@ pub trait VestingContract {
     #[endpoint(addBeneficiary)]
     fn add_beneficiary(
         &self,
-        addr: &ManagedAddress,
+        addr: ManagedAddress,
         can_be_revoked: bool,
         group_type: GroupType,
         start: u64,
@@ -58,7 +58,7 @@ pub trait VestingContract {
         self.assert_multisig_wallet();
 
         require!(
-            self.beneficiary_info(addr).is_empty(),
+            self.beneficiary_info(&addr).is_empty(),
             "beneficiary has already been added",
         );
 
@@ -81,9 +81,9 @@ pub trait VestingContract {
     }
 
     #[endpoint(removeBeneficiary)]
-    fn remove_beneficiary(&self, addr: &ManagedAddress) {
+    fn remove_beneficiary(&self, addr: ManagedAddress) {
         self.assert_multisig_wallet();
-        let beneficiary_info = self.beneficiary_info(addr).get();
+        let beneficiary_info = self.beneficiary_info(&addr).get();
 
         require!(!beneficiary_info.is_revoked, "beneficiary already removed",);
         require!(
@@ -91,7 +91,7 @@ pub trait VestingContract {
             "beneficiary cannot be removed",
         );
 
-        let available_tokens = self.get_available_tokens(&addr);
+        let available_tokens = self.get_available_tokens(addr.clone());
         let new_allocated_tokens = beneficiary_info.tokens_claimed + available_tokens;
         self.beneficiary_info(&addr)
             .update(|beneficiary| beneficiary.tokens_allocated = new_allocated_tokens);
@@ -105,7 +105,7 @@ pub trait VestingContract {
             "non-existent beneficiary"
         );
 
-        let available_tokens = self.get_available_tokens(&caller);
+        let available_tokens = self.get_available_tokens(caller.clone());
         require!(
             available_tokens > 0,
             "no tokens are available to be claimed"
@@ -138,7 +138,7 @@ pub trait VestingContract {
     // view functions
 
     #[view(getAvailableTokens)]
-    fn get_available_tokens(&self, addr: &ManagedAddress) -> BigUint {
+    fn get_available_tokens(&self, addr: ManagedAddress) -> BigUint {
         let claimed_tokens = self.beneficiary_info(&addr).get().tokens_claimed;
         let vested_tokens = self.get_vested_tokens(&addr);
 
