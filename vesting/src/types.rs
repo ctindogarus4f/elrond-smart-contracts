@@ -21,11 +21,11 @@ pub struct GroupInfo {
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub enum GroupType {
-    Advisor,
-    Marketing,
-    PrivateInvestor,
-    SeedInvestor,
-    Strategy,
-    Team,
-    Treasury,
+    Advisor,         // we will have multiple beneficiaries for this type
+    Marketing,       // we will have a multisig address for this type
+    PrivateInvestor, // we will have multiple beneficiaries for this type
+    SeedInvestor,    // we will have multiple beneficiaries for this type
+    Strategy,        // we will have a single beneficiary for this type
+    Team,            // we will have multiple beneficiaries for this type
+    Treasury,        // we will have a single beneficiary for this type
 }
