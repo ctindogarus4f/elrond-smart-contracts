@@ -14,7 +14,11 @@ elrond_wasm_node::wasm_endpoints! {
         getGroupInfo
         getMultisigAddress
         getTokenIdentifier
+<<<<<<< HEAD
         setGroupInfo
+=======
+        removeBeneficiary
+>>>>>>> main
     )
 }
 
