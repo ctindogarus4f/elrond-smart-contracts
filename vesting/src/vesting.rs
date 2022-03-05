@@ -83,8 +83,12 @@ pub trait VestingContract {
     #[endpoint(removeBeneficiary)]
     fn remove_beneficiary(&self, addr: ManagedAddress) {
         self.assert_multisig_wallet();
-        let beneficiary_info = self.beneficiary_info(&addr).get();
+        require!(
+            !self.beneficiary_info(&addr).is_empty(),
+            "beneficiary does not exist",
+        );
 
+        let beneficiary_info = self.beneficiary_info(&addr).get();
         require!(!beneficiary_info.is_revoked, "beneficiary already removed",);
         require!(
             beneficiary_info.can_be_revoked,
@@ -93,8 +97,10 @@ pub trait VestingContract {
 
         let available_tokens = self.get_available_tokens(addr.clone());
         let new_allocated_tokens = beneficiary_info.tokens_claimed + available_tokens;
-        self.beneficiary_info(&addr)
-            .update(|beneficiary| beneficiary.tokens_allocated = new_allocated_tokens);
+        self.beneficiary_info(&addr).update(|beneficiary| {
+            beneficiary.is_revoked = true;
+            beneficiary.tokens_allocated = new_allocated_tokens;
+        });
     }
 
     #[endpoint]
