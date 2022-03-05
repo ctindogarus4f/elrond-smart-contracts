@@ -20,7 +20,7 @@ pub trait VestingContract {
 
     // endpoints
 
-    #[endpoint(addGroupInfo)]
+    #[endpoint(setGroupInfo)]
     fn set_group_info(
         &self,
         group_type: GroupType,
@@ -178,14 +178,14 @@ pub trait VestingContract {
     #[event("claim")]
     fn claim_event(&self, #[indexed] to: &ManagedAddress, #[indexed] amount: &BigUint);
 
-    #[event("beneficiary_add")]
+    #[event("addBeneficiary")]
     fn beneficiary_add_event(
         &self,
         #[indexed] addr: &ManagedAddress,
         #[indexed] beneficiary_info: &BeneficiaryInfo<Self::Api>,
     );
 
-    #[event("beneficiary_add")]
+    #[event("addGroup")]
     fn group_add_event(&self, #[indexed] group_type: &GroupType, #[indexed] group_info: &GroupInfo);
 
     // storage

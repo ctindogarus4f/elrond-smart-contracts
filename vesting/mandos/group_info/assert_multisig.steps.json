@@ -1,0 +1,28 @@
+{
+    "name": "group_info_assert_multisig",
+    "steps": [
+        {
+            "step": "scCall",
+            "comment": "set group info using unauthorized account",
+            "txId": "group#1",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:vesting",
+                "function": "setGroupInfo",
+                "arguments": [
+                    "1",
+                    "0",
+                    "0",
+                    "0"
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:caller not authorized",
+                "gas": "*"
+            }
+        }
+    ]
+}

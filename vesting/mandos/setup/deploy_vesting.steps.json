@@ -3,6 +3,7 @@
     "steps": [
         {
             "step": "scDeploy",
+            "comment": "deploy vesting contract",
             "txId": "deploy_vesting#1",
             "tx": {
                 "from": "address:owner",
@@ -21,8 +22,8 @@
         },
         {
             "step": "scQuery",
-            "txId": "deploy_vesting#2",
             "comment": "assert token_identifier",
+            "txId": "deploy_vesting#2",
             "tx": {
                 "to": "sc:vesting",
                 "function": "getTokenIdentifier"
@@ -36,8 +37,8 @@
         },
         {
             "step": "scQuery",
-            "txId": "deploy_vesting#3",
             "comment": "assert multisig_address",
+            "txId": "deploy_vesting#3",
             "tx": {
                 "to": "sc:vesting",
                 "function": "getMultisigAddress"

@@ -1,5 +1,5 @@
 {
-    "name": "init_vesting",
+    "name": "group_info",
     "steps": [
         {
             "step": "externalSteps",
@@ -12,6 +12,14 @@
         {
             "step": "externalSteps",
             "path": "setup/supply_vesting_esdt.steps.json"
+        },
+        {
+            "step": "externalSteps",
+            "path": "group_info/set.steps.json"
+        },
+        {
+            "step": "externalSteps",
+            "path": "group_info/assert_multisig.steps.json"
         }
     ]
 }

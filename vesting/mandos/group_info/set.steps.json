@@ -1,0 +1,79 @@
+{
+    "name": "group_info_set",
+    "steps": [
+        {
+            "step": "scCall",
+            "comment": "set group info",
+            "txId": "group_info_set#1",
+            "tx": {
+                "from": "sc:multisig",
+                "to": "sc:vesting",
+                "function": "setGroupInfo",
+                "arguments": [
+                    "1",
+                    "u64:10",
+                    "u64:20",
+                    "u64:30"
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "logs": [
+                    {
+                        "address": "sc:vesting",
+                        "endpoint": "str:setGroupInfo",
+                        "topics": [
+                            "str:addGroup",
+                            "1",
+                            "u64:10|u64:20|u64:30"
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "assert group info",
+            "txId": "group_info_set#2",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getGroupInfo",
+                "arguments": [
+                    "1"
+                ]
+            },
+            "expect": {
+                "out": [
+                    "u64:10|u64:20|u64:30"
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "check error after reinitializing group",
+            "txId": "group_info_set#3",
+            "tx": {
+                "from": "sc:multisig",
+                "to": "sc:vesting",
+                "function": "setGroupInfo",
+                "arguments": [
+                    "1",
+                    "20",
+                    "30",
+                    "70"
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:group has already been defined",
+                "gas": "*"
+            }
+        }
+    ]
+}

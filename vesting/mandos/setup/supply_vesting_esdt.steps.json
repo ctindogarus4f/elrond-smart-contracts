@@ -3,6 +3,7 @@
     "steps": [
         {
             "step": "transfer",
+            "comment": "supply vesting contract with ESDT",
             "txId": "supply_vesting_esdt#1",
             "tx": {
                 "from": "address:owner",
