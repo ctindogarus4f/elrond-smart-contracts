@@ -14,7 +14,7 @@ pub trait VestingContract {
     #[init]
     fn init(&self, token_identifier: TokenIdentifier, multisig_address: ManagedAddress) {
         self.multisig_address()
-            .set_if_empty(multisig_address);
+            .set_if_empty(&multisig_address);
 
         self.token_identifier().set_if_empty(&token_identifier);
     }
@@ -204,14 +204,14 @@ pub trait VestingContract {
     #[event("claim")]
     fn claim_event(&self, #[indexed] to: &ManagedAddress, #[indexed] amount: &BigUint);
 
-    #[event("add_beneficiary")]
+    #[event("addBeneficiary")]
     fn add_beneficiary_event(
         &self,
         #[indexed] addr: &ManagedAddress,
         #[indexed] beneficiary_info: &BeneficiaryInfo<Self::Api>,
     );
 
-    #[event("add_group")]
+    #[event("addGroup")]
     fn add_group_event(&self, #[indexed] group_type: &GroupType, #[indexed] group_info: &GroupInfo);
 
     // storage
