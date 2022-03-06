@@ -1,0 +1,39 @@
+{
+    "name": "beneficiary_info_assert_non_existing_group",
+    "steps": [
+        {
+            "step": "scCall",
+            "comment": "add beneficiary info with non exiting group",
+            "txId": "beneficiary_info_assert_non_existing_group#1",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "addBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_alice"
+                    },
+                    {
+                        "is_revoked": "false"
+                    },
+                    {
+                        "group_type": "2"
+                    },
+                    {
+                        "start": "u64:10"
+                    },
+                    {
+                        "tokens_allocated": "1,000,000"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:specified group is not set up",
+                "gas": "*"
+            }
+        }
+    ]
+}

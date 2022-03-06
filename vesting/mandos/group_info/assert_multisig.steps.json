@@ -1,0 +1,36 @@
+{
+    "name": "group_info_assert_multisig",
+    "steps": [
+        {
+            "step": "scCall",
+            "comment": "add group info using unauthorized account",
+            "txId": "group_info_assert_multisig#1",
+            "tx": {
+                "from": "address:beneficiary_bob",
+                "to": "sc:vesting",
+                "function": "addGroupInfo",
+                "arguments": [
+                    {
+                        "group_type": "1"
+                    },
+                    {
+                        "release_cliff": "u64:10"
+                    },
+                    {
+                        "release_duration": "u64:20"
+                    },
+                    {
+                        "release_percentage": "u8:30"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:caller not authorized",
+                "gas": "*"
+            }
+        }
+    ]
+}

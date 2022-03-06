@@ -1,0 +1,107 @@
+{
+    "name": "group_info_add",
+    "steps": [
+        {
+            "step": "scCall",
+            "comment": "add group info",
+            "txId": "group_info_add#1",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "addGroupInfo",
+                "arguments": [
+                    {
+                        "group_type": "1"
+                    },
+                    {
+                        "release_cliff": "u64:10"
+                    },
+                    {
+                        "release_duration": "u64:20"
+                    },
+                    {
+                        "release_percentage": "u8:30"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "logs": [
+                    {
+                        "address": "sc:vesting",
+                        "endpoint": "str:addGroupInfo",
+                        "topics": [
+                            {
+                                "event": "str:add_group"
+                            },
+                            {
+                                "group_type": "1"
+                            },
+                            {
+                                "0-release_cliff": "u64:10",
+                                "1-release_percentage": "u64:20",
+                                "2-release_duration": "u8:30"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "assert group info",
+            "txId": "group_info_add#2",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getGroupInfo",
+                "arguments": [
+                    "1"
+                ]
+            },
+            "expect": {
+                "out": [
+                    {
+                        "0-release_cliff": "u64:10",
+                        "1-release_percentage": "u64:20",
+                        "2-release_duration": "u8:30"
+                    }
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "check error after reinitializing group",
+            "txId": "group_info_add#3",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "addGroupInfo",
+                "arguments": [
+                    {
+                        "group_type": "1"
+                    },
+                    {
+                        "release_cliff": "u64:20"
+                    },
+                    {
+                        "release_duration": "u64:30"
+                    },
+                    {
+                        "release_percentage": "u8:70"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:group has already been defined",
+                "gas": "*"
+            }
+        }
+    ]
+}

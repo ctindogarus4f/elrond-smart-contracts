@@ -1,0 +1,32 @@
+{
+    "name": "init_accounts",
+    "steps": [
+        {
+            "step": "setState",
+            "accounts": {
+                "address:owner": {
+                    "nonce": "0",
+                    "esdt": {
+                        "str:TOK-0001": "100,000,000,000"
+                    }
+                },
+                "address:beneficiary_alice": {
+                    "nonce": "0"
+                },
+                "address:beneficiary_bob": {
+                    "nonce": "0"
+                },
+                "address:multisig": {
+                    "nonce": "0"
+                }
+            },
+            "newAddresses": [
+                {
+                    "creatorAddress": "address:owner",
+                    "creatorNonce": "0",
+                    "newAddress": "sc:vesting"
+                }
+            ]
+        }
+    ]
+}

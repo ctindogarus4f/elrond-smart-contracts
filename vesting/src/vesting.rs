@@ -12,9 +12,9 @@ use types::GroupType;
 #[elrond_wasm::derive::contract]
 pub trait VestingContract {
     #[init]
-    fn init(&self, token_identifier: TokenIdentifier, _multisig_address: ManagedAddress) {
+    fn init(&self, token_identifier: TokenIdentifier, multisig_address: ManagedAddress) {
         self.multisig_address()
-            .set_if_empty(&self.blockchain().get_caller()); // todo: use multisig_address after full implementation
+            .set_if_empty(&multisig_address);
 
         self.token_identifier().set_if_empty(&token_identifier);
     }

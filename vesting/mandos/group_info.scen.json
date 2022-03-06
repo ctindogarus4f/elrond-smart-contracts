@@ -1,0 +1,25 @@
+{
+    "name": "group_info",
+    "steps": [
+        {
+            "step": "externalSteps",
+            "path": "setup/init_accounts.steps.json"
+        },
+        {
+            "step": "externalSteps",
+            "path": "setup/deploy_vesting.steps.json"
+        },
+        {
+            "step": "externalSteps",
+            "path": "setup/supply_vesting_esdt.steps.json"
+        },
+        {
+            "step": "externalSteps",
+            "path": "group_info/add.steps.json"
+        },
+        {
+            "step": "externalSteps",
+            "path": "group_info/assert_multisig.steps.json"
+        }
+    ]
+}
