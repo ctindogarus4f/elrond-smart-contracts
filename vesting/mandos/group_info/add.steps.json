@@ -35,7 +35,7 @@
                         "endpoint": "str:addGroupInfo",
                         "topics": [
                             {
-                                "event": "str:addGroup"
+                                "event": "str:add_group"
                             },
                             {
                                 "group_type": "1"

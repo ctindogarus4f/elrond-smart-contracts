@@ -204,14 +204,14 @@ pub trait VestingContract {
     #[event("claim")]
     fn claim_event(&self, #[indexed] to: &ManagedAddress, #[indexed] amount: &BigUint);
 
-    #[event("addBeneficiary")]
+    #[event("add_beneficiary")]
     fn add_beneficiary_event(
         &self,
         #[indexed] addr: &ManagedAddress,
         #[indexed] beneficiary_info: &BeneficiaryInfo<Self::Api>,
     );
 
-    #[event("addGroup")]
+    #[event("add_group")]
     fn add_group_event(&self, #[indexed] group_type: &GroupType, #[indexed] group_info: &GroupInfo);
 
     // storage

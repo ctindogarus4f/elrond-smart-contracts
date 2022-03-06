@@ -37,7 +37,7 @@
                         "address": "sc:vesting",
                         "endpoint": "str:addBeneficiary",
                         "topics": [
-                            "str:addBeneficiary",
+                            "str:add_beneficiary",
                             "address:beneficiary_bob",
                             {
                                 "0-can_be_revoked": "u8:0",
