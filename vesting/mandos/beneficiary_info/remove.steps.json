@@ -1,0 +1,172 @@
+{
+    "name": "beneficiary_info_remove",
+    "steps": [
+        {
+            "step": "scCall",
+            "comment": "assert non-revokable beneficiary",
+            "txId": "beneficiary_info_remove#10",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "removeBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_bob"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:beneficiary cannot be removed",
+                "gas": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "remove beneficiary using unauthorized account",
+            "txId": "beneficiary_info_remove#20",
+            "tx": {
+                "from": "address:beneficiary_alice",
+                "to": "sc:vesting",
+                "function": "removeBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_charlie"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:caller not authorized",
+                "gas": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "remove beneficiary",
+            "txId": "beneficiary_info_remove#30",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "removeBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_charlie"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "refund": "*",
+                "logs": [
+                    {
+                        "address": "sc:vesting",
+                        "endpoint": "str:removeBeneficiary",
+                        "topics": [
+                            "str:remove_beneficiary",
+                            "address:beneficiary_charlie"
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "assert beneficiary info",
+            "txId": "beneficiary_info_remove#35",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getBeneficiaryInfo",
+                "arguments": [
+                    "address:beneficiary_charlie"
+                ]
+            },
+            "expect": {
+                "out": [
+                    {
+                        "0-can_be_revoked": "u8:1",
+                        "1-is_revoked": "u8:1",
+                        "2-group_type": "1",
+                        "3-start": "u64:1000",
+                        "4-tokens_allocated": "biguint:0",
+                        "5-tokens_claimed": "biguint:0"
+                    }
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "remove non-existent beneficiary",
+            "txId": "beneficiary_info_remove#40",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "removeBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_alice"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:beneficiary does not exist",
+                "gas": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "remove already removed beneficiary",
+            "txId": "beneficiary_info_remove#5",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "removeBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_charlie"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:beneficiary already removed",
+                "gas": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "remove non-revokable beneficiary",
+            "txId": "beneficiary_info_remove#60",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "removeBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_charlie"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:beneficiary already removed",
+                "gas": "*"
+            }
+        }
+    ]
+}

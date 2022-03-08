@@ -23,14 +23,14 @@
             "step": "checkState",
             "comment": "assert TOK-0001 balance",
             "accounts": {
-                "+": "",
                 "sc:vesting": {
                     "nonce": "0",
                     "esdt": {
                         "str:TOK-0001": "100,000,000,000"
                     },
                     "code": "file:../../output/vesting.wasm"
-                }
+                },
+                "+": ""
             }
         }
     ]

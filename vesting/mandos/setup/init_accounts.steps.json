@@ -16,6 +16,9 @@
                 "address:beneficiary_bob": {
                     "nonce": "0"
                 },
+                "address:beneficiary_charlie": {
+                    "nonce": "0"
+                },
                 "address:multisig": {
                     "nonce": "0"
                 }
