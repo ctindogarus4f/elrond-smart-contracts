@@ -155,7 +155,7 @@ pub trait VestingContract {
         let claimed_tokens = self.beneficiary_info(&addr).get().tokens_claimed;
         let vested_tokens = self.get_vested_tokens(&addr);
 
-        vested_tokens.sub(claimed_tokens)
+        vested_tokens - claimed_tokens
     }
 
     // private functions
@@ -188,9 +188,9 @@ pub trait VestingContract {
             let no_of_releases_until_now =
                 1 + (current_timestamp - first_release) / group_info.release_duration;
             return allocated_tokens
-                .mul(group_info.release_percentage as u64)
-                .mul(no_of_releases_until_now)
-                .div(100u64);
+                * group_info.release_percentage as u64
+                * no_of_releases_until_now
+                / 100u64;
         }
     }
 
