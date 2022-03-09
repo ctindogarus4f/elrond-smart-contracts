@@ -13,13 +13,17 @@ use types::GroupType;
 pub trait VestingContract {
     #[init]
     fn init(&self, token_identifier: TokenIdentifier, multisig_address: ManagedAddress) {
-        self.multisig_address()
-            .set_if_empty(&multisig_address);
-
         self.token_identifier().set_if_empty(&token_identifier);
+        self.multisig_address().set_if_empty(&multisig_address);
     }
 
     // endpoints
+
+    #[endpoint(changeMultisigAddress)]
+    fn change_multisig_address(&self, new_multisig_address: ManagedAddress) {
+        self.assert_multisig_wallet();
+        self.multisig_address().set(&new_multisig_address);
+    }
 
     #[endpoint(addGroupInfo)]
     fn add_group_info(
@@ -100,7 +104,7 @@ pub trait VestingContract {
         self.beneficiary_info(&addr).update(|beneficiary| {
             beneficiary.is_revoked = true;
             beneficiary.tokens_allocated = new_allocated_tokens;
-        }); 
+        });
 
         self.remove_beneficiary_event(&addr);
     }
@@ -219,10 +223,7 @@ pub trait VestingContract {
     );
 
     #[event("remove_beneficiary")]
-    fn remove_beneficiary_event(
-        &self,
-        #[indexed] addr: &ManagedAddress,
-    );
+    fn remove_beneficiary_event(&self, #[indexed] addr: &ManagedAddress);
 
     #[event("add_group")]
     fn add_group_event(&self, #[indexed] group_type: &GroupType, #[indexed] group_info: &GroupInfo);
