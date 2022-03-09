@@ -100,7 +100,9 @@ pub trait VestingContract {
         self.beneficiary_info(&addr).update(|beneficiary| {
             beneficiary.is_revoked = true;
             beneficiary.tokens_allocated = new_allocated_tokens;
-        });
+        }); 
+
+        self.remove_beneficiary_event(&addr);
     }
 
     #[endpoint]
@@ -145,6 +147,11 @@ pub trait VestingContract {
 
     #[view(getAvailableTokens)]
     fn get_available_tokens(&self, addr: ManagedAddress) -> BigUint {
+        require!(
+            !self.beneficiary_info(&addr).is_empty(),
+            "non-existent beneficiary"
+        );
+
         let claimed_tokens = self.beneficiary_info(&addr).get().tokens_claimed;
         let vested_tokens = self.get_vested_tokens(&addr);
 
@@ -209,6 +216,12 @@ pub trait VestingContract {
         &self,
         #[indexed] addr: &ManagedAddress,
         #[indexed] beneficiary_info: &BeneficiaryInfo<Self::Api>,
+    );
+
+    #[event("remove_beneficiary")]
+    fn remove_beneficiary_event(
+        &self,
+        #[indexed] addr: &ManagedAddress,
     );
 
     #[event("add_group")]

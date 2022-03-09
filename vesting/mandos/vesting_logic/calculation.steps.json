@@ -1,0 +1,196 @@
+{
+    "name": "vesting_logic_calculation",
+    "steps": [
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "1000"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "add group info",
+            "txId": "vesting_logic_calculation#10",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "addGroupInfo",
+                "arguments": [
+                    {
+                        "group_type": "1"
+                    },
+                    {
+                        "release_cliff": "u64:100"
+                    },
+                    {
+                        "release_duration": "u64:500"
+                    },
+                    {
+                        "release_percentage": "u8:10"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "logs": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "add revokable beneficiary info with start in future",
+            "txId": "vesting_logic_calculation#20",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "addBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_bob"
+                    },
+                    {
+                        "can_be_revoked": "true"
+                    },
+                    {
+                        "group_type": "1"
+                    },
+                    {
+                        "start": "u64:2000"
+                    },
+                    {
+                        "tokens_allocated": "1,000,000"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "logs": "*"
+            }
+        },
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "2100"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "get available tokens (after cliff)",
+            "txId": "vesting_logic_calculation#30",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_bob"
+                ]
+            },
+            "expect": {
+                "out": [
+                    "100,000"
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "2500"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "get available tokens (during first interval)",
+            "txId": "vesting_logic_calculation#40",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_bob"
+                ]
+            },
+            "expect": {
+                "out": [
+                    "100,000"
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "2700"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "get available tokens (during second interval)",
+            "txId": "vesting_logic_calculation#50",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_bob"
+                ]
+            },
+            "expect": {
+                "out": [
+                    "200,000"
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "6600"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "get available tokens (at the end of the period)",
+            "txId": "vesting_logic_calculation#60",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_bob"
+                ]
+            },
+            "expect": {
+                "out": [
+                    "1,000,000"
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "8000"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "get available tokens (after the end of period)",
+            "txId": "vesting_logic_calculation#70",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_bob"
+                ]
+            },
+            "expect": {
+                "out": [
+                    "1,000,000"
+                ],
+                "status": "0"
+            }
+        }
+    ]
+}

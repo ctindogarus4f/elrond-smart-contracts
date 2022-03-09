@@ -3,8 +3,84 @@
     "steps": [
         {
             "step": "scCall",
+            "comment": "add revokable beneficiary info",
+            "txId": "beneficiary_info_add#10",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "addBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_charlie"
+                    },
+                    {
+                        "can_be_revoked": "true"
+                    },
+                    {
+                        "group_type": "1"
+                    },
+                    {
+                        "start": "u64:1000"
+                    },
+                    {
+                        "tokens_allocated": "1,000,000"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "logs": [
+                    {
+                        "address": "sc:vesting",
+                        "endpoint": "str:addBeneficiary",
+                        "topics": [
+                            "str:add_beneficiary",
+                            "address:beneficiary_charlie",
+                            {
+                                "0-can_be_revoked": "u8:1",
+                                "1-is_revoked": "u8:0",
+                                "2-group_type": "1",
+                                "3-start": "u64:1000",
+                                "4-tokens_allocated": "biguint:1,000,000",
+                                "5-tokens_claimed": "biguint:0"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "assert beneficiary info",
+            "txId": "beneficiary_info_add#20",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getBeneficiaryInfo",
+                "arguments": [
+                    "address:beneficiary_charlie"
+                ]
+            },
+            "expect": {
+                "out": [
+                    {
+                        "0-can_be_revoked": "u8:1",
+                        "1-is_revoked": "u8:0",
+                        "2-group_type": "1",
+                        "3-start": "u64:1000",
+                        "4-tokens_allocated": "biguint:1,000,000",
+                        "5-tokens_claimed": "biguint:0"
+                    }
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
             "comment": "add beneficiary info",
-            "txId": "beneficiary_info_add#1",
+            "txId": "beneficiary_info_add#30",
             "tx": {
                 "from": "address:multisig",
                 "to": "sc:vesting",
@@ -14,13 +90,13 @@
                         "addr": "address:beneficiary_bob"
                     },
                     {
-                        "is_revoked": "false"
+                        "can_be_revoked": "false"
                     },
                     {
                         "group_type": "1"
                     },
                     {
-                        "start": "u64:10"
+                        "start": "u64:1000"
                     },
                     {
                         "tokens_allocated": "1,000,000"
@@ -43,7 +119,7 @@
                                 "0-can_be_revoked": "u8:0",
                                 "1-is_revoked": "u8:0",
                                 "2-group_type": "1",
-                                "3-start": "u64:10",
+                                "3-start": "u64:1000",
                                 "4-tokens_allocated": "biguint:1,000,000",
                                 "5-tokens_claimed": "biguint:0"
                             }
@@ -55,7 +131,7 @@
         {
             "step": "scQuery",
             "comment": "assert beneficiary info",
-            "txId": "beneficiary_info_add#2",
+            "txId": "beneficiary_info_add#40",
             "tx": {
                 "to": "sc:vesting",
                 "function": "getBeneficiaryInfo",
@@ -69,7 +145,32 @@
                         "0-can_be_revoked": "u8:0",
                         "1-is_revoked": "u8:0",
                         "2-group_type": "1",
-                        "3-start": "u64:10",
+                        "3-start": "u64:1000",
+                        "4-tokens_allocated": "biguint:1,000,000",
+                        "5-tokens_claimed": "biguint:0"
+                    }
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "assert beneficiary info after time ",
+            "txId": "beneficiary_info_add#45",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getBeneficiaryInfo",
+                "arguments": [
+                    "address:beneficiary_bob"
+                ]
+            },
+            "expect": {
+                "out": [
+                    {
+                        "0-can_be_revoked": "u8:0",
+                        "1-is_revoked": "u8:0",
+                        "2-group_type": "1",
+                        "3-start": "u64:1000",
                         "4-tokens_allocated": "biguint:1,000,000",
                         "5-tokens_claimed": "biguint:0"
                     }
@@ -80,7 +181,7 @@
         {
             "step": "scCall",
             "comment": "check error after re-adding beneficiary",
-            "txId": "beneficiary_info_add#3",
+            "txId": "beneficiary_info_add#50",
             "tx": {
                 "from": "address:multisig",
                 "to": "sc:vesting",
@@ -90,13 +191,13 @@
                         "addr": "address:beneficiary_bob"
                     },
                     {
-                        "is_revoked": "false"
+                        "can_be_revoked": "false"
                     },
                     {
                         "group_type": "1"
                     },
                     {
-                        "start": "u64:10"
+                        "start": "u64:1000"
                     },
                     {
                         "tokens_allocated": "1,000,000"
@@ -108,6 +209,74 @@
             "expect": {
                 "status": "4",
                 "message": "str:beneficiary has already been added",
+                "gas": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "add beneficiary info using unauthorized account",
+            "txId": "beneficiary_info_add#60",
+            "tx": {
+                "from": "address:beneficiary_alice",
+                "to": "sc:vesting",
+                "function": "addBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_bob"
+                    },
+                    {
+                        "can_be_revoked": "false"
+                    },
+                    {
+                        "group_type": "1"
+                    },
+                    {
+                        "start": "u64:1000"
+                    },
+                    {
+                        "tokens_allocated": "1,000,000"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:caller not authorized",
+                "gas": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "add beneficiary info with non exiting group",
+            "txId": "beneficiary_info_add#70",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "addBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_alice"
+                    },
+                    {
+                        "can_be_revoked": "false"
+                    },
+                    {
+                        "group_type": "2"
+                    },
+                    {
+                        "start": "u64:1000"
+                    },
+                    {
+                        "tokens_allocated": "1,000,000"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:specified group is not set up",
                 "gas": "*"
             }
         }

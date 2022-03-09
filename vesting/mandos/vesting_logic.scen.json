@@ -1,5 +1,5 @@
 {
-    "name": "group_info",
+    "name": "vesting_logic",
     "steps": [
         {
             "step": "externalSteps",
@@ -11,19 +11,11 @@
         },
         {
             "step": "externalSteps",
-            "path": "setup/supply_vesting_esdt.steps.json"
+            "path": "vesting_logic/calculation.steps.json"
         },
         {
             "step": "externalSteps",
-            "path": "group_info/add.steps.json"
-        },
-        {
-            "step": "externalSteps",
-            "path": "beneficiary_info/add.steps.json"
-        },
-        {
-            "step": "externalSteps",
-            "path": "beneficiary_info/remove.steps.json"
+            "path": "vesting_logic/claim.steps.json"
         }
     ]
 }
