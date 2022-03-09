@@ -8,7 +8,7 @@
             "tx": {
                 "from": "address:multisig",
                 "to": "sc:vesting",
-                "function": "addGroupInfo",
+                "function": "addGroup",
                 "arguments": [
                     {
                         "group_type": "1"
@@ -32,7 +32,7 @@
                 "logs": [
                     {
                         "address": "sc:vesting",
-                        "endpoint": "str:addGroupInfo",
+                        "endpoint": "str:addGroup",
                         "topics": [
                             {
                                 "event": "str:add_group"
@@ -79,7 +79,7 @@
             "tx": {
                 "from": "address:multisig",
                 "to": "sc:vesting",
-                "function": "addGroupInfo",
+                "function": "addGroup",
                 "arguments": [
                     {
                         "group_type": "1"

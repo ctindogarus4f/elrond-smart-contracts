@@ -4,9 +4,7 @@ elrond_wasm::imports!();
 
 mod types;
 
-use types::BeneficiaryInfo;
-use types::GroupInfo;
-use types::GroupType;
+use types::*;
 
 /// A vesting contract that can release its token balance gradually like a typical vesting scheme.
 #[elrond_wasm::derive::contract]
@@ -25,8 +23,8 @@ pub trait VestingContract {
         self.multisig_address().set(&new_multisig_address);
     }
 
-    #[endpoint(addGroupInfo)]
-    fn add_group_info(
+    #[endpoint(addGroup)]
+    fn add_group(
         &self,
         group_type: GroupType,
         release_cliff: u64,
@@ -87,12 +85,14 @@ pub trait VestingContract {
     #[endpoint(removeBeneficiary)]
     fn remove_beneficiary(&self, addr: ManagedAddress) {
         self.assert_multisig_wallet();
+
         require!(
             !self.beneficiary_info(&addr).is_empty(),
             "beneficiary does not exist",
         );
 
         let beneficiary_info = self.beneficiary_info(&addr).get();
+
         require!(!beneficiary_info.is_revoked, "beneficiary already removed",);
         require!(
             beneficiary_info.can_be_revoked,
@@ -101,11 +101,11 @@ pub trait VestingContract {
 
         let available_tokens = self.get_available_tokens(addr.clone());
         let new_allocated_tokens = beneficiary_info.tokens_claimed + available_tokens;
+
         self.beneficiary_info(&addr).update(|beneficiary| {
             beneficiary.is_revoked = true;
             beneficiary.tokens_allocated = new_allocated_tokens;
         });
-
         self.remove_beneficiary_event(&addr);
     }
 
@@ -128,7 +128,6 @@ pub trait VestingContract {
             &self.token_identifier().get(),
             0,
         );
-
         require!(
             esdt_balance >= available_tokens,
             "not enough tokens in vesting contract"
