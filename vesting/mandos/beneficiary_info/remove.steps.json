@@ -72,7 +72,8 @@
                         "topics": [
                             "str:remove_beneficiary",
                             "address:beneficiary_charlie"
-                        ]
+                        ],
+                        "data": ""
                     }
                 ]
             }

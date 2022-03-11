@@ -25,6 +25,9 @@
             "accounts": {
                 "sc:vesting": {
                     "nonce": "0",
+                    "storage": {
+                        "+": ""
+                    },
                     "esdt": {
                         "str:TOK-0001": "100,000,000,000"
                     },

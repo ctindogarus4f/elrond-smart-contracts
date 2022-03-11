@@ -45,7 +45,8 @@
                                 "1-release_percentage": "u64:20",
                                 "2-release_duration": "u8:30"
                             }
-                        ]
+                        ],
+                        "data": ""
                     }
                 ]
             }
