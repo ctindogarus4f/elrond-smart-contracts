@@ -73,6 +73,24 @@
             }
         },
         {
+            "step": "scQuery",
+            "comment": "get available tokens",
+            "txId": "vesting_logic_calculation#25",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_bob"
+                ]
+            },
+            "expect": {
+                "out": [
+                    ""
+                ],
+                "status": "0"
+            }
+        },
+        {
             "step": "setState",
             "currentBlockInfo": {
                 "blockTimestamp": "2100"
