@@ -3,6 +3,8 @@
 /target/
 */target/
 
+*/node_modules/
+
 # The erdpy output
 output*
 
