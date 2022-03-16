@@ -91,9 +91,22 @@ const main = async () => {
       status => status.isExecuted(),
       TransactionWatcher.NoopOnStatusReceived,
     );
-    console.log(
-      `## Successfully added group ${name} via transaction with hash ${tx.getHash()}`,
+    let wrappedResult = await tx.getAsOnNetwork(
+      provider,
+      undefined,
+      false,
+      true,
     );
+    let result = wrappedResult.getSmartContractResults().getImmediate();
+    if (result.isSuccess()) {
+      console.log(
+        `## Successfully added group ${name} via transaction with hash ${tx.getHash()}`,
+      );
+    } else {
+      console.log(
+        `## Error while adding group ${name} via transaction with hash ${tx.getHash()}. Details: ${result.getReturnMessage()}`,
+      );
+    }
 
     console.log(`## Fetching group ${name}`);
     let response = await contract.runQuery(provider, {
@@ -150,9 +163,22 @@ const main = async () => {
       status => status.isExecuted(),
       TransactionWatcher.NoopOnStatusReceived,
     );
-    console.log(
-      `## Successfully added beneficiary ${addr} via transaction with hash ${tx.getHash()}`,
+    let wrappedResult = await tx.getAsOnNetwork(
+      provider,
+      undefined,
+      false,
+      true,
     );
+    let result = wrappedResult.getSmartContractResults().getImmediate();
+    if (result.isSuccess()) {
+      console.log(
+        `## Successfully added beneficiary ${addr} via transaction with hash ${tx.getHash()}`,
+      );
+    } else {
+      console.log(
+        `## Error while adding beneficiary ${addr} via transaction with hash ${tx.getHash()}. Details: ${result.getReturnMessage()}`,
+      );
+    }
 
     console.log(`## Fetching beneficiary ${addr}`);
     let response = await contract.runQuery(provider, {
