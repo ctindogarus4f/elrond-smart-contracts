@@ -57,6 +57,7 @@ const main = async () => {
     });
 
     tx.setNonce(owner.nonce);
+    owner.incrementNonce();
     await signer.sign(tx);
     await tx.send(provider);
   }
