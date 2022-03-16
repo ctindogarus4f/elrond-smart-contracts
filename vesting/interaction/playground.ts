@@ -91,6 +91,7 @@ const main = async () => {
       status => status.isExecuted(),
       TransactionWatcher.NoopOnStatusReceived,
     );
+
     let wrappedResult = await tx.getAsOnNetwork(
       provider,
       undefined,
@@ -161,6 +162,7 @@ const main = async () => {
       status => status.isExecuted(),
       TransactionWatcher.NoopOnStatusReceived,
     );
+
     let wrappedResult = await tx.getAsOnNetwork(
       provider,
       undefined,
