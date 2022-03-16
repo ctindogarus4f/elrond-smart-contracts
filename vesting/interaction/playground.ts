@@ -51,7 +51,7 @@ const main = async () => {
   // ------------------------ SC SETUP -------------------------
 
   // ------------------------ ADD GROUPS -----------------------
-  let data = fs.readFileSync("data/groups.txt", { encoding: "utf8" });
+  let data = fs.readFileSync("../data/groups.txt", { encoding: "utf8" });
   let lines = data.split(/\r?\n/);
 
   for (const line of lines) {
@@ -98,7 +98,7 @@ const main = async () => {
   // ------------------------ ADD GROUPS -----------------------
 
   // ------------------------ ADD BENEFICIARIES -----------------------
-  data = fs.readFileSync("data/beneficiaries.txt", { encoding: "utf8" });
+  data = fs.readFileSync("../data/beneficiaries.txt", { encoding: "utf8" });
   lines = data.split(/\r?\n/);
 
   for (const line of lines) {

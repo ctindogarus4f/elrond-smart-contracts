@@ -4,7 +4,7 @@ if [ -f .env ]; then
   export $(cat .env | xargs)
 fi
 
-GROUPS_DATA="groups_data.txt"
+GROUPS_DATA="../data/groups.txt"
 
 while read group; do
   read name id cliff duration percentage <<<$group
