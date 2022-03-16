@@ -12,6 +12,7 @@ import {
   NetworkConfig,
   ProxyProvider,
   SmartContract,
+  TransactionWatcher,
   U8Value,
   U64Value,
 } from "@elrondnetwork/erdjs";
@@ -79,7 +80,17 @@ const main = async () => {
     owner.incrementNonce();
     await signer.sign(tx);
     await tx.send(provider);
-    await tx.awaitExecuted(provider);
+
+    let watcher = new TransactionWatcher(
+      tx.getHash(),
+      provider,
+      TransactionWatcher.DefaultPollingInterval,
+      TransactionWatcher.DefaultTimeout * 3,
+    );
+    await watcher.awaitStatus(
+      status => status.isExecuted(),
+      TransactionWatcher.NoopOnStatusReceived,
+    );
     console.log(
       `## Successfully added group ${name} via transaction with hash ${tx.getHash()}`,
     );
@@ -128,7 +139,17 @@ const main = async () => {
     owner.incrementNonce();
     await signer.sign(tx);
     await tx.send(provider);
-    await tx.awaitExecuted(provider);
+
+    let watcher = new TransactionWatcher(
+      tx.getHash(),
+      provider,
+      TransactionWatcher.DefaultPollingInterval,
+      TransactionWatcher.DefaultTimeout * 3,
+    );
+    await watcher.awaitStatus(
+      status => status.isExecuted(),
+      TransactionWatcher.NoopOnStatusReceived,
+    );
     console.log(
       `## Successfully added beneficiary ${addr} via transaction with hash ${tx.getHash()}`,
     );
