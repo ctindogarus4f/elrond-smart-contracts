@@ -1,0 +1,2 @@
+erd1vvsv9kx057g4yukv2k6qytf3yp83dc2v92ztcn3ul45sccsashdqw6dqry permanent 5 1,656,633,600 6,000,000
+erd1k3c53shaxhtcd5glpmu7xxhxsdf2pm0z3t8uv8gvpv2xxemy8x5q2ryn3s temporary 5 1,656,633,600 1,000,000
