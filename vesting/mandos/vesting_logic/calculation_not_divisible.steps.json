@@ -1,0 +1,214 @@
+{
+    "name": "vesting_logic_calculation_not_divisible",
+    "steps": [
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "10000"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "add group info with divisble not divisible by 100",
+            "txId": "vesting_logic_calculation_not_divisible#10",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "addGroupInfo",
+                "arguments": [
+                    {
+                        "group_type": "2"
+                    },
+                    {
+                        "release_cliff": "u64:100"
+                    },
+                    {
+                        "release_duration": "u64:500"
+                    },
+                    {
+                        "release_percentage": "u8:30"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "logs": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "add revokable beneficiary info with start in future",
+            "txId": "vesting_logic_calculation_not_divisible#20",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "addBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_alice"
+                    },
+                    {
+                        "can_be_revoked": "true"
+                    },
+                    {
+                        "group_type": "2"
+                    },
+                    {
+                        "start": "u64:10000"
+                    },
+                    {
+                        "tokens_allocated": "1,000,000"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "logs": "*"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "get available tokens",
+            "txId": "vesting_logic_calculation_not_divisible#25",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_alice"
+                ]
+            },
+            "expect": {
+                "out": [
+                    ""
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "10100"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "get available tokens (after cliff) 30%",
+            "txId": "vesting_logic_calculation_not_divisible#30",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_alice"
+                ]
+            },
+            "expect": {
+                "out": [
+                    "300,000"
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "10600"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "get available tokens 60%",
+            "txId": "vesting_logic_calculation_not_divisible#40",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_alice"
+                ]
+            },
+            "expect": {
+                "out": [
+                    "600,000"
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "11100"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "get available tokens 90%",
+            "txId": "vesting_logic_calculation_not_divisible#50",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_alice"
+                ]
+            },
+            "expect": {
+                "out": [
+                    "900,000"
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "11600"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "get available tokens 100%",
+            "txId": "vesting_logic_calculation_not_divisible#60",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_alice"
+                ]
+            },
+            "expect": {
+                "out": [
+                    "1,000,000"
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "currentBlockInfo": {
+                "blockTimestamp": "12000"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "get available tokens still 100%",
+            "txId": "vesting_logic_calculation_not_divisible#70",
+            "tx": {
+                "to": "sc:vesting",
+                "function": "getAvailableTokens",
+                "arguments": [
+                    "address:beneficiary_alice"
+                ]
+            },
+            "expect": {
+                "out": [
+                    "1,000,000"
+                ],
+                "status": "0"
+            }
+        }
+    ]
+}

@@ -15,6 +15,10 @@
         },
         {
             "step": "externalSteps",
+            "path": "vesting_logic/calculation_not_divisible.steps.json"
+        },
+        {
+            "step": "externalSteps",
             "path": "vesting_logic/claim.steps.json"
         }
     ]
