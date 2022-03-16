@@ -1,4 +1,11 @@
 import {
+  ABI_PATH,
+  GAS_LIMIT,
+  OWNER_WALLET,
+  PROXY,
+  VESTING_SC_ADDRESS,
+} from "./config";
+import {
   AbiRegistry,
   Account,
   Address,
@@ -17,13 +24,6 @@ import {
   U64Value,
 } from "@elrondnetwork/erdjs";
 const fs = require("fs");
-
-const ABI_PATH = "../output/vesting.abi.json";
-const GAS_LIMIT = 600000000;
-const OWNER_WALLET = "/Users/constantindogaru/elrond-wallet/wallet-owner.pem";
-const PROXY = "https://devnet-api.elrond.com";
-const VESTING_SC_ADDRESS =
-  "erd1qqqqqqqqqqqqqpgqfh8txltrewpf6rrec7ntzfw682gdy98d8x5qcq49t2";
 
 const main = async () => {
   // ----------------------- CODEC SETUP -----------------------
