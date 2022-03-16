@@ -22,26 +22,31 @@ const VESTING_SC_ADDRESS =
   "erd1qqqqqqqqqqqqqpgqfh8txltrewpf6rrec7ntzfw682gdy98d8x5qcq49t2";
 
 const main = async () => {
-  // CODEC SETUP
+  // ----------------------- CODEC SETUP -----------------------
   let abi = await AbiRegistry.load({ files: [ABI_PATH] });
   let groupInfoType = abi.getStruct("GroupInfo");
   let codec = new BinaryCodec();
+  // ----------------------- CODEC SETUP -----------------------
 
-  // NETWORK SETUP
+  // ---------------------- NETWORK SETUP ----------------------
   const provider = new ProxyProvider(PROXY);
   await NetworkConfig.getDefault().sync(provider);
+  // ---------------------- NETWORK SETUP ----------------------
 
-  // SIGNER AND OWNER SETUP
+  // ----------------- SIGNER AND OWNER SETUP ------------------
   const privateKey = fs.readFileSync(OWNER_WALLET, { encoding: "utf8" });
   const signer = UserSigner.fromPem(privateKey);
   const owner = new Account(signer.getAddress());
   await owner.sync(provider);
+  // ----------------- SIGNER AND OWNER SETUP ------------------
 
-  // SC SETUP
+  // ------------------------ SC SETUP -------------------------
   let contract = new SmartContract({
     address: new Address(VESTING_SC_ADDRESS),
   });
+  // ------------------------ SC SETUP -------------------------
 
+  // ------------------------ ADD GROUPS -----------------------
   const data = fs.readFileSync("groups_data.txt", { encoding: "utf8" });
   const lines = data.split(/\r?\n/);
 
@@ -86,6 +91,7 @@ const main = async () => {
       .valueOf();
     console.log(decodedResponse);
   }
+  // ------------------------ ADD GROUPS -----------------------
 };
 
 (async () => {
