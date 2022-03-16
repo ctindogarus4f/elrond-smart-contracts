@@ -39,6 +39,7 @@ const main = async () => {
 
   for (const line of lines) {
     const info = line.split(" ");
+    const name = info[0];
     const id = info[1];
     // remove thousand separator from numbers
     const cliff = info[2].replace(/,/g, "");
@@ -56,10 +57,15 @@ const main = async () => {
       ],
     });
 
+    console.log(`Adding group ${name}`);
     tx.setNonce(owner.nonce);
     owner.incrementNonce();
     await signer.sign(tx);
     await tx.send(provider);
+    await tx.awaitExecuted(provider);
+    console.log(
+      `Successfully added group ${name} via transaction with hash ${tx.getHash()}`,
+    );
   }
 };
 
