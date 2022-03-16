@@ -75,7 +75,7 @@ const main = async () => {
       ],
     });
 
-    console.log(`## Adding group ${name}`);
+    console.log(`# Adding group ${name}...`);
     tx.setNonce(owner.nonce);
     owner.incrementNonce();
     await signer.sign(tx);
@@ -99,16 +99,14 @@ const main = async () => {
     );
     let result = wrappedResult.getSmartContractResults().getImmediate();
     if (result.isSuccess()) {
-      console.log(
-        `## Successfully added group ${name} via transaction with hash ${tx.getHash()}`,
-      );
+      console.log(`# SUCCESS! Group added: ${name}, tx hash: ${tx.getHash()}.`);
     } else {
       console.log(
-        `## Error while adding group ${name} via transaction with hash ${tx.getHash()}. Details: ${result.getReturnMessage()}`,
+        `# ERROR! tx hash: ${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
       );
     }
 
-    console.log(`## Fetching group ${name}`);
+    console.log(`# Fetching group ${name}...`);
     let response = await contract.runQuery(provider, {
       func: new ContractFunction("getGroupInfo"),
       args: [new U8Value(id)],
@@ -117,7 +115,7 @@ const main = async () => {
     let decodedResponse = codec
       .decodeTopLevel(response.outputUntyped()[0], groupInfoType)
       .valueOf();
-    console.log(decodedResponse);
+    console.log(decodedResponse, "\n");
   }
   // ------------------------ ADD GROUPS -----------------------
 
@@ -147,7 +145,7 @@ const main = async () => {
       ],
     });
 
-    console.log(`## Adding beneficiary ${addr}`);
+    console.log(`# Adding beneficiary ${addr}...`);
     tx.setNonce(owner.nonce);
     owner.incrementNonce();
     await signer.sign(tx);
@@ -171,16 +169,14 @@ const main = async () => {
     );
     let result = wrappedResult.getSmartContractResults().getImmediate();
     if (result.isSuccess()) {
-      console.log(
-        `## Successfully added beneficiary ${addr} via transaction with hash ${tx.getHash()}`,
-      );
+      console.log(`# SUCCESS! Group added: ${addr}, tx hash: ${tx.getHash()}.`);
     } else {
       console.log(
-        `## Error while adding beneficiary ${addr} via transaction with hash ${tx.getHash()}. Details: ${result.getReturnMessage()}`,
+        `# ERROR! tx hash: ${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
       );
     }
 
-    console.log(`## Fetching beneficiary ${addr}`);
+    console.log(`# Fetching beneficiary ${addr}...`);
     let response = await contract.runQuery(provider, {
       func: new ContractFunction("getBeneficiaryInfo"),
       args: [new AddressValue(addrObj)],
@@ -189,7 +185,7 @@ const main = async () => {
     let decodedResponse = codec
       .decodeTopLevel(response.outputUntyped()[0], beneficiaryInfoType)
       .valueOf();
-    console.log(decodedResponse);
+    console.log(decodedResponse, "\n");
   }
   // ------------------------ ADD BENEFICIARIES -----------------------
 };
