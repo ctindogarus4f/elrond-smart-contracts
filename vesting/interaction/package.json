@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "format": "prettier --write \"*.{js,jsx,ts,tsx}\" --tab-width=2 --trailing-comma all",
+    "format": "prettier --write \"*.{js,jsx,ts,tsx}\" --tab-width=2 --trailing-comma all --arrow-parens avoid",
     "start": "ts-node playground.ts"
   },
   "dependencies": {
