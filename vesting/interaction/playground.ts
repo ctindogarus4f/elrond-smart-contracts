@@ -9,6 +9,7 @@ import {
   AbiRegistry,
   Account,
   Address,
+  AddressType,
   AddressValue,
   BigUIntValue,
   BinaryCodec,
@@ -19,6 +20,7 @@ import {
   NetworkConfig,
   ProxyProvider,
   SmartContract,
+  TokenIdentifierType,
   TransactionWatcher,
   U8Value,
   U64Value,
@@ -50,6 +52,32 @@ const main = async () => {
     address: new Address(VESTING_SC_ADDRESS),
   });
   // ------------------------ SC SETUP -------------------------
+
+  // ---------------------- CONTRACT CHECK ---------------------
+  {
+    console.log(`# Getting token identifier...`);
+    let response = await contract.runQuery(provider, {
+      func: new ContractFunction("getTokenIdentifier"),
+    });
+
+    let decodedResponse = codec
+      .decodeTopLevel(response.outputUntyped()[0], new TokenIdentifierType())
+      .valueOf();
+    console.log(decodedResponse, "\n");
+  }
+
+  {
+    console.log(`# Getting multisig address...`);
+    let response = await contract.runQuery(provider, {
+      func: new ContractFunction("getMultisigAddress"),
+    });
+
+    let decodedResponse = codec
+      .decodeTopLevel(response.outputUntyped()[0], new AddressType())
+      .valueOf();
+    console.log(decodedResponse, "\n");
+  }
+  // ---------------------- CONTRACT CHECK ---------------------
 
   // ------------------------ ADD GROUPS -----------------------
   let data = fs.readFileSync("../data/groups.txt", { encoding: "utf8" });
@@ -120,7 +148,7 @@ const main = async () => {
   }
   // ------------------------ ADD GROUPS -----------------------
 
-  // ------------------------ ADD BENEFICIARIES -----------------------
+  // -------------------- ADD BENEFICIARIES --------------------
   data = fs.readFileSync("../data/beneficiaries.txt", { encoding: "utf8" });
   lines = data.split(/\r?\n/);
 
@@ -189,7 +217,7 @@ const main = async () => {
       .valueOf();
     console.log(decodedResponse, "\n");
   }
-  // ------------------------ ADD BENEFICIARIES -----------------------
+  // -------------------- ADD BENEFICIARIES --------------------
 };
 
 (async () => {
