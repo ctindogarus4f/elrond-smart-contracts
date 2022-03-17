@@ -74,7 +74,8 @@ const main = async () => {
 
     let decodedResponse = codec
       .decodeTopLevel(response.outputUntyped()[0], new AddressType())
-      .valueOf();
+      .valueOf()
+      .bech32();
     console.log(decodedResponse, "\n");
   }
   // ---------------------- CONTRACT CHECK ---------------------
