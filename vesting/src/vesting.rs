@@ -44,7 +44,7 @@ pub trait VestingContract {
             release_frequency,
         };
 
-        self.group_info(&group_type).set_if_empty(&group_info);
+        self.group_info(&group_type).set(&group_info);
         self.add_group_event(&group_type, &group_info);
     }
 
@@ -164,7 +164,7 @@ pub trait VestingContract {
     // private functions
 
     fn assert_multisig_wallet(&self) {
-        let multisig_address = self.multisig_address().get(); // set in constructor
+        let multisig_address = self.multisig_address().get();
         require!(
             self.blockchain().get_caller() == multisig_address,
             "caller not authorized",
@@ -173,7 +173,7 @@ pub trait VestingContract {
 
     fn get_tokens_vested(&self, addr: &ManagedAddress) -> BigUint {
         let beneficiary_info = self.beneficiary_info(addr).get();
-        let group_info = self.group_info(&beneficiary_info.group_type).get(); // checked when set beneficiaryInfo
+        let group_info = self.group_info(&beneficiary_info.group_type).get();
 
         let tokens_allocated = beneficiary_info.tokens_allocated;
         let no_of_releases_after_cliff =
