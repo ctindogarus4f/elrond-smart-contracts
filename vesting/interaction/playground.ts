@@ -56,7 +56,7 @@ const main = async () => {
 
   // ---------------------- CONTRACT CHECK ---------------------
   {
-    console.log(`# Getting token identifier...`);
+    console.log(`Getting token identifier...`);
     let response = await contract.runQuery(provider, {
       func: new ContractFunction("getTokenIdentifier"),
     });
@@ -69,7 +69,7 @@ const main = async () => {
   }
 
   {
-    console.log(`# Getting multisig address...`);
+    console.log(`Getting multisig address...`);
     let response = await contract.runQuery(provider, {
       func: new ContractFunction("getMultisigAddress"),
     });
@@ -106,7 +106,7 @@ const main = async () => {
       ],
     });
 
-    console.log(`# Adding group ${name}...`);
+    console.log(`Adding group ${name}...`);
     tx.setNonce(owner.nonce);
     owner.incrementNonce();
     await signer.sign(tx);
@@ -133,16 +133,16 @@ const main = async () => {
     if (result.isSuccess()) {
       console.log(
         GREEN,
-        `# SUCCESS! Group added: ${name}, tx hash: ${tx.getHash()}.`,
+        `SUCCESS! Group added: ${name}, tx hash: ${tx.getHash()}.`,
       );
     } else {
       console.log(
         RED,
-        `# ERROR! tx hash: ${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
+        `ERROR! tx hash: ${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
       );
     }
 
-    console.log(`# Fetching group ${name}...`);
+    console.log(`Fetching group ${name}...`);
     let response = await contract.runQuery(provider, {
       func: new ContractFunction("getGroupInfo"),
       args: [new U8Value(id)],
@@ -181,7 +181,7 @@ const main = async () => {
       ],
     });
 
-    console.log(`# Adding beneficiary ${addr}...`);
+    console.log(`Adding beneficiary ${addr}...`);
     tx.setNonce(owner.nonce);
     owner.incrementNonce();
     await signer.sign(tx);
@@ -208,16 +208,16 @@ const main = async () => {
     if (result.isSuccess()) {
       console.log(
         GREEN,
-        `# SUCCESS! Group added: ${addr}, tx hash: ${tx.getHash()}.`,
+        `SUCCESS! Group added: ${addr}, tx hash: ${tx.getHash()}.`,
       );
     } else {
       console.log(
         RED,
-        `# ERROR! tx hash: ${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
+        `ERROR! tx hash: ${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
       );
     }
 
-    console.log(`# Fetching beneficiary ${addr}...`);
+    console.log(`Fetching beneficiary ${addr}...`);
     let response = await contract.runQuery(provider, {
       func: new ContractFunction("getBeneficiaryInfo"),
       args: [new AddressValue(addrObj)],
