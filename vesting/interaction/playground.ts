@@ -151,6 +151,9 @@ const main = async () => {
     let decodedResponse = codec
       .decodeTopLevel(response.outputUntyped()[0], groupInfoType)
       .valueOf();
+    Object.keys(decodedResponse).forEach(key => {
+      decodedResponse[key] = decodedResponse[key].toString();
+    });
     console.log(YELLOW, decodedResponse, "\n");
   }
   // ------------------------ ADD GROUPS -----------------------
@@ -226,6 +229,13 @@ const main = async () => {
     let decodedResponse = codec
       .decodeTopLevel(response.outputUntyped()[0], beneficiaryInfoType)
       .valueOf();
+    Object.keys(decodedResponse).forEach(key => {
+      if (key === "group_type") {
+        decodedResponse[key] = decodedResponse[key].name;
+      } else {
+        decodedResponse[key] = decodedResponse[key].toString();
+      }
+    });
     console.log(YELLOW, decodedResponse, "\n");
   }
   // -------------------- ADD BENEFICIARIES --------------------
