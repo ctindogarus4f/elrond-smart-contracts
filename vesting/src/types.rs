@@ -14,9 +14,9 @@ pub struct BeneficiaryInfo<M: ManagedTypeApi> {
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub struct GroupInfo {
-    pub release_cliff: u64,
-    pub release_frequency: u64,
-    pub release_percentage: u8,
+    pub release_cliff: u64,     // moment when the first release takes place
+    pub release_frequency: u64, // frequency of each release
+    pub release_percentage: u8, // percentage that gets released from the allocated tokens
 }
 
 // Discriminants are not explicit in the Rust code, they get generated automatically. Discriminats start from 0.
