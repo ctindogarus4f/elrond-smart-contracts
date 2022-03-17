@@ -3,7 +3,7 @@
     "steps": [
         {
             "step": "externalSteps",
-            "path": "init_vesting.steps.json"
+            "path": "init_vesting.scen.json"
         },
         {
             "step": "externalSteps",
