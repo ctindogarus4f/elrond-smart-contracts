@@ -1,5 +1,5 @@
 {
-    "name": "group_info",
+    "name": "beneficiary_info",
     "steps": [
         {
             "step": "externalSteps",
