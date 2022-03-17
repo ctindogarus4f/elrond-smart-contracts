@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "format": "prettier --write \"*.{js,jsx,ts,tsx}\" --tab-width=2 --trailing-comma all --arrow-parens avoid",
+    "start": "ts-node playground.ts"
+  },
+  "dependencies": {
+    "@elrondnetwork/erdjs": "^9.2.0",
+    "prettier": "^2.5.1",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.2"
+  }
+}

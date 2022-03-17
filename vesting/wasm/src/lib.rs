@@ -8,7 +8,8 @@ elrond_wasm_node::wasm_endpoints! {
     vesting
     (
         addBeneficiary
-        addGroupInfo
+        addGroup
+        changeMultisigAddress
         claim
         getAvailableTokens
         getBeneficiaryInfo

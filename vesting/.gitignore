@@ -3,5 +3,9 @@
 /target/
 */target/
 
+*/node_modules/
+
 # The erdpy output
 output*
+
+deploy-devnet.interaction.json
