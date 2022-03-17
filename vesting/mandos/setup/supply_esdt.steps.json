@@ -1,10 +1,10 @@
 {
-    "name": "setup_supply_vesting_esdt",
+    "name": "setup_supply_esdt",
     "steps": [
         {
             "step": "transfer",
             "comment": "supply vesting contract with ESDT",
-            "txId": "supply_vesting_esdt#1",
+            "txId": "supply_esdt#1",
             "tx": {
                 "from": "address:owner",
                 "to": "sc:vesting",

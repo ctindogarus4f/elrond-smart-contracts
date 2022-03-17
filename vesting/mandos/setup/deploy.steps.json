@@ -1,5 +1,5 @@
 {
-    "name": "setup_deploy_vesting",
+    "name": "setup_deploy",
     "steps": [
         {
             "step": "scDeploy",
