@@ -223,9 +223,7 @@
             "comment": "assert TOK-0001 balance",
             "accounts": {
                 "address:beneficiary_charlie": {
-                    "storage": {
-                        "+": ""
-                    },
+                    "nonce": "*",
                     "esdt": {
                         "str:TOK-0001": "200,000"
                     }
@@ -314,9 +312,7 @@
             "comment": "assert TOK-0001 balance",
             "accounts": {
                 "address:beneficiary_charlie": {
-                    "storage": {
-                        "+": ""
-                    },
+                    "nonce": "*",
                     "esdt": {
                         "str:TOK-0001": "600,000"
                     }
@@ -425,9 +421,7 @@
             "comment": "assert TOK-0001 balance",
             "accounts": {
                 "address:beneficiary_charlie": {
-                    "storage": {
-                        "+": ""
-                    },
+                    "nonce": "*",
                     "esdt": {
                         "str:TOK-0001": "800,000"
                     }
