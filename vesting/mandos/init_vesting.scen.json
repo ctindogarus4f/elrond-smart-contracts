@@ -7,11 +7,11 @@
         },
         {
             "step": "externalSteps",
-            "path": "setup/deploy_vesting.steps.json"
+            "path": "setup/deploy.steps.json"
         },
         {
             "step": "externalSteps",
-            "path": "setup/supply_vesting_esdt.steps.json"
+            "path": "setup/supply_esdt.steps.json"
         }
     ]
 }

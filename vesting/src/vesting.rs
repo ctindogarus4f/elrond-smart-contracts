@@ -114,7 +114,7 @@ pub trait VestingContract {
         let caller = self.blockchain().get_caller();
         require!(
             !self.beneficiary_info(&caller).is_empty(),
-            "non-existent beneficiary"
+            "beneficiary does not exist"
         );
 
         let available_tokens = self.get_available_tokens(caller.clone());
@@ -152,7 +152,7 @@ pub trait VestingContract {
     fn get_available_tokens(&self, addr: ManagedAddress) -> BigUint {
         require!(
             !self.beneficiary_info(&addr).is_empty(),
-            "non-existent beneficiary"
+            "beneficiary does not exist"
         );
 
         let claimed_tokens = self.beneficiary_info(&addr).get().tokens_claimed;

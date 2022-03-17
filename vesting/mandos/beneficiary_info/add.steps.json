@@ -37,8 +37,12 @@
                         "address": "sc:vesting",
                         "endpoint": "str:addBeneficiary",
                         "topics": [
-                            "str:add_beneficiary",
-                            "address:beneficiary_charlie",
+                            {
+                                "event": "str:add_beneficiary"
+                            },
+                            {
+                                "addr": "address:beneficiary_charlie"
+                            },
                             {
                                 "0-can_be_revoked": "u8:1",
                                 "1-is_revoked": "u8:0",
@@ -114,8 +118,12 @@
                         "address": "sc:vesting",
                         "endpoint": "str:addBeneficiary",
                         "topics": [
-                            "str:add_beneficiary",
-                            "address:beneficiary_bob",
+                            {
+                                "event": "str:add_beneficiary"
+                            },
+                            {
+                                "addr": "address:beneficiary_bob"
+                            },
                             {
                                 "0-can_be_revoked": "u8:0",
                                 "1-is_revoked": "u8:0",

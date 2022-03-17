@@ -7,11 +7,15 @@
         },
         {
             "step": "externalSteps",
-            "path": "setup/deploy_vesting.steps.json"
+            "path": "setup/deploy.steps.json"
         },
         {
             "step": "externalSteps",
             "path": "vesting_logic/calculation.steps.json"
+        },
+        {
+            "step": "externalSteps",
+            "path": "vesting_logic/calculation_not_divisible.steps.json"
         },
         {
             "step": "externalSteps",

@@ -70,8 +70,12 @@
                         "address": "sc:vesting",
                         "endpoint": "str:removeBeneficiary",
                         "topics": [
-                            "str:remove_beneficiary",
-                            "address:beneficiary_charlie"
+                            {
+                                "event": "str:remove_beneficiary"
+                            },
+                            {
+                                "addr": "address:beneficiary_charlie"
+                            }
                         ],
                         "data": ""
                     }

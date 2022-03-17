@@ -12,7 +12,7 @@ fn init_vesting() {
 }
 
 #[test]
-fn group_info_go() {
+fn group_info() {
     elrond_wasm_debug::mandos_rs("mandos/group_info.scen.json", world());
 }
 

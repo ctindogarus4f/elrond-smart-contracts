@@ -1,5 +1,5 @@
 {
-    "name": "init_accounts",
+    "name": "setup_init_accounts",
     "steps": [
         {
             "step": "setState",
