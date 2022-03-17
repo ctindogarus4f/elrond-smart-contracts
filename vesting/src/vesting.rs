@@ -100,11 +100,11 @@ pub trait VestingContract {
         );
 
         let available_tokens = self.get_available_tokens(addr.clone());
-        let new_allocated_tokens = beneficiary_info.tokens_claimed + available_tokens;
+        let new_tokens_allocated = beneficiary_info.tokens_claimed + available_tokens;
 
         self.beneficiary_info(&addr).update(|beneficiary| {
             beneficiary.is_revoked = true;
-            beneficiary.tokens_allocated = new_allocated_tokens;
+            beneficiary.tokens_allocated = new_tokens_allocated;
         });
         self.remove_beneficiary_event(&addr);
     }
@@ -155,10 +155,10 @@ pub trait VestingContract {
             "beneficiary does not exist"
         );
 
-        let claimed_tokens = self.beneficiary_info(&addr).get().tokens_claimed;
+        let tokens_claimed = self.beneficiary_info(&addr).get().tokens_claimed;
         let vested_tokens = self.get_vested_tokens(&addr);
 
-        vested_tokens - claimed_tokens
+        vested_tokens - tokens_claimed
     }
 
     // private functions
@@ -175,7 +175,7 @@ pub trait VestingContract {
         let beneficiary_info = self.beneficiary_info(addr).get();
         let group_info = self.group_info(&beneficiary_info.group_type).get(); // checked when set beneficiaryInfo
 
-        let allocated_tokens = beneficiary_info.tokens_allocated;
+        let tokens_allocated = beneficiary_info.tokens_allocated;
         let no_of_releases_after_cliff =
             self.get_no_of_releases_after_cliff(group_info.release_percentage);
         let first_release = beneficiary_info.start + group_info.release_cliff;
@@ -186,11 +186,11 @@ pub trait VestingContract {
         if current_timestamp < first_release {
             return BigUint::zero();
         } else if current_timestamp >= last_release || beneficiary_info.is_revoked {
-            return allocated_tokens.clone();
+            return tokens_allocated.clone();
         } else {
             let no_of_releases_until_now =
                 1 + (current_timestamp - first_release) / group_info.release_duration;
-            return allocated_tokens
+            return tokens_allocated
                 * group_info.release_percentage as u64
                 * no_of_releases_until_now
                 / 100u64;
