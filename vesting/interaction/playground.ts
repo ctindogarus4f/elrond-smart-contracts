@@ -62,7 +62,8 @@ const main = async () => {
 
     let decodedResponse = codec
       .decodeTopLevel(response.outputUntyped()[0], new TokenIdentifierType())
-      .valueOf();
+      .valueOf()
+      .toString();
     console.log(decodedResponse, "\n");
   }
 
