@@ -211,7 +211,7 @@ const main = async () => {
     if (result.isSuccess()) {
       console.log(
         GREEN,
-        `SUCCESS! Group added: ${addr}, tx hash: ${tx.getHash()}.`,
+        `SUCCESS! Beneficiary added: ${addr}, tx hash: ${tx.getHash()}.`,
       );
     } else {
       console.log(
