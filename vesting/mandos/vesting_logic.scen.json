@@ -3,23 +3,23 @@
     "steps": [
         {
             "step": "externalSteps",
-            "path": "setup/init_accounts.steps.json"
+            "path": "setup/1_init_accounts.steps.json"
         },
         {
             "step": "externalSteps",
-            "path": "setup/deploy.steps.json"
+            "path": "setup/2_deploy.steps.json"
         },
         {
             "step": "externalSteps",
-            "path": "vesting_logic/calculation.steps.json"
+            "path": "vesting_logic/1_calculation.steps.json"
         },
         {
             "step": "externalSteps",
-            "path": "vesting_logic/calculation_not_divisible.steps.json"
+            "path": "vesting_logic/2_calculation_not_divisible.steps.json"
         },
         {
             "step": "externalSteps",
-            "path": "vesting_logic/claim.steps.json"
+            "path": "vesting_logic/3_claim.steps.json"
         }
     ]
 }

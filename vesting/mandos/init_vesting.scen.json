@@ -3,15 +3,15 @@
     "steps": [
         {
             "step": "externalSteps",
-            "path": "setup/init_accounts.steps.json"
+            "path": "setup/1_init_accounts.steps.json"
         },
         {
             "step": "externalSteps",
-            "path": "setup/deploy.steps.json"
+            "path": "setup/2_deploy.steps.json"
         },
         {
             "step": "externalSteps",
-            "path": "setup/supply_esdt.steps.json"
+            "path": "setup/3_supply_esdt.steps.json"
         }
     ]
 }

@@ -7,11 +7,11 @@
         },
         {
             "step": "externalSteps",
-            "path": "group_info/add.steps.json"
+            "path": "group_info/1_add.steps.json"
         },
         {
             "step": "externalSteps",
-            "path": "group_info/assert_multisig.steps.json"
+            "path": "group_info/2_assert_multisig.steps.json"
         }
     ]
 }
