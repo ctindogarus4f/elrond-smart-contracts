@@ -1,6 +1,6 @@
 #[test]
-fn init_vesting() {
-    elrond_wasm_debug::mandos_go("mandos/init_vesting.scen.json");
+fn setup() {
+    elrond_wasm_debug::mandos_go("mandos/setup.scen.json");
 }
 
 #[test]

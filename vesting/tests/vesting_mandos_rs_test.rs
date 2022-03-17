@@ -7,8 +7,8 @@ fn world() -> BlockchainMock {
 }
 
 #[test]
-fn init_vesting() {
-    elrond_wasm_debug::mandos_rs("mandos/init_vesting.scen.json", world());
+fn setup() {
+    elrond_wasm_debug::mandos_rs("mandos/setup.scen.json", world());
 }
 
 #[test]

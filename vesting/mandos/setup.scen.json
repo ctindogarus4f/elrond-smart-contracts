@@ -1,5 +1,5 @@
 {
-    "name": "init_vesting",
+    "name": "setup",
     "steps": [
         {
             "step": "externalSteps",
