@@ -28,7 +28,7 @@ pub trait VestingContract {
         &self,
         group_type: GroupType,
         release_cliff: u64,
-        release_duration: u64,
+        release_frequency: u64,
         release_percentage: u8,
     ) {
         self.assert_multisig_wallet();
@@ -41,7 +41,7 @@ pub trait VestingContract {
         let group_info = GroupInfo {
             release_cliff,
             release_percentage,
-            release_duration,
+            release_frequency,
         };
 
         self.group_info(&group_type).set_if_empty(&group_info);
@@ -180,7 +180,7 @@ pub trait VestingContract {
             self.get_no_of_releases_after_cliff(group_info.release_percentage);
         let first_release = beneficiary_info.start + group_info.release_cliff;
         let last_release =
-            first_release + group_info.release_duration * no_of_releases_after_cliff as u64;
+            first_release + group_info.release_frequency * no_of_releases_after_cliff as u64;
 
         let current_timestamp = self.blockchain().get_block_timestamp();
         if current_timestamp < first_release {
@@ -189,7 +189,7 @@ pub trait VestingContract {
             return tokens_allocated.clone();
         } else {
             let no_of_releases_until_now =
-                1 + (current_timestamp - first_release) / group_info.release_duration;
+                1 + (current_timestamp - first_release) / group_info.release_frequency;
             return tokens_allocated
                 * group_info.release_percentage as u64
                 * no_of_releases_until_now

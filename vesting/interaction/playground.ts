@@ -61,7 +61,7 @@ const main = async () => {
     const id = info[1];
     // remove thousand separator from numbers
     const cliff = info[2].replace(/,/g, "");
-    const duration = info[3].replace(/,/g, "");
+    const frequency = info[3].replace(/,/g, "");
     const percentage = info[4];
 
     let tx = contract.call({
@@ -70,7 +70,7 @@ const main = async () => {
       args: [
         new U8Value(id),
         new U64Value(cliff),
-        new U64Value(duration),
+        new U64Value(frequency),
         new U8Value(percentage),
       ],
     });

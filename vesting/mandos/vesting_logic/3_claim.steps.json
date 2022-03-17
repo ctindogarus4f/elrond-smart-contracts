@@ -40,7 +40,7 @@
                         "release_cliff": "u64:300"
                     },
                     {
-                        "release_duration": "u64:500"
+                        "release_frequency": "u64:500"
                     },
                     {
                         "release_percentage": "u8:20"

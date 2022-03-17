@@ -17,7 +17,7 @@
                         "release_cliff": "u64:10"
                     },
                     {
-                        "release_duration": "u64:20"
+                        "release_frequency": "u64:20"
                     },
                     {
                         "release_percentage": "u8:30"
@@ -43,7 +43,7 @@
                             {
                                 "0-release_cliff": "u64:10",
                                 "1-release_percentage": "u64:20",
-                                "2-release_duration": "u8:30"
+                                "2-release_frequency": "u8:30"
                             }
                         ],
                         "data": ""
@@ -67,7 +67,7 @@
                     {
                         "0-release_cliff": "u64:10",
                         "1-release_percentage": "u64:20",
-                        "2-release_duration": "u8:30"
+                        "2-release_frequency": "u8:30"
                     }
                 ],
                 "status": "0"
@@ -89,7 +89,7 @@
                         "release_cliff": "u64:20"
                     },
                     {
-                        "release_duration": "u64:30"
+                        "release_frequency": "u64:30"
                     },
                     {
                         "release_percentage": "u8:70"

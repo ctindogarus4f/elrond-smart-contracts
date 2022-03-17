@@ -15,7 +15,7 @@ pub struct BeneficiaryInfo<M: ManagedTypeApi> {
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub struct GroupInfo {
     pub release_cliff: u64,
-    pub release_duration: u64,
+    pub release_frequency: u64,
     pub release_percentage: u8,
 }
 

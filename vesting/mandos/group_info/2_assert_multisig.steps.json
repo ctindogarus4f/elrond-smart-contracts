@@ -17,7 +17,7 @@
                         "release_cliff": "u64:10"
                     },
                     {
-                        "release_duration": "u64:20"
+                        "release_frequency": "u64:20"
                     },
                     {
                         "release_percentage": "u8:30"

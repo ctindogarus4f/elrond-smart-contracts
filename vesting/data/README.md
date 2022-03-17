@@ -3,13 +3,13 @@
 Each line represents the following:
 
 ```bash
-<group_name> <group_id> <release_cliff> <release_duration> <release_percentage>
+<group_name> <group_id> <release_cliff> <release_frequency> <release_percentage>
 ```
 where:
 - `group_name`: name of the group (ex: `team`)
 - `group_id`: id of the group (ex: `5`)
 - `release_cliff`: release cliff of the group, measured in seconds (ex: for 12 months cliff we have `60 (seconds) * 60 (minutes) * 24 (hours) * 30 (days) * 12 (months)`=`31,104,400`)
-- `release_duration`: release duration of the group, measured in seconds (ex: for releases that occur every 4 months we have `60 (seconds) * 60 (minutes) * 24 (hours) * 30 (days) * 4 (months)`=`10,368,000`)
+- `release_frequency`: release frequency of the group, measured in seconds (ex: for releases that occur every 4 months we have `60 (seconds) * 60 (minutes) * 24 (hours) * 30 (days) * 4 (months)`=`10,368,000`)
 - `release_percentage`: release percentage of the group (ex: for 10% we have `10`)
 
 # beneficiaries.txt
