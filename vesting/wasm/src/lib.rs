@@ -11,11 +11,11 @@ elrond_wasm_node::wasm_endpoints! {
         addGroup
         changeMultisigAddress
         claim
-        getAvailableTokens
         getBeneficiaryInfo
         getGroupInfo
         getMultisigAddress
         getTokenIdentifier
+        getTokensAvailable
         removeBeneficiary
     )
 }

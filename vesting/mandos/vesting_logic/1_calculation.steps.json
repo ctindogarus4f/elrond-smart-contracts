@@ -78,7 +78,7 @@
             "txId": "vesting_logic_calculation#25",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_bob"
                 ]
@@ -102,7 +102,7 @@
             "txId": "vesting_logic_calculation#30",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_bob"
                 ]
@@ -126,7 +126,7 @@
             "txId": "vesting_logic_calculation#40",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_bob"
                 ]
@@ -150,7 +150,7 @@
             "txId": "vesting_logic_calculation#50",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_bob"
                 ]
@@ -174,7 +174,7 @@
             "txId": "vesting_logic_calculation#60",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_bob"
                 ]
@@ -198,7 +198,7 @@
             "txId": "vesting_logic_calculation#70",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_bob"
                 ]

@@ -99,8 +99,8 @@ pub trait VestingContract {
             "beneficiary cannot be removed",
         );
 
-        let available_tokens = self.get_available_tokens(addr.clone());
-        let new_tokens_allocated = beneficiary_info.tokens_claimed + available_tokens;
+        let tokens_available = self.get_tokens_available(addr.clone());
+        let new_tokens_allocated = beneficiary_info.tokens_claimed + tokens_available;
 
         self.beneficiary_info(&addr).update(|beneficiary| {
             beneficiary.is_revoked = true;
@@ -117,9 +117,9 @@ pub trait VestingContract {
             "beneficiary does not exist"
         );
 
-        let available_tokens = self.get_available_tokens(caller.clone());
+        let tokens_available = self.get_tokens_available(caller.clone());
         require!(
-            available_tokens > 0,
+            tokens_available > 0,
             "no tokens are available to be claimed"
         );
 
@@ -129,7 +129,7 @@ pub trait VestingContract {
             0,
         );
         require!(
-            esdt_balance >= available_tokens,
+            esdt_balance >= tokens_available,
             "not enough tokens in vesting contract"
         );
 
@@ -137,28 +137,28 @@ pub trait VestingContract {
             &caller,
             &self.token_identifier().get(),
             0,
-            &available_tokens,
+            &tokens_available,
             b"successful claim",
         );
 
         self.beneficiary_info(&caller)
-            .update(|beneficiary| beneficiary.tokens_claimed += &available_tokens);
-        self.claim_event(&caller, &available_tokens);
+            .update(|beneficiary| beneficiary.tokens_claimed += &tokens_available);
+        self.claim_event(&caller, &tokens_available);
     }
 
     // view functions
 
-    #[view(getAvailableTokens)]
-    fn get_available_tokens(&self, addr: ManagedAddress) -> BigUint {
+    #[view(getTokensAvailable)]
+    fn get_tokens_available(&self, addr: ManagedAddress) -> BigUint {
         require!(
             !self.beneficiary_info(&addr).is_empty(),
             "beneficiary does not exist"
         );
 
         let tokens_claimed = self.beneficiary_info(&addr).get().tokens_claimed;
-        let vested_tokens = self.get_vested_tokens(&addr);
+        let tokens_vested = self.get_tokens_vested(&addr);
 
-        vested_tokens - tokens_claimed
+        tokens_vested - tokens_claimed
     }
 
     // private functions
@@ -171,7 +171,7 @@ pub trait VestingContract {
         );
     }
 
-    fn get_vested_tokens(&self, addr: &ManagedAddress) -> BigUint {
+    fn get_tokens_vested(&self, addr: &ManagedAddress) -> BigUint {
         let beneficiary_info = self.beneficiary_info(addr).get();
         let group_info = self.group_info(&beneficiary_info.group_type).get(); // checked when set beneficiaryInfo
 

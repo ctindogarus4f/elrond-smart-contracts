@@ -78,7 +78,7 @@
             "txId": "vesting_logic_calculation_not_divisible#25",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_alice"
                 ]
@@ -102,7 +102,7 @@
             "txId": "vesting_logic_calculation_not_divisible#30",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_alice"
                 ]
@@ -126,7 +126,7 @@
             "txId": "vesting_logic_calculation_not_divisible#40",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_alice"
                 ]
@@ -150,7 +150,7 @@
             "txId": "vesting_logic_calculation_not_divisible#50",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_alice"
                 ]
@@ -174,7 +174,7 @@
             "txId": "vesting_logic_calculation_not_divisible#60",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_alice"
                 ]
@@ -198,7 +198,7 @@
             "txId": "vesting_logic_calculation_not_divisible#70",
             "tx": {
                 "to": "sc:vesting",
-                "function": "getAvailableTokens",
+                "function": "getTokensAvailable",
                 "arguments": [
                     "address:beneficiary_alice"
                 ]
