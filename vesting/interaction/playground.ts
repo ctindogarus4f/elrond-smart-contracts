@@ -5,6 +5,7 @@ import {
   PROXY,
   VESTING_SC_ADDRESS,
 } from "./config";
+import { GREEN, RED, YELLOW } from "./colors";
 import {
   AbiRegistry,
   Account,
@@ -64,7 +65,7 @@ const main = async () => {
       .decodeTopLevel(response.outputUntyped()[0], new TokenIdentifierType())
       .valueOf()
       .toString();
-    console.log(decodedResponse, "\n");
+    console.log(YELLOW, decodedResponse, "\n");
   }
 
   {
@@ -77,7 +78,7 @@ const main = async () => {
       .decodeTopLevel(response.outputUntyped()[0], new AddressType())
       .valueOf()
       .bech32();
-    console.log(decodedResponse, "\n");
+    console.log(YELLOW, decodedResponse, "\n");
   }
   // ---------------------- CONTRACT CHECK ---------------------
 
@@ -130,9 +131,13 @@ const main = async () => {
     );
     let result = wrappedResult.getSmartContractResults().getImmediate();
     if (result.isSuccess()) {
-      console.log(`# SUCCESS! Group added: ${name}, tx hash: ${tx.getHash()}.`);
+      console.log(
+        GREEN,
+        `# SUCCESS! Group added: ${name}, tx hash: ${tx.getHash()}.`,
+      );
     } else {
       console.log(
+        RED,
         `# ERROR! tx hash: ${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
       );
     }
@@ -146,7 +151,7 @@ const main = async () => {
     let decodedResponse = codec
       .decodeTopLevel(response.outputUntyped()[0], groupInfoType)
       .valueOf();
-    console.log(decodedResponse, "\n");
+    console.log(YELLOW, decodedResponse, "\n");
   }
   // ------------------------ ADD GROUPS -----------------------
 
@@ -201,9 +206,13 @@ const main = async () => {
     );
     let result = wrappedResult.getSmartContractResults().getImmediate();
     if (result.isSuccess()) {
-      console.log(`# SUCCESS! Group added: ${addr}, tx hash: ${tx.getHash()}.`);
+      console.log(
+        GREEN,
+        `# SUCCESS! Group added: ${addr}, tx hash: ${tx.getHash()}.`,
+      );
     } else {
       console.log(
+        RED,
         `# ERROR! tx hash: ${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
       );
     }
@@ -217,7 +226,7 @@ const main = async () => {
     let decodedResponse = codec
       .decodeTopLevel(response.outputUntyped()[0], beneficiaryInfoType)
       .valueOf();
-    console.log(decodedResponse, "\n");
+    console.log(YELLOW, decodedResponse, "\n");
   }
   // -------------------- ADD BENEFICIARIES --------------------
 };
