@@ -14,7 +14,7 @@
             "tx": {
                 "from": "address:multisig",
                 "to": "sc:vesting",
-                "function": "addGroupInfo",
+                "function": "addGroup",
                 "arguments": [
                     {
                         "group_type": "2"
