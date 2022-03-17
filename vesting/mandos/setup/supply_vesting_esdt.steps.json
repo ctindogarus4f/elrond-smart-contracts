@@ -1,5 +1,5 @@
 {
-    "name": "supply_vesting_esdt",
+    "name": "setup_supply_vesting_esdt",
     "steps": [
         {
             "step": "transfer",
