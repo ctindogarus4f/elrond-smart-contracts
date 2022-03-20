@@ -91,15 +91,17 @@ const main = async () => {
     const name = info[0];
     const id = info[1];
     // remove thousand separator from numbers
-    const cliff = info[2].replace(/,/g, "");
-    const frequency = info[3].replace(/,/g, "");
-    const percentage = info[4];
+    const maxAllocation = info[2].replace(/,/g, "");
+    const cliff = info[3].replace(/,/g, "");
+    const frequency = info[4].replace(/,/g, "");
+    const percentage = info[5];
 
     let tx = contract.call({
       func: new ContractFunction("addGroup"),
       gasLimit: new GasLimit(GAS_LIMIT),
       args: [
         new U8Value(id),
+        new BigUIntValue(maxAllocation),
         new U64Value(cliff),
         new U64Value(frequency),
         new U8Value(percentage),
