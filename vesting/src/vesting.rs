@@ -27,6 +27,7 @@ pub trait VestingContract {
     fn add_group(
         &self,
         group_type: GroupType,
+        max_allocation: BigUint,
         release_cliff: u64,
         release_frequency: u64,
         release_percentage: u8,
@@ -39,6 +40,8 @@ pub trait VestingContract {
         );
 
         let group_info = GroupInfo {
+            current_allocation: BigUint::zero(),
+            max_allocation,
             release_cliff,
             release_percentage,
             release_frequency,
@@ -67,6 +70,15 @@ pub trait VestingContract {
         require!(
             !self.group_info(&group_type).is_empty(),
             "specified group is not set up",
+        );
+
+        let group_info = self.group_info(&group_type).get();
+        self.group_info(&group_type).update(|group| {
+            group.current_allocation += &tokens_allocated;
+        });
+        require!(
+            group_info.current_allocation <= group_info.max_allocation,
+            "group exceeds total allocation"
         );
 
         let beneficiary_info = BeneficiaryInfo {
@@ -100,7 +112,14 @@ pub trait VestingContract {
         );
 
         let tokens_available = self.get_tokens_available(addr.clone());
-        let new_tokens_allocated = beneficiary_info.tokens_claimed + tokens_available;
+        let new_tokens_allocated = &beneficiary_info.tokens_claimed + &tokens_available;
+
+        self.group_info(&beneficiary_info.group_type)
+            .update(|group| {
+                group.current_allocation = &group.current_allocation
+                    + &beneficiary_info.tokens_allocated
+                    + &new_tokens_allocated;
+            });
 
         self.beneficiary_info(&addr).update(|beneficiary| {
             beneficiary.is_revoked = true;
@@ -225,7 +244,11 @@ pub trait VestingContract {
     fn remove_beneficiary_event(&self, #[indexed] addr: &ManagedAddress);
 
     #[event("add_group")]
-    fn add_group_event(&self, #[indexed] group_type: &GroupType, #[indexed] group_info: &GroupInfo);
+    fn add_group_event(
+        &self,
+        #[indexed] group_type: &GroupType,
+        #[indexed] group_info: &GroupInfo<Self::Api>,
+    );
 
     // storage
 
@@ -246,5 +269,5 @@ pub trait VestingContract {
 
     #[view(getGroupInfo)]
     #[storage_mapper("groupInfo")]
-    fn group_info(&self, group_type: &GroupType) -> SingleValueMapper<GroupInfo>;
+    fn group_info(&self, group_type: &GroupType) -> SingleValueMapper<GroupInfo<Self::Api>>;
 }

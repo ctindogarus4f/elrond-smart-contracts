@@ -20,6 +20,9 @@
                         "group_type": "2"
                     },
                     {
+                        "max_allocation": "10,000,000"
+                    },
+                    {
                         "release_cliff": "u64:100"
                     },
                     {

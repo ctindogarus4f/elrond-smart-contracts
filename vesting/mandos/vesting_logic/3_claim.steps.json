@@ -37,6 +37,9 @@
                         "group_type": "3"
                     },
                     {
+                        "max_allocation": "10,000,000"
+                    },
+                    {
                         "release_cliff": "u64:300"
                     },
                     {
