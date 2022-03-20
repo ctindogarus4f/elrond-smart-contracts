@@ -117,7 +117,7 @@ pub trait VestingContract {
         self.group_info(&beneficiary_info.group_type)
             .update(|group| {
                 group.current_allocation = &group.current_allocation
-                    + &beneficiary_info.tokens_allocated
+                    - &beneficiary_info.tokens_allocated
                     + &new_tokens_allocated;
             });
 
