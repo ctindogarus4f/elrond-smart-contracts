@@ -1,5 +1,6 @@
 import {
   ABI_PATH,
+  DECIMALS_SUFFIX,
   GAS_LIMIT,
   OWNER_WALLET,
   PROXY,
@@ -94,7 +95,8 @@ const main = async () => {
     const name = info[0];
     const id = info[1];
     // remove thousand separator from numbers
-    const maxAllocation = info[2].replace(/,/g, "");
+    const maxAllocationWithDecimals = info[2] + DECIMALS_SUFFIX;
+    const maxAllocation = maxAllocationWithDecimals.replace(/,/g, "");
     const cliff = info[3].replace(/,/g, "");
     const frequency = info[4].replace(/,/g, "");
     const percentage = info[5];
@@ -175,7 +177,8 @@ const main = async () => {
     const groupId = info[2];
     // remove thousand separator from numbers
     const startTimestamp = info[3].replace(/,/g, "");
-    const tokensAllocated = info[4].replace(/,/g, "");
+    const tokensAllocatedWithDecimals = info[4] + DECIMALS_SUFFIX;
+    const tokensAllocated = tokensAllocatedWithDecimals.replace(/,/g, "");
 
     let tx = contract.call({
       func: new ContractFunction("addBeneficiary"),
