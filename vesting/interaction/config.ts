@@ -4,4 +4,4 @@ export const OWNER_WALLET =
   "/Users/constantindogaru/elrond-wallet/wallet-owner.pem";
 export const PROXY = "https://devnet-api.elrond.com";
 export const VESTING_SC_ADDRESS =
-  "erd1qqqqqqqqqqqqqpgq5uxt9epcwp9fsvxytl0k0eaxtswqr6ap8x5qhekxv6";
+  "erd1qqqqqqqqqqqqqpgq8zh8kq42meut2qv09sacrmmepkajycxn8x5qhgeaj6";
