@@ -16,6 +16,7 @@ elrond_wasm_node::wasm_endpoints! {
         getMultisigAddress
         getTokenIdentifier
         getTokensAvailable
+        getTotalTokensAllocated
         removeBeneficiary
     )
 }

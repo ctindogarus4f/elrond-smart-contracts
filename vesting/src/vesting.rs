@@ -13,6 +13,7 @@ pub trait VestingContract {
     fn init(&self, token_identifier: TokenIdentifier, multisig_address: ManagedAddress) {
         self.token_identifier().set_if_empty(&token_identifier);
         self.multisig_address().set_if_empty(&multisig_address);
+        self.total_tokens_allocated().set_if_empty(&BigUint::zero());
     }
 
     // endpoints
@@ -72,6 +73,18 @@ pub trait VestingContract {
             "specified group is not set up",
         );
 
+        self.total_tokens_allocated()
+            .update(|tokens| *tokens += &tokens_allocated);
+        let esdt_balance = self.blockchain().get_esdt_balance(
+            &self.blockchain().get_sc_address(),
+            &self.token_identifier().get(),
+            0,
+        );
+        require!(
+            esdt_balance >= self.total_tokens_allocated().get(),
+            "not enough tokens in vesting contract"
+        );
+
         let group_info = self.group_info(&group_type).get();
         self.group_info(&group_type).update(|group| {
             group.current_allocation += &tokens_allocated;
@@ -114,6 +127,10 @@ pub trait VestingContract {
         let tokens_available = self.get_tokens_available(addr.clone());
         let new_tokens_allocated = &beneficiary_info.tokens_claimed + &tokens_available;
 
+        self.total_tokens_allocated().update(|tokens| {
+            *tokens = tokens.clone() - &beneficiary_info.tokens_allocated + &new_tokens_allocated
+        });
+
         self.group_info(&beneficiary_info.group_type)
             .update(|group| {
                 group.current_allocation = &group.current_allocation
@@ -140,16 +157,6 @@ pub trait VestingContract {
         require!(
             tokens_available > 0,
             "no tokens are available to be claimed"
-        );
-
-        let esdt_balance = self.blockchain().get_esdt_balance(
-            &self.blockchain().get_sc_address(),
-            &self.token_identifier().get(),
-            0,
-        );
-        require!(
-            esdt_balance >= tokens_available,
-            "not enough tokens in vesting contract"
         );
 
         self.send().direct(
@@ -251,6 +258,10 @@ pub trait VestingContract {
     );
 
     // storage
+
+    #[view(getTotalTokensAllocated)]
+    #[storage_mapper("totalTokensAllocated")]
+    fn total_tokens_allocated(&self) -> SingleValueMapper<BigUint>;
 
     #[view(getTokenIdentifier)]
     #[storage_mapper("tokenIdentifier")]

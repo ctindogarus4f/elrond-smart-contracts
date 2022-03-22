@@ -43,6 +43,58 @@
         },
         {
             "step": "scCall",
+            "comment": "add beneficiary without having tokens in the vesting contract",
+            "txId": "vesting_logic_calculation#15",
+            "tx": {
+                "from": "address:multisig",
+                "to": "sc:vesting",
+                "function": "addBeneficiary",
+                "arguments": [
+                    {
+                        "addr": "address:beneficiary_bob"
+                    },
+                    {
+                        "can_be_revoked": "true"
+                    },
+                    {
+                        "group_type": "1"
+                    },
+                    {
+                        "start": "u64:2000"
+                    },
+                    {
+                        "tokens_allocated": "1,000,000"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:not enough tokens in vesting contract",
+                "gas": "*"
+            }
+        },
+        {
+            "step": "transfer",
+            "comment": "supply vesting contract with ESDT",
+            "txId": "vesting_logic_calculation#18",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:vesting",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:TOK-0001",
+                        "value": "100,000,000,000"
+                    }
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            }
+        },
+        {
+            "step": "scCall",
             "comment": "add revokable beneficiary info with start in future",
             "txId": "vesting_logic_calculation#20",
             "tx": {
