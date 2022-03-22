@@ -56,7 +56,10 @@ const main = async () => {
 
   // ---------------------- CONTRACT CHECK ---------------------
   {
-    console.log(`Getting token identifier...`);
+    console.log("Vesting SC address:");
+    console.log(YELLOW, VESTING_SC_ADDRESS, "\n");
+
+    console.log("Getting token identifier...");
     let response = await contract.runQuery(provider, {
       func: new ContractFunction("getTokenIdentifier"),
     });
@@ -69,7 +72,7 @@ const main = async () => {
   }
 
   {
-    console.log(`Getting multisig address...`);
+    console.log("Getting multisig address...");
     let response = await contract.runQuery(provider, {
       func: new ContractFunction("getMultisigAddress"),
     });
