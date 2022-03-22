@@ -39,6 +39,10 @@ pub trait VestingContract {
             self.group_info(&group_type).is_empty(),
             "group has already been defined",
         );
+        require!(
+            release_percentage > 0 && release_percentage <= 100,
+            "release percentage should be between (0, 100]"
+        );
 
         let group_info = GroupInfo {
             current_allocation: BigUint::zero(),
@@ -224,11 +228,6 @@ pub trait VestingContract {
     }
 
     fn get_no_of_releases_after_cliff(&self, release_percentage: u8) -> u8 {
-        require!(
-            release_percentage > 0 && release_percentage <= 100,
-            "release percentage should be between (0, 100]"
-        );
-
         if 100 % release_percentage == 0 {
             return 100 / release_percentage - 1;
         }
