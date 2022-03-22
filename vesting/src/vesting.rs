@@ -95,7 +95,7 @@ pub trait VestingContract {
         });
         require!(
             group_info.current_allocation <= group_info.max_allocation,
-            "group exceeds total allocation"
+            "group exceeds max allocation"
         );
 
         let beneficiary_info = BeneficiaryInfo {
