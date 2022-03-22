@@ -25,10 +25,12 @@ pub struct GroupInfo<M: ManagedTypeApi> {
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub enum GroupType {
     Advisor,         // we will have multiple beneficiaries for this type - id 0
-    Marketing,       // we will have a multisig address for this type - id 1
-    PrivateInvestor, // we will have multiple beneficiaries for this type - id 2
-    SeedInvestor,    // we will have multiple beneficiaries for this type - id 3
-    Strategy,        // we will have a multisig address for this type - id 4
-    Team,            // we will have multiple beneficiaries for this type - id 5
-    Treasury,        // we will have a single beneficiary for this type - id 6
+    IdoInvestor,     // we will have multiple beneficiaries for this type - id 1
+    Marketing,       // we will have a single beneficiary for this type - id 2
+    PrivateInvestor, // we will have multiple beneficiaries for this type - id 3
+    SeedInvestor,    // we will have multiple beneficiaries for this type - id 4
+    Staking,         // we will have a single beneficiary for this type - id 5
+    Strategy,        // we will have a single beneficiary for this type - id 6
+    Team,            // we will have multiple beneficiaries for this type - id 7
+    Treasury,        // we will have a single beneficiary for this type - id 8
 }
