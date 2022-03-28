@@ -10,9 +10,10 @@ use types::*;
 #[elrond_wasm::derive::contract]
 pub trait VestingContract {
     #[init]
-    fn init(&self, token_identifier: TokenIdentifier, multisig_address: ManagedAddress) {
+    fn init(&self, token_identifier: TokenIdentifier) {
+        let caller = self.blockchain().get_caller();
+        self.multisig_address().set_if_empty(&caller);
         self.token_identifier().set_if_empty(&token_identifier);
-        self.multisig_address().set_if_empty(&multisig_address);
         self.total_tokens_allocated().set_if_empty(&BigUint::zero());
     }
 

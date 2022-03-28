@@ -13,7 +13,7 @@
             "recall-nonce": true,
             "pem": "../../../elrond-wallet/wallet-owner.pem",
             "gas-limit": 60000000,
-            "arguments": ["0x5653542d623964633635", "0xb47148c2fd35d786d11f0ef9e31ae68352a0ede28acfc61d0c0b1463676439a8"],
+            "arguments": ["0x5653542d623964633635"],
             "send": true,
             "outfile": "deploy-devnet.interaction.json"
         }

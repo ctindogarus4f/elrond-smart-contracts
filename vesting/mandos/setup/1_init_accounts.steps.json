@@ -25,7 +25,7 @@
             },
             "newAddresses": [
                 {
-                    "creatorAddress": "address:owner",
+                    "creatorAddress": "address:multisig",
                     "creatorNonce": "0",
                     "newAddress": "sc:vesting"
                 }

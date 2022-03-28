@@ -6,14 +6,11 @@
             "comment": "deploy vesting contract",
             "txId": "deploy_vesting#1",
             "tx": {
-                "from": "address:owner",
+                "from": "address:multisig",
                 "contractCode": "file:../../output/vesting.wasm",
                 "arguments": [
                     {
                         "token_identifier": "str:TOK-0001"
-                    },
-                    {
-                        "multisig_address": "address:multisig"
                     }
                 ],
                 "gasLimit": "5,000,000",
