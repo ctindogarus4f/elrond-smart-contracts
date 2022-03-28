@@ -38,7 +38,7 @@ const main = async () => {
   // ----------------------- CODEC SETUP -----------------------
 
   // ---------------------- NETWORK SETUP ----------------------
-  const provider = new ProxyProvider(PROXY);
+  const provider = new ProxyProvider(PROXY, { timeout: 4000 });
   await NetworkConfig.getDefault().sync(provider);
   // ---------------------- NETWORK SETUP ----------------------
 
