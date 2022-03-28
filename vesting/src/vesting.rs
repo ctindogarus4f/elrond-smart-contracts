@@ -28,7 +28,7 @@ pub trait VestingContract {
     #[endpoint(addGroup)]
     fn add_group(
         &self,
-        group_type: GroupType,
+        group_name: ManagedBuffer,
         max_allocation: BigUint,
         release_cliff: u64,
         release_frequency: u64,
@@ -37,7 +37,7 @@ pub trait VestingContract {
         self.assert_multisig_wallet();
 
         require!(
-            self.group_info(&group_type).is_empty(),
+            self.group_info(&group_name).is_empty(),
             "group has already been defined",
         );
         require!(
@@ -53,8 +53,8 @@ pub trait VestingContract {
             release_frequency,
         };
 
-        self.group_info(&group_type).set(&group_info);
-        self.add_group_event(&group_type, &group_info);
+        self.group_info(&group_name).set(&group_info);
+        self.add_group_event(&group_name, &group_info);
     }
 
     #[endpoint(addBeneficiary)]
@@ -62,7 +62,7 @@ pub trait VestingContract {
         &self,
         addr: ManagedAddress,
         can_be_revoked: bool,
-        group_type: GroupType,
+        group_name: ManagedBuffer,
         start: u64,
         tokens_allocated: BigUint,
     ) {
@@ -74,7 +74,7 @@ pub trait VestingContract {
         );
 
         require!(
-            !self.group_info(&group_type).is_empty(),
+            !self.group_info(&group_name).is_empty(),
             "specified group is not set up",
         );
 
@@ -90,8 +90,8 @@ pub trait VestingContract {
             "not enough tokens in vesting contract"
         );
 
-        let group_info = self.group_info(&group_type).get();
-        self.group_info(&group_type).update(|group| {
+        let group_info = self.group_info(&group_name).get();
+        self.group_info(&group_name).update(|group| {
             group.current_allocation += &tokens_allocated;
         });
         require!(
@@ -102,7 +102,7 @@ pub trait VestingContract {
         let beneficiary_info = BeneficiaryInfo {
             can_be_revoked,
             is_revoked: false,
-            group_type,
+            group_name,
             start,
             tokens_allocated,
             tokens_claimed: BigUint::zero(),
@@ -136,7 +136,7 @@ pub trait VestingContract {
             *tokens = tokens.clone() - &beneficiary_info.tokens_allocated + &new_tokens_allocated
         });
 
-        self.group_info(&beneficiary_info.group_type)
+        self.group_info(&beneficiary_info.group_name)
             .update(|group| {
                 group.current_allocation = &group.current_allocation
                     - &beneficiary_info.tokens_allocated
@@ -204,7 +204,7 @@ pub trait VestingContract {
 
     fn get_tokens_vested(&self, addr: &ManagedAddress) -> BigUint {
         let beneficiary_info = self.beneficiary_info(addr).get();
-        let group_info = self.group_info(&beneficiary_info.group_type).get();
+        let group_info = self.group_info(&beneficiary_info.group_name).get();
 
         let tokens_allocated = beneficiary_info.tokens_allocated;
         let no_of_releases_after_cliff =
@@ -253,7 +253,7 @@ pub trait VestingContract {
     #[event("add_group")]
     fn add_group_event(
         &self,
-        #[indexed] group_type: &GroupType,
+        #[indexed] group_name: &ManagedBuffer,
         #[indexed] group_info: &GroupInfo<Self::Api>,
     );
 
@@ -280,5 +280,5 @@ pub trait VestingContract {
 
     #[view(getGroupInfo)]
     #[storage_mapper("groupInfo")]
-    fn group_info(&self, group_type: &GroupType) -> SingleValueMapper<GroupInfo<Self::Api>>;
+    fn group_info(&self, group_name: &ManagedBuffer) -> SingleValueMapper<GroupInfo<Self::Api>>;
 }

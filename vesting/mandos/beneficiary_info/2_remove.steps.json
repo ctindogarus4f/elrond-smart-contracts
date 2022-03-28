@@ -98,7 +98,7 @@
                     {
                         "0-can_be_revoked": "u8:1",
                         "1-is_revoked": "u8:1",
-                        "2-group_type": "1",
+                        "2-group_name": "nested:str:idoinvestor",
                         "3-start": "u64:1000",
                         "4-tokens_allocated": "biguint:0",
                         "5-tokens_claimed": "biguint:0"

@@ -17,7 +17,7 @@
                         "can_be_revoked": "true"
                     },
                     {
-                        "group_type": "1"
+                        "group_name": "str:idoinvestor"
                     },
                     {
                         "start": "u64:1000"
@@ -46,7 +46,7 @@
                             {
                                 "0-can_be_revoked": "u8:1",
                                 "1-is_revoked": "u8:0",
-                                "2-group_type": "1",
+                                "2-group_name": "nested:str:idoinvestor",
                                 "3-start": "u64:1000",
                                 "4-tokens_allocated": "biguint:1,000,000",
                                 "5-tokens_claimed": "biguint:0"
@@ -73,7 +73,7 @@
                     {
                         "0-can_be_revoked": "u8:1",
                         "1-is_revoked": "u8:0",
-                        "2-group_type": "1",
+                        "2-group_name": "nested:str:idoinvestor",
                         "3-start": "u64:1000",
                         "4-tokens_allocated": "biguint:1,000,000",
                         "5-tokens_claimed": "biguint:0"
@@ -98,7 +98,7 @@
                         "can_be_revoked": "false"
                     },
                     {
-                        "group_type": "1"
+                        "group_name": "str:idoinvestor"
                     },
                     {
                         "start": "u64:1000"
@@ -127,7 +127,7 @@
                             {
                                 "0-can_be_revoked": "u8:0",
                                 "1-is_revoked": "u8:0",
-                                "2-group_type": "1",
+                                "2-group_name": "nested:str:idoinvestor",
                                 "3-start": "u64:1000",
                                 "4-tokens_allocated": "biguint:1,000,000",
                                 "5-tokens_claimed": "biguint:0"
@@ -154,7 +154,7 @@
                     {
                         "0-can_be_revoked": "u8:0",
                         "1-is_revoked": "u8:0",
-                        "2-group_type": "1",
+                        "2-group_name": "nested:str:idoinvestor",
                         "3-start": "u64:1000",
                         "4-tokens_allocated": "biguint:1,000,000",
                         "5-tokens_claimed": "biguint:0"
@@ -179,7 +179,7 @@
                     {
                         "0-can_be_revoked": "u8:0",
                         "1-is_revoked": "u8:0",
-                        "2-group_type": "1",
+                        "2-group_name": "nested:str:idoinvestor",
                         "3-start": "u64:1000",
                         "4-tokens_allocated": "biguint:1,000,000",
                         "5-tokens_claimed": "biguint:0"
@@ -204,7 +204,7 @@
                         "can_be_revoked": "false"
                     },
                     {
-                        "group_type": "1"
+                        "group_name": "str:idoinvestor"
                     },
                     {
                         "start": "u64:1000"
@@ -238,7 +238,7 @@
                         "can_be_revoked": "false"
                     },
                     {
-                        "group_type": "1"
+                        "group_name": "str:idoinvestor"
                     },
                     {
                         "start": "u64:1000"
@@ -272,7 +272,7 @@
                         "can_be_revoked": "false"
                     },
                     {
-                        "group_type": "2"
+                        "group_name": "str:marketing"
                     },
                     {
                         "start": "u64:1000"

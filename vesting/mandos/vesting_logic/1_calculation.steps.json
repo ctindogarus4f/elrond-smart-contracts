@@ -17,7 +17,7 @@
                 "function": "addGroup",
                 "arguments": [
                     {
-                        "group_type": "1"
+                        "group_name": "str:idoinvestor"
                     },
                     {
                         "max_allocation": "10,000,000"
@@ -75,7 +75,7 @@
                         "can_be_revoked": "true"
                     },
                     {
-                        "group_type": "1"
+                        "group_name": "str:idoinvestor"
                     },
                     {
                         "start": "u64:2000"
@@ -127,7 +127,7 @@
                         "can_be_revoked": "true"
                     },
                     {
-                        "group_type": "1"
+                        "group_name": "str:idoinvestor"
                     },
                     {
                         "start": "u64:2000"
