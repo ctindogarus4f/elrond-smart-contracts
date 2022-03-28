@@ -16,6 +16,7 @@ import {
   BigUIntValue,
   BinaryCodec,
   BooleanValue,
+  BytesValue,
   UserSigner,
   ContractFunction,
   GasLimit,
@@ -92,7 +93,6 @@ const main = async () => {
   for (const line of lines) {
     const info = line.split(" ");
     const name = info[0];
-    const id = info[1];
     // remove thousand separator from numbers
     const maxAllocationWithDecimals = info[2] + DECIMALS_SUFFIX;
     const maxAllocation = maxAllocationWithDecimals.replace(/,/g, "");
@@ -104,7 +104,7 @@ const main = async () => {
       func: new ContractFunction("addGroup"),
       gasLimit: new GasLimit(GAS_LIMIT),
       args: [
-        new U8Value(id),
+        BytesValue.fromUTF8(name),
         new BigUIntValue(maxAllocation),
         new U64Value(cliff),
         new U64Value(frequency),
@@ -141,7 +141,7 @@ const main = async () => {
     console.log(`Fetching group ${name}...`);
     let response = await contract.runQuery(provider, {
       func: new ContractFunction("getGroupInfo"),
-      args: [new U8Value(id)],
+      args: [BytesValue.fromUTF8(name)],
     });
 
     let decodedResponse = codec
@@ -163,7 +163,7 @@ const main = async () => {
     const addr = info[0];
     const addrObj = new Address(addr);
     const canBeRevoked = info[1] === "temporary";
-    const groupId = info[2];
+    const groupName = info[2];
     // remove thousand separator from numbers
     const startTimestamp = info[3].replace(/,/g, "");
     const tokensAllocatedWithDecimals = info[4] + DECIMALS_SUFFIX;
@@ -175,7 +175,7 @@ const main = async () => {
       args: [
         new AddressValue(addrObj),
         new BooleanValue(canBeRevoked),
-        new U8Value(groupId),
+        BytesValue.fromUTF8(groupName),
         new U64Value(startTimestamp),
         new BigUIntValue(tokensAllocated),
       ],
@@ -217,11 +217,7 @@ const main = async () => {
       .decodeTopLevel(response.outputUntyped()[0], beneficiaryInfoType)
       .valueOf();
     Object.keys(decodedResponse).forEach(key => {
-      if (key === "group_type") {
-        decodedResponse[key] = decodedResponse[key].name;
-      } else {
-        decodedResponse[key] = decodedResponse[key].toString();
-      }
+      decodedResponse[key] = decodedResponse[key].toString();
     });
     console.log(YELLOW, decodedResponse, "\n");
   }
