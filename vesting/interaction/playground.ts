@@ -23,7 +23,6 @@ import {
   ProxyProvider,
   SmartContract,
   TokenIdentifierType,
-  TransactionWatcher,
   U8Value,
   U64Value,
 } from "@elrondnetwork/erdjs";
@@ -118,17 +117,7 @@ const main = async () => {
     owner.incrementNonce();
     await signer.sign(tx);
     await tx.send(provider);
-
-    let watcher = new TransactionWatcher(
-      tx.getHash(),
-      provider,
-      TransactionWatcher.DefaultPollingInterval,
-      TransactionWatcher.DefaultTimeout * 3,
-    );
-    await watcher.awaitStatus(
-      status => status.isExecuted(),
-      TransactionWatcher.NoopOnStatusReceived,
-    );
+    await tx.awaitExecuted(provider);
 
     let wrappedResult = await tx.getAsOnNetwork(
       provider,
@@ -197,17 +186,7 @@ const main = async () => {
     owner.incrementNonce();
     await signer.sign(tx);
     await tx.send(provider);
-
-    let watcher = new TransactionWatcher(
-      tx.getHash(),
-      provider,
-      TransactionWatcher.DefaultPollingInterval,
-      TransactionWatcher.DefaultTimeout * 3,
-    );
-    await watcher.awaitStatus(
-      status => status.isExecuted(),
-      TransactionWatcher.NoopOnStatusReceived,
-    );
+    await tx.awaitExecuted(provider);
 
     let wrappedResult = await tx.getAsOnNetwork(
       provider,
