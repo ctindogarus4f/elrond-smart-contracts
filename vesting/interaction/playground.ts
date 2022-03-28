@@ -94,11 +94,11 @@ const main = async () => {
     const info = line.split(" ");
     const name = info[0];
     // remove thousand separator from numbers
-    const maxAllocationWithDecimals = info[2] + DECIMALS_SUFFIX;
+    const maxAllocationWithDecimals = info[1] + DECIMALS_SUFFIX;
     const maxAllocation = maxAllocationWithDecimals.replace(/,/g, "");
-    const cliff = info[3].replace(/,/g, "");
-    const frequency = info[4].replace(/,/g, "");
-    const percentage = info[5];
+    const cliff = info[2].replace(/,/g, "");
+    const frequency = info[3].replace(/,/g, "");
+    const percentage = info[4];
 
     let tx = contract.call({
       func: new ContractFunction("addGroup"),
