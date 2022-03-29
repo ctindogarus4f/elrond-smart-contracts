@@ -74,7 +74,34 @@ pub trait StakingContract {
     }
 
     #[endpoint]
-    fn unstake(&self) {}
+    fn unstake(&self) {
+        let caller = self.blockchain().get_caller();
+        require!(
+            !self.staker_info(&caller).is_empty(),
+            "staker does not exist",
+        );
+
+        let staker_info = self.staker_info(&caller).get();
+        let package_info = self.package_info(&staker_info.package_name).get();
+
+        require!(
+            staker_info.start + package_info.locking_period
+                >= self.blockchain().get_block_timestamp(),
+            "cannot unstake sooner than the locking period"
+        );
+
+        let unstake_amount =
+            staker_info.tokens_staked * package_info.apr_percentage as u64 / 100u64;
+        self.send().direct(
+            &caller,
+            &self.token_identifier().get(),
+            0,
+            &unstake_amount,
+            b"successful unstake",
+        );
+
+        self.staker_info(&caller).clear();
+    }
 
     // private functions
 
