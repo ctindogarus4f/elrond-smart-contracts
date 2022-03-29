@@ -24,7 +24,7 @@ pub trait StakingContract {
     // endpoints
 
     #[endpoint(addPackage)]
-    fn add_package(&self, package_name: ManagedBuffer, apr_percentage: u8, locking_period: u32) {
+    fn add_package(&self, package_name: ManagedBuffer, apr_percentage: u8, locking_period: u64) {
         self.assert_multisig_wallet();
 
         require!(
@@ -44,6 +44,7 @@ pub trait StakingContract {
         self.package_info(&package_name).set(&package_info);
     }
 
+    #[payable("*")]
     #[endpoint]
     fn stake(&self) {}
 
@@ -69,6 +70,10 @@ pub trait StakingContract {
     #[view(getMultisigAddress)]
     #[storage_mapper("multisigAddress")]
     fn multisig_address(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[view(getStakerInfo)]
+    #[storage_mapper("stakerInfo")]
+    fn staker_info(&self, staker: &ManagedAddress) -> SingleValueMapper<StakerInfo<Self::Api>>;
 
     #[view(getPackageInfo)]
     #[storage_mapper("packageInfo")]
