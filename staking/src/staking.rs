@@ -91,7 +91,7 @@ pub trait StakingContract {
         );
 
         let unstake_amount =
-            staker_info.tokens_staked * package_info.apr_percentage as u64 / 100u64;
+            staker_info.tokens_staked * (100 + package_info.apr_percentage) as u64 / 100u64;
         self.send().direct(
             &caller,
             &self.token_identifier().get(),
