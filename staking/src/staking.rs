@@ -14,6 +14,14 @@ pub trait StakingContract {
         self.token_identifier().set_if_empty(&token_identifier);
     }
 
+    // endpoints
+
+    #[endpoint]
+    fn stake(&self) {}
+
+    #[endpoint]
+    fn unstake(&self) {}
+
     // storage
 
     #[view(getTokenIdentifier)]
