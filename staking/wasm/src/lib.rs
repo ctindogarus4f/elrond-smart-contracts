@@ -12,6 +12,7 @@ elrond_wasm_node::wasm_endpoints! {
         getPackageInfo
         getStakerInfo
         getTokenIdentifier
+        getTotalTokensAllocated
         stake
         unstake
     )

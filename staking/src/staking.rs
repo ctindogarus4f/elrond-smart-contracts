@@ -19,6 +19,7 @@ pub trait StakingContract {
 
         let caller = self.blockchain().get_caller();
         self.multisig_address().set_if_empty(&caller);
+        self.total_tokens_allocated().set_if_empty(&BigUint::zero());
     }
 
     // endpoints
@@ -64,6 +65,22 @@ pub trait StakingContract {
             "invalid staked token"
         );
 
+        let package_info = self.package_info(&package_name).get();
+        let unstake_amount =
+            self.compute_unstake_amount(&payment_amount, package_info.apr_percentage);
+        self.total_tokens_allocated()
+            .update(|tokens| *tokens += unstake_amount);
+
+        let esdt_balance = self.blockchain().get_esdt_balance(
+            &self.blockchain().get_sc_address(),
+            &self.token_identifier().get(),
+            0,
+        );
+        require!(
+            esdt_balance >= self.total_tokens_allocated().get(),
+            "not enough tokens in staking contract"
+        );
+
         let staker_info = StakerInfo {
             package_name,
             start: self.blockchain().get_block_timestamp(),
@@ -91,7 +108,7 @@ pub trait StakingContract {
         );
 
         let unstake_amount =
-            staker_info.tokens_staked * (100 + package_info.apr_percentage) as u64 / 100u64;
+            self.compute_unstake_amount(&staker_info.tokens_staked, package_info.apr_percentage);
         self.send().direct(
             &caller,
             &self.token_identifier().get(),
@@ -113,7 +130,15 @@ pub trait StakingContract {
         );
     }
 
+    fn compute_unstake_amount(&self, staked_amount: &BigUint, apr_percentage: u8) -> BigUint {
+        staked_amount * (100 + apr_percentage) as u64 / 100u64
+    }
+
     // storage
+
+    #[view(getTotalTokensAllocated)]
+    #[storage_mapper("totalTokensAllocated")]
+    fn total_tokens_allocated(&self) -> SingleValueMapper<BigUint>;
 
     #[view(getTokenIdentifier)]
     #[storage_mapper("tokenIdentifier")]
