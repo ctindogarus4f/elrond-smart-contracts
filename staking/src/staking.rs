@@ -45,6 +45,26 @@ pub trait StakingContract {
         self.package_info(&package_name).set(&package_info);
     }
 
+    #[endpoint(claimTokensUnallocated)]
+    fn claim_tokens_unallocated(&self) {
+        self.assert_multisig_wallet();
+
+        let esdt_balance = self.blockchain().get_esdt_balance(
+            &self.blockchain().get_sc_address(),
+            &self.token_identifier().get(),
+            0,
+        );
+        let tokens_unallocated = esdt_balance - self.total_tokens_allocated().get();
+
+        self.send().direct(
+            &self.multisig_address().get(),
+            &self.token_identifier().get(),
+            0,
+            &tokens_unallocated,
+            b"successful claim",
+        );
+    }
+
     #[payable("*")]
     #[endpoint]
     fn stake(&self, package_name: ManagedBuffer) {

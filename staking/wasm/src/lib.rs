@@ -8,6 +8,7 @@ elrond_wasm_node::wasm_endpoints! {
     staking
     (
         addPackage
+        claimTokensUnallocated
         getMultisigAddress
         getPackageInfo
         getStakerInfo
