@@ -46,7 +46,32 @@ pub trait StakingContract {
 
     #[payable("*")]
     #[endpoint]
-    fn stake(&self) {}
+    fn stake(&self, package_name: ManagedBuffer) {
+        let caller = self.blockchain().get_caller();
+        require!(
+            self.staker_info(&caller).is_empty(),
+            "staker has already been added",
+        );
+
+        require!(
+            !self.package_info(&package_name).is_empty(),
+            "specified package is not set up",
+        );
+
+        let (payment_amount, payment_token) = self.call_value().payment_token_pair();
+        require!(
+            payment_token == self.token_identifier().get(),
+            "invalid staked token"
+        );
+
+        let staker_info = StakerInfo {
+            package_name,
+            start: self.blockchain().get_block_timestamp(),
+            tokens_staked: payment_amount,
+        };
+
+        self.staker_info(&caller).set(&staker_info);
+    }
 
     #[endpoint]
     fn unstake(&self) {}

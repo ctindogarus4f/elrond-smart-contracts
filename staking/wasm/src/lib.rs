@@ -10,6 +10,7 @@ elrond_wasm_node::wasm_endpoints! {
         addPackage
         getMultisigAddress
         getPackageInfo
+        getStakerInfo
         getTokenIdentifier
         stake
         unstake
