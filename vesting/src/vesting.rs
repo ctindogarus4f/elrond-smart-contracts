@@ -15,10 +15,11 @@ pub trait VestingContract {
             token_identifier.is_valid_esdt_identifier(),
             "invalid esdt token"
         );
+        self.token_identifier().set_if_empty(&token_identifier);
 
         let caller = self.blockchain().get_caller();
         self.multisig_address().set_if_empty(&caller);
-        self.token_identifier().set_if_empty(&token_identifier);
+
         self.total_tokens_allocated().set_if_empty(&BigUint::zero());
         self.beneficiary_counter().set_if_empty(&0);
     }
@@ -124,10 +125,9 @@ pub trait VestingContract {
         };
         let beneficiary_counter = self.get_and_increase_beneficiary_counter();
         beneficiary_ids.push(beneficiary_counter);
+        self.beneficiary_ids(&addr).set(beneficiary_ids);
         self.beneficiary_info(beneficiary_counter)
             .set(&beneficiary_info);
-        self.beneficiary_ids(&addr).set(beneficiary_ids);
-
         self.add_beneficiary_event(&addr, &beneficiary_info)
     }
 
@@ -142,11 +142,10 @@ pub trait VestingContract {
         let beneficiary_ids = self.beneficiary_ids(&addr).get();
         require!(
             beneficiary_ids.contains(&id),
-            "id does not exist for beneficiary"
+            "id is not defined for the beneficiary"
         );
 
         let beneficiary_info = self.beneficiary_info(id).get();
-
         require!(!beneficiary_info.is_revoked, "beneficiary already removed",);
         require!(
             beneficiary_info.can_be_revoked,
@@ -185,7 +184,7 @@ pub trait VestingContract {
         let beneficiary_ids = self.beneficiary_ids(&caller).get();
         require!(
             beneficiary_ids.contains(&id),
-            "id does not exist for beneficiary"
+            "id is not defined for the beneficiary"
         );
 
         let tokens_available = self.get_tokens_available(id);
