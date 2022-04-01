@@ -11,6 +11,8 @@ elrond_wasm_node::wasm_endpoints! {
         addGroup
         changeMultisigAddress
         claim
+        getBeneficiaryCounter
+        getBeneficiaryIds
         getBeneficiaryInfo
         getGroupInfo
         getMultisigAddress
