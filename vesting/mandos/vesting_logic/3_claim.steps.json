@@ -135,7 +135,7 @@
                         "endpoint": "str:ESDTTransfer",
                         "topics": [
                             {
-                                "token": "str:TOK-0001"
+                                "token": "str:TOK-abcd01"
                             },
                             {
                                 "?": ""
@@ -170,12 +170,12 @@
         },
         {
             "step": "checkState",
-            "comment": "assert TOK-0001 balance",
+            "comment": "assert TOK-abcd01 balance",
             "accounts": {
                 "address:beneficiary_charlie": {
                     "nonce": "*",
                     "esdt": {
-                        "str:TOK-0001": "200,000"
+                        "str:TOK-abcd01": "200,000"
                     }
                 },
                 "+": ""
@@ -224,7 +224,7 @@
                         "endpoint": "str:ESDTTransfer",
                         "topics": [
                             {
-                                "token": "str:TOK-0001"
+                                "token": "str:TOK-abcd01"
                             },
                             {
                                 "?": ""
@@ -259,12 +259,12 @@
         },
         {
             "step": "checkState",
-            "comment": "assert TOK-0001 balance",
+            "comment": "assert TOK-abcd01 balance",
             "accounts": {
                 "address:beneficiary_charlie": {
                     "nonce": "*",
                     "esdt": {
-                        "str:TOK-0001": "600,000"
+                        "str:TOK-abcd01": "600,000"
                     }
                 },
                 "+": ""
@@ -333,7 +333,7 @@
                         "endpoint": "str:ESDTTransfer",
                         "topics": [
                             {
-                                "token": "str:TOK-0001"
+                                "token": "str:TOK-abcd01"
                             },
                             {
                                 "?": ""
@@ -368,12 +368,12 @@
         },
         {
             "step": "checkState",
-            "comment": "assert TOK-0001 balance",
+            "comment": "assert TOK-abcd01 balance",
             "accounts": {
                 "address:beneficiary_charlie": {
                     "nonce": "*",
                     "esdt": {
-                        "str:TOK-0001": "800,000"
+                        "str:TOK-abcd01": "800,000"
                     }
                 },
                 "+": ""

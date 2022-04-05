@@ -51,7 +51,7 @@
                 "egldValue": "0",
                 "esdtValue": [
                     {
-                        "tokenIdentifier": "str:TOK-0001",
+                        "tokenIdentifier": "str:TOK-abcd01",
                         "value": "100"
                     }
                 ],
@@ -103,7 +103,7 @@
                 "egldValue": "0",
                 "esdtValue": [
                     {
-                        "tokenIdentifier": "str:TOK-0001",
+                        "tokenIdentifier": "str:TOK-abcd01",
                         "value": "10,000,000,000"
                     }
                 ],

@@ -7,7 +7,7 @@
                 "address:owner": {
                     "nonce": "0",
                     "esdt": {
-                        "str:TOK-0001": "100,000,000,000"
+                        "str:TOK-abcd01": "100,000,000,000"
                     }
                 },
                 "address:beneficiary_alice": {

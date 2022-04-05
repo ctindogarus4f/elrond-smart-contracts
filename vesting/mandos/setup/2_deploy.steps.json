@@ -10,7 +10,7 @@
                 "contractCode": "file:../../output/vesting.wasm",
                 "arguments": [
                     {
-                        "token_identifier": "str:TOK-0001"
+                        "token_identifier": "str:TOK-abcd01"
                     }
                 ],
                 "gasLimit": "5,000,000",
@@ -31,7 +31,7 @@
             },
             "expect": {
                 "out": [
-                    "str:TOK-0001"
+                    "str:TOK-abcd01"
                 ],
                 "status": "0"
             }
