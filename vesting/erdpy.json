@@ -1,8 +1,8 @@
 {
     "configurations": {
         "default": {
-            "proxy": "https://devnet-api.elrond.com",
-            "chainID": "D"
+            "proxy": "https://testnet-api.elrond.com",
+            "chainID": "T"
         }
     },
     "contract":{
@@ -13,9 +13,9 @@
             "recall-nonce": true,
             "pem": "../../../elrond-wallet/wallet-owner.pem",
             "gas-limit": 60000000,
-            "arguments": ["0x5653542d623964633635"],
+            "arguments": ["0x564553542d393564653532"],
             "send": true,
-            "outfile": "deploy-devnet.interaction.json"
+            "outfile": "deploy-testnet.interaction.json"
         }
      }
 }
