@@ -83,7 +83,7 @@
                 "to": "sc:vesting",
                 "function": "getTokensAvailable",
                 "arguments": [
-                    "address:beneficiary_alice"
+                    "u64:1"
                 ]
             },
             "expect": {
@@ -107,7 +107,7 @@
                 "to": "sc:vesting",
                 "function": "getTokensAvailable",
                 "arguments": [
-                    "address:beneficiary_alice"
+                    "u64:1"
                 ]
             },
             "expect": {
@@ -131,7 +131,7 @@
                 "to": "sc:vesting",
                 "function": "getTokensAvailable",
                 "arguments": [
-                    "address:beneficiary_alice"
+                    "u64:1"
                 ]
             },
             "expect": {
@@ -155,7 +155,7 @@
                 "to": "sc:vesting",
                 "function": "getTokensAvailable",
                 "arguments": [
-                    "address:beneficiary_alice"
+                    "u64:1"
                 ]
             },
             "expect": {
@@ -179,7 +179,7 @@
                 "to": "sc:vesting",
                 "function": "getTokensAvailable",
                 "arguments": [
-                    "address:beneficiary_alice"
+                    "u64:1"
                 ]
             },
             "expect": {
@@ -203,7 +203,7 @@
                 "to": "sc:vesting",
                 "function": "getTokensAvailable",
                 "arguments": [
-                    "address:beneficiary_alice"
+                    "u64:1"
                 ]
             },
             "expect": {
