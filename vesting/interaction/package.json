@@ -1,7 +1,9 @@
 {
   "scripts": {
     "format": "prettier --write \"*.{js,jsx,ts,tsx}\" --tab-width=2 --trailing-comma all --arrow-parens avoid",
-    "start": "ts-node playground.ts"
+    "start": "ts-node playground.ts",
+    "add_groups": "ts-node playground.ts add_groups",
+    "add_beneficiaries": "ts-node playground.ts add_beneficiaries"
   },
   "dependencies": {
     "@elrondnetwork/erdjs": "^9.2.4",

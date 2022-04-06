@@ -30,64 +30,16 @@ import {
 } from "@elrondnetwork/erdjs";
 const fs = require("fs");
 
-const main = async () => {
-  // ----------------------- CODEC SETUP -----------------------
-  let abi = await AbiRegistry.load({ files: [ABI_PATH] });
+const addGroups = async (
+  contract: SmartContract,
+  owner: Account,
+  signer: UserSigner,
+  provider: ProxyProvider,
+  abi: AbiRegistry,
+  codec: BinaryCodec,
+) => {
   let groupInfoType = abi.getStruct("GroupInfo");
-  let beneficiaryInfoType = abi.getStruct("BeneficiaryInfo");
-  let codec = new BinaryCodec();
-  // ----------------------- CODEC SETUP -----------------------
 
-  // ---------------------- NETWORK SETUP ----------------------
-  const provider = new ProxyProvider(PROXY, { timeout: 4000 });
-  await NetworkConfig.getDefault().sync(provider);
-  // ---------------------- NETWORK SETUP ----------------------
-
-  // ----------------- SIGNER AND OWNER SETUP ------------------
-  const privateKey = fs.readFileSync(OWNER_WALLET, { encoding: "utf8" });
-  const signer = UserSigner.fromPem(privateKey);
-  const owner = new Account(signer.getAddress());
-  await owner.sync(provider);
-  // ----------------- SIGNER AND OWNER SETUP ------------------
-
-  // ------------------------ SC SETUP -------------------------
-  let contract = new SmartContract({
-    address: new Address(VESTING_SC_ADDRESS),
-  });
-  // ------------------------ SC SETUP -------------------------
-
-  // ---------------------- CONTRACT CHECK ---------------------
-  {
-    console.log("Vesting SC address:");
-    console.log(YELLOW, VESTING_SC_ADDRESS, "\n");
-
-    console.log("Getting token identifier...");
-    let response = await contract.runQuery(provider, {
-      func: new ContractFunction("getTokenIdentifier"),
-    });
-
-    let decodedResponse = codec
-      .decodeTopLevel(response.outputUntyped()[0], new TokenIdentifierType())
-      .valueOf()
-      .toString();
-    console.log(YELLOW, decodedResponse, "\n");
-  }
-
-  {
-    console.log("Getting multisig address...");
-    let response = await contract.runQuery(provider, {
-      func: new ContractFunction("getMultisigAddress"),
-    });
-
-    let decodedResponse = codec
-      .decodeTopLevel(response.outputUntyped()[0], new AddressType())
-      .valueOf()
-      .bech32();
-    console.log(YELLOW, decodedResponse, "\n");
-  }
-  // ---------------------- CONTRACT CHECK ---------------------
-
-  // ------------------------ ADD GROUPS -----------------------
   let data = fs.readFileSync("../data/groups.txt", { encoding: "utf8" });
   let lines = data.split(/\r?\n/);
 
@@ -153,11 +105,20 @@ const main = async () => {
     });
     console.log(YELLOW, decodedResponse, "\n");
   }
-  // ------------------------ ADD GROUPS -----------------------
+};
 
-  // -------------------- ADD BENEFICIARIES --------------------
-  data = fs.readFileSync("../data/beneficiaries.txt", { encoding: "utf8" });
-  lines = data.split(/\r?\n/);
+const addBeneficiaries = async (
+  contract: SmartContract,
+  owner: Account,
+  signer: UserSigner,
+  provider: ProxyProvider,
+  abi: AbiRegistry,
+  codec: BinaryCodec,
+) => {
+  let beneficiaryInfoType = abi.getStruct("BeneficiaryInfo");
+
+  let data = fs.readFileSync("../data/beneficiaries.txt", { encoding: "utf8" });
+  let lines = data.split(/\r?\n/);
 
   for (const line of lines) {
     const info = line.split(" ");
@@ -221,6 +182,78 @@ const main = async () => {
       decodedResponse[key] = decodedResponse[key].toString();
     });
     console.log(YELLOW, decodedResponse, "\n");
+  }
+};
+
+const main = async () => {
+  // ----------------------- CODEC SETUP -----------------------
+  let abi = await AbiRegistry.load({ files: [ABI_PATH] });
+  let codec = new BinaryCodec();
+  // ----------------------- CODEC SETUP -----------------------
+
+  // ---------------------- NETWORK SETUP ----------------------
+  const provider = new ProxyProvider(PROXY, { timeout: 4000 });
+  await NetworkConfig.getDefault().sync(provider);
+  // ---------------------- NETWORK SETUP ----------------------
+
+  // ----------------- SIGNER AND OWNER SETUP ------------------
+  const privateKey = fs.readFileSync(OWNER_WALLET, { encoding: "utf8" });
+  const signer = UserSigner.fromPem(privateKey);
+  const owner = new Account(signer.getAddress());
+  await owner.sync(provider);
+  // ----------------- SIGNER AND OWNER SETUP ------------------
+
+  // ------------------------ SC SETUP -------------------------
+  let contract = new SmartContract({
+    address: new Address(VESTING_SC_ADDRESS),
+  });
+  // ------------------------ SC SETUP -------------------------
+
+  // ---------------------- CONTRACT CHECK ---------------------
+  {
+    console.log("Vesting SC address:");
+    console.log(YELLOW, VESTING_SC_ADDRESS, "\n");
+
+    console.log("Getting token identifier...");
+    let response = await contract.runQuery(provider, {
+      func: new ContractFunction("getTokenIdentifier"),
+    });
+
+    let decodedResponse = codec
+      .decodeTopLevel(response.outputUntyped()[0], new TokenIdentifierType())
+      .valueOf()
+      .toString();
+    console.log(YELLOW, decodedResponse, "\n");
+  }
+
+  {
+    console.log("Getting multisig address...");
+    let response = await contract.runQuery(provider, {
+      func: new ContractFunction("getMultisigAddress"),
+    });
+
+    let decodedResponse = codec
+      .decodeTopLevel(response.outputUntyped()[0], new AddressType())
+      .valueOf()
+      .bech32();
+    console.log(YELLOW, decodedResponse, "\n");
+  }
+  // ---------------------- CONTRACT CHECK ---------------------
+
+  const action = process.argv.length > 2 ? process.argv[2] : undefined;
+  const shouldAddGroups = action === undefined || action === "add_groups";
+  const shouldAddBeneficiaries =
+    action === undefined || action === "add_beneficiaries";
+
+  // ------------------------ ADD GROUPS -----------------------
+  if (shouldAddGroups) {
+    await addGroups(contract, owner, signer, provider, abi, codec);
+  }
+  // ------------------------ ADD GROUPS -----------------------
+
+  // -------------------- ADD BENEFICIARIES --------------------
+  if (shouldAddBeneficiaries) {
+    await addBeneficiaries(contract, owner, signer, provider, abi, codec);
   }
   // -------------------- ADD BENEFICIARIES --------------------
 };
