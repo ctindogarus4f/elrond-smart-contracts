@@ -18,15 +18,17 @@ import {
   BinaryCodec,
   BooleanValue,
   BytesValue,
-  UserSigner,
   ContractFunction,
   GasLimit,
+  ListType,
   NetworkConfig,
   ProxyProvider,
   SmartContract,
   TokenIdentifierType,
   U8Value,
   U64Value,
+  U64Type,
+  UserSigner,
 } from "@elrondnetwork/erdjs";
 import axios from "axios";
 const fs = require("fs");
@@ -162,19 +164,18 @@ const addBeneficiaries = async (
       );
     }
 
-    console.log(`Fetching beneficiary ${addr}...`);
+    console.log(`Fetching ids for beneficiary ${addr}...`);
     let response = await contract.runQuery(provider, {
-      func: new ContractFunction("getBeneficiaryInfo"),
+      func: new ContractFunction("getBeneficiaryIds"),
       args: [new AddressValue(addrObj)],
     });
 
-    let decodedResponse = codec
-      .decodeTopLevel(response.outputUntyped()[0], beneficiaryInfoType)
+    let beneficiaryIds = codec
+      .decodeTopLevel(response.outputUntyped()[0], new ListType(new U64Type()))
       .valueOf();
-    Object.keys(decodedResponse).forEach(key => {
-      decodedResponse[key] = decodedResponse[key].toString();
-    });
-    console.log(YELLOW, decodedResponse, "\n");
+    for (const beneficiaryId of beneficiaryIds) {
+      console.log(YELLOW, beneficiaryId, "\n");
+    }
   }
 };
 
