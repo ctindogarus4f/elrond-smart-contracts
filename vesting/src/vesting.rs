@@ -22,6 +22,7 @@ pub trait VestingContract {
         self.multisig_address().set_if_empty(&caller);
 
         self.total_tokens_allocated().set_if_empty(&BigUint::zero());
+        self.total_tokens_claimed().set_if_empty(&BigUint::zero());
         self.beneficiary_counter().set_if_empty(&0);
     }
 
@@ -97,13 +98,14 @@ pub trait VestingContract {
 
         self.total_tokens_allocated()
             .update(|tokens| *tokens += &tokens_allocated);
-        let esdt_balance = self.blockchain().get_esdt_balance(
+        let contract_balance = self.blockchain().get_esdt_balance(
             &self.blockchain().get_sc_address(),
             &self.token_identifier().get(),
             0,
         );
         require!(
-            esdt_balance >= self.total_tokens_allocated().get(),
+            contract_balance
+                >= self.total_tokens_allocated().get() - self.total_tokens_claimed().get(),
             "not enough tokens in vesting contract"
         );
 
@@ -202,6 +204,8 @@ pub trait VestingContract {
             b"successful claim",
         );
 
+        self.total_tokens_claimed()
+            .update(|tokens| *tokens += &tokens_available);
         self.beneficiary_info(id)
             .update(|beneficiary| beneficiary.tokens_claimed += &tokens_available);
         self.claim_event(&caller, &tokens_available);
@@ -317,6 +321,10 @@ pub trait VestingContract {
     #[view(getTotalTokensAllocated)]
     #[storage_mapper("totalTokensAllocated")]
     fn total_tokens_allocated(&self) -> SingleValueMapper<BigUint>;
+
+    #[view(getTotalTokensClaimed)]
+    #[storage_mapper("totalTokensClaimed")]
+    fn total_tokens_claimed(&self) -> SingleValueMapper<BigUint>;
 
     #[view(getTokenIdentifier)]
     #[storage_mapper("tokenIdentifier")]
