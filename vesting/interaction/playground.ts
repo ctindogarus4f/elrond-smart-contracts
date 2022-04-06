@@ -28,6 +28,7 @@ import {
   U8Value,
   U64Value,
 } from "@elrondnetwork/erdjs";
+import axios from "axios";
 const fs = require("fs");
 
 const addGroups = async (
@@ -72,14 +73,8 @@ const addGroups = async (
     await tx.send(provider);
     await tx.awaitExecuted(provider);
 
-    let wrappedResult = await tx.getAsOnNetwork(
-      provider,
-      undefined,
-      false,
-      true,
-    );
-    let result = wrappedResult.getSmartContractResults().getImmediate();
-    if (result.isSuccess()) {
+    let result = await getTransaction(`${tx.getHash()}`);
+    if (result.success) {
       console.log(
         GREEN,
         `SUCCESS! Group added: ${name}, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`,
@@ -87,7 +82,9 @@ const addGroups = async (
     } else {
       console.log(
         RED,
-        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
+        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${
+          result.errorMessage
+        }.`,
       );
     }
 
@@ -150,14 +147,8 @@ const addBeneficiaries = async (
     await tx.send(provider);
     await tx.awaitExecuted(provider);
 
-    let wrappedResult = await tx.getAsOnNetwork(
-      provider,
-      undefined,
-      false,
-      true,
-    );
-    let result = wrappedResult.getSmartContractResults().getImmediate();
-    if (result.isSuccess()) {
+    let result = await getTransaction(`${tx.getHash()}`);
+    if (result.success) {
       console.log(
         GREEN,
         `SUCCESS! Beneficiary added: ${addr}, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`,
@@ -165,7 +156,9 @@ const addBeneficiaries = async (
     } else {
       console.log(
         RED,
-        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
+        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${
+          result.errorMessage
+        }.`,
       );
     }
 
@@ -183,6 +176,18 @@ const addBeneficiaries = async (
     });
     console.log(YELLOW, decodedResponse, "\n");
   }
+};
+
+const getTransaction = async (txHash: string) => {
+  const { data } = await axios.get(`${PROXY}/transactions/${txHash}`, {
+    timeout: 4000,
+  });
+
+  const success = data.status === "success";
+  return {
+    success,
+    errorMessage: success ? "" : data.operations[0].message,
+  };
 };
 
 const main = async () => {
