@@ -1,6 +1,7 @@
 import {
   ABI_PATH,
   DECIMALS_SUFFIX,
+  EXPLORER,
   GAS_LIMIT,
   OWNER_WALLET,
   PROXY,
@@ -129,12 +130,12 @@ const main = async () => {
     if (result.isSuccess()) {
       console.log(
         GREEN,
-        `SUCCESS! Group added: ${name}, tx hash: ${tx.getHash()}.`,
+        `SUCCESS! Group added: ${name}, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`,
       );
     } else {
       console.log(
         RED,
-        `ERROR! tx hash: ${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
+        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
       );
     }
 
@@ -198,12 +199,12 @@ const main = async () => {
     if (result.isSuccess()) {
       console.log(
         GREEN,
-        `SUCCESS! Beneficiary added: ${addr}, tx hash: ${tx.getHash()}.`,
+        `SUCCESS! Beneficiary added: ${addr}, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`,
       );
     } else {
       console.log(
         RED,
-        `ERROR! tx hash: ${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
+        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${result.getReturnMessage()}.`,
       );
     }
 
