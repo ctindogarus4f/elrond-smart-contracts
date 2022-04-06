@@ -1,4 +1,5 @@
 #![no_std]
+#![feature(generic_associated_types)]
 
 elrond_wasm::imports!();
 
@@ -11,10 +12,17 @@ use types::*;
 pub trait VestingContract {
     #[init]
     fn init(&self, token_identifier: TokenIdentifier) {
+        require!(
+            token_identifier.is_valid_esdt_identifier(),
+            "invalid esdt token"
+        );
+        self.token_identifier().set_if_empty(&token_identifier);
+
         let caller = self.blockchain().get_caller();
         self.multisig_address().set_if_empty(&caller);
-        self.token_identifier().set_if_empty(&token_identifier);
+
         self.total_tokens_allocated().set_if_empty(&BigUint::zero());
+        self.beneficiary_counter().set_if_empty(&0);
     }
 
     // endpoints
@@ -68,10 +76,19 @@ pub trait VestingContract {
     ) {
         self.assert_multisig_wallet();
 
-        require!(
-            self.beneficiary_info(&addr).is_empty(),
-            "beneficiary has already been added",
-        );
+        let mut beneficiary_ids;
+        if self.beneficiary_ids(&addr).is_empty() {
+            beneficiary_ids = ManagedVec::new();
+        } else {
+            beneficiary_ids = self.beneficiary_ids(&addr).get();
+        }
+        for beneficiary_id in beneficiary_ids.iter() {
+            let info = self.beneficiary_info(beneficiary_id).get();
+            require!(
+                info.group_name != group_name,
+                "beneficiary is already defined for this group"
+            );
+        }
 
         require!(
             !self.group_info(&group_name).is_empty(),
@@ -107,29 +124,36 @@ pub trait VestingContract {
             tokens_allocated,
             tokens_claimed: BigUint::zero(),
         };
-
-        self.beneficiary_info(&addr).set(&beneficiary_info);
+        let beneficiary_counter = self.get_and_increase_beneficiary_counter();
+        beneficiary_ids.push(beneficiary_counter);
+        self.beneficiary_ids(&addr).set(beneficiary_ids);
+        self.beneficiary_info(beneficiary_counter)
+            .set(&beneficiary_info);
         self.add_beneficiary_event(&addr, &beneficiary_info)
     }
 
     #[endpoint(removeBeneficiary)]
-    fn remove_beneficiary(&self, addr: ManagedAddress) {
+    fn remove_beneficiary(&self, addr: ManagedAddress, id: u64) {
         self.assert_multisig_wallet();
 
         require!(
-            !self.beneficiary_info(&addr).is_empty(),
+            !self.beneficiary_ids(&addr).is_empty(),
             "beneficiary does not exist",
         );
+        let beneficiary_ids = self.beneficiary_ids(&addr).get();
+        require!(
+            beneficiary_ids.contains(&id),
+            "id is not defined for the beneficiary"
+        );
 
-        let beneficiary_info = self.beneficiary_info(&addr).get();
-
+        let beneficiary_info = self.beneficiary_info(id).get();
         require!(!beneficiary_info.is_revoked, "beneficiary already removed",);
         require!(
             beneficiary_info.can_be_revoked,
             "beneficiary cannot be removed",
         );
 
-        let tokens_available = self.get_tokens_available(addr.clone());
+        let tokens_available = self.get_tokens_available(id);
         let new_tokens_allocated = &beneficiary_info.tokens_claimed + &tokens_available;
 
         self.total_tokens_allocated().update(|tokens| {
@@ -143,7 +167,7 @@ pub trait VestingContract {
                     + &new_tokens_allocated;
             });
 
-        self.beneficiary_info(&addr).update(|beneficiary| {
+        self.beneficiary_info(id).update(|beneficiary| {
             beneficiary.is_revoked = true;
             beneficiary.tokens_allocated = new_tokens_allocated;
         });
@@ -151,14 +175,20 @@ pub trait VestingContract {
     }
 
     #[endpoint]
-    fn claim(&self) {
+    fn claim(&self, id: u64) {
         let caller = self.blockchain().get_caller();
         require!(
-            !self.beneficiary_info(&caller).is_empty(),
+            !self.beneficiary_ids(&caller).is_empty(),
             "beneficiary does not exist"
         );
 
-        let tokens_available = self.get_tokens_available(caller.clone());
+        let beneficiary_ids = self.beneficiary_ids(&caller).get();
+        require!(
+            beneficiary_ids.contains(&id),
+            "id is not defined for the beneficiary"
+        );
+
+        let tokens_available = self.get_tokens_available(id);
         require!(
             tokens_available > 0,
             "no tokens are available to be claimed"
@@ -172,7 +202,7 @@ pub trait VestingContract {
             b"successful claim",
         );
 
-        self.beneficiary_info(&caller)
+        self.beneficiary_info(id)
             .update(|beneficiary| beneficiary.tokens_claimed += &tokens_available);
         self.claim_event(&caller, &tokens_available);
     }
@@ -180,16 +210,35 @@ pub trait VestingContract {
     // view functions
 
     #[view(getTokensAvailable)]
-    fn get_tokens_available(&self, addr: ManagedAddress) -> BigUint {
+    fn get_tokens_available(&self, id: u64) -> BigUint {
         require!(
-            !self.beneficiary_info(&addr).is_empty(),
+            !self.beneficiary_info(id).is_empty(),
             "beneficiary does not exist"
         );
 
-        let tokens_claimed = self.beneficiary_info(&addr).get().tokens_claimed;
-        let tokens_vested = self.get_tokens_vested(&addr);
+        let tokens_claimed = self.beneficiary_info(id).get().tokens_claimed;
+        let tokens_vested = self.get_tokens_vested(id);
 
         tokens_vested - tokens_claimed
+    }
+
+    #[view(getAllBeneficiaryDeals)]
+    fn get_all_beneficiary_deals(
+        &self,
+        beneficiary: ManagedAddress,
+    ) -> MultiValueManagedVec<BeneficiaryInfo<Self::Api>> {
+        require!(
+            !self.beneficiary_ids(&beneficiary).is_empty(),
+            "beneficiary does not exist"
+        );
+
+        let beneficiary_ids = self.beneficiary_ids(&beneficiary).get();
+        let mut beneficiary_deals = MultiValueManagedVec::new();
+        for beneficiary_id in beneficiary_ids.iter() {
+            beneficiary_deals.push(self.beneficiary_info(beneficiary_id).get());
+        }
+
+        beneficiary_deals
     }
 
     // private functions
@@ -202,8 +251,8 @@ pub trait VestingContract {
         );
     }
 
-    fn get_tokens_vested(&self, addr: &ManagedAddress) -> BigUint {
-        let beneficiary_info = self.beneficiary_info(addr).get();
+    fn get_tokens_vested(&self, id: u64) -> BigUint {
+        let beneficiary_info = self.beneficiary_info(id).get();
         let group_info = self.group_info(&beneficiary_info.group_name).get();
 
         let tokens_allocated = beneficiary_info.tokens_allocated;
@@ -233,6 +282,12 @@ pub trait VestingContract {
             return 100 / release_percentage - 1;
         }
         100 / release_percentage
+    }
+
+    fn get_and_increase_beneficiary_counter(&self) -> u64 {
+        let id = self.beneficiary_counter().get();
+        self.beneficiary_counter().set(&(id + 1));
+        id
     }
 
     // events
@@ -271,12 +326,17 @@ pub trait VestingContract {
     #[storage_mapper("multisigAddress")]
     fn multisig_address(&self) -> SingleValueMapper<ManagedAddress>;
 
+    #[view(getBeneficiaryCounter)]
+    #[storage_mapper("beneficiaryCounter")]
+    fn beneficiary_counter(&self) -> SingleValueMapper<u64>;
+
     #[view(getBeneficiaryInfo)]
     #[storage_mapper("beneficiaryInfo")]
-    fn beneficiary_info(
-        &self,
-        beneficiary: &ManagedAddress,
-    ) -> SingleValueMapper<BeneficiaryInfo<Self::Api>>;
+    fn beneficiary_info(&self, id: u64) -> SingleValueMapper<BeneficiaryInfo<Self::Api>>;
+
+    #[view(getBeneficiaryIds)]
+    #[storage_mapper("beneficiaryIds")]
+    fn beneficiary_ids(&self, beneficiary: &ManagedAddress) -> SingleValueMapper<ManagedVec<u64>>;
 
     #[view(getGroupInfo)]
     #[storage_mapper("groupInfo")]

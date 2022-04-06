@@ -2,7 +2,7 @@ use elrond_wasm::{api::ManagedTypeApi, types::BigUint, types::ManagedBuffer};
 
 elrond_wasm::derive_imports!();
 
-#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
+#[derive(ManagedVecItem, NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub struct BeneficiaryInfo<M: ManagedTypeApi> {
     pub can_be_revoked: bool, // true if the beneficiary can be removed from the vesting scheme. false otherwise
     pub is_revoked: bool, // true if the beneficiary was removed from the vesting scheme. false otherwise

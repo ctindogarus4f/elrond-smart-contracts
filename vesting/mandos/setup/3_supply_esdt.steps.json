@@ -11,7 +11,7 @@
                 "egldValue": "0",
                 "esdtValue": [
                     {
-                        "tokenIdentifier": "str:TOK-0001",
+                        "tokenIdentifier": "str:TOK-abcd01",
                         "value": "100,000,000,000"
                     }
                 ],
@@ -21,7 +21,7 @@
         },
         {
             "step": "checkState",
-            "comment": "assert TOK-0001 balance",
+            "comment": "assert TOK-abcd01 balance",
             "accounts": {
                 "sc:vesting": {
                     "nonce": "0",
@@ -29,7 +29,7 @@
                         "+": ""
                     },
                     "esdt": {
-                        "str:TOK-0001": "100,000,000,000"
+                        "str:TOK-abcd01": "100,000,000,000"
                     },
                     "code": "file:../../output/vesting.wasm"
                 },
