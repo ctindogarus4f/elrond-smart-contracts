@@ -35,21 +35,6 @@
                 ],
                 "status": "0"
             }
-        },
-        {
-            "step": "scQuery",
-            "comment": "assert multisig_address",
-            "txId": "deploy_vesting#3",
-            "tx": {
-                "to": "sc:vesting",
-                "function": "getMultisigAddress"
-            },
-            "expect": {
-                "out": [
-                    "address:multisig"
-                ],
-                "status": "0"
-            }
         }
     ]
 }

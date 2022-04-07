@@ -17,10 +17,6 @@ pub trait VestingContract {
             "invalid esdt token"
         );
         self.token_identifier().set_if_empty(&token_identifier);
-
-        let caller = self.blockchain().get_caller();
-        self.multisig_address().set_if_empty(&caller);
-
         self.total_tokens_allocated().set_if_empty(&BigUint::zero());
         self.total_tokens_claimed().set_if_empty(&BigUint::zero());
         self.beneficiary_counter().set_if_empty(&0);
@@ -28,12 +24,7 @@ pub trait VestingContract {
 
     // endpoints
 
-    #[endpoint(changeMultisigAddress)]
-    fn change_multisig_address(&self, new_multisig_address: ManagedAddress) {
-        self.assert_multisig_wallet();
-        self.multisig_address().set(&new_multisig_address);
-    }
-
+    #[only_owner]
     #[endpoint(addGroup)]
     fn add_group(
         &self,
@@ -43,8 +34,6 @@ pub trait VestingContract {
         release_frequency: u64,
         release_percentage: u8,
     ) {
-        self.assert_multisig_wallet();
-
         require!(
             self.group_info(&group_name).is_empty(),
             "group has already been defined",
@@ -66,6 +55,7 @@ pub trait VestingContract {
         self.add_group_event(&group_name, &group_info);
     }
 
+    #[only_owner]
     #[endpoint(addBeneficiary)]
     fn add_beneficiary(
         &self,
@@ -75,8 +65,6 @@ pub trait VestingContract {
         start: u64,
         tokens_allocated: BigUint,
     ) {
-        self.assert_multisig_wallet();
-
         let mut beneficiary_ids;
         if self.beneficiary_ids(&addr).is_empty() {
             beneficiary_ids = ManagedVec::new();
@@ -134,10 +122,9 @@ pub trait VestingContract {
         self.add_beneficiary_event(&addr, &beneficiary_info)
     }
 
+    #[only_owner]
     #[endpoint(removeBeneficiary)]
     fn remove_beneficiary(&self, addr: ManagedAddress, id: u64) {
-        self.assert_multisig_wallet();
-
         require!(
             !self.beneficiary_ids(&addr).is_empty(),
             "beneficiary does not exist",
@@ -247,14 +234,6 @@ pub trait VestingContract {
 
     // private functions
 
-    fn assert_multisig_wallet(&self) {
-        let multisig_address = self.multisig_address().get();
-        require!(
-            self.blockchain().get_caller() == multisig_address,
-            "caller not authorized",
-        );
-    }
-
     fn get_tokens_vested(&self, id: u64) -> BigUint {
         let beneficiary_info = self.beneficiary_info(id).get();
         let group_info = self.group_info(&beneficiary_info.group_name).get();
@@ -329,10 +308,6 @@ pub trait VestingContract {
     #[view(getTokenIdentifier)]
     #[storage_mapper("tokenIdentifier")]
     fn token_identifier(&self) -> SingleValueMapper<TokenIdentifier>;
-
-    #[view(getMultisigAddress)]
-    #[storage_mapper("multisigAddress")]
-    fn multisig_address(&self) -> SingleValueMapper<ManagedAddress>;
 
     #[view(getBeneficiaryCounter)]
     #[storage_mapper("beneficiaryCounter")]

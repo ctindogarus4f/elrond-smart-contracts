@@ -47,7 +47,7 @@
             },
             "expect": {
                 "status": "4",
-                "message": "str:caller not authorized",
+                "message": "str:Endpoint can only be called by owner",
                 "gas": "*"
             }
         },

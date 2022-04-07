@@ -9,14 +9,12 @@ elrond_wasm_node::wasm_endpoints! {
     (
         addBeneficiary
         addGroup
-        changeMultisigAddress
         claim
         getAllBeneficiaryDeals
         getBeneficiaryCounter
         getBeneficiaryIds
         getBeneficiaryInfo
         getGroupInfo
-        getMultisigAddress
         getTokenIdentifier
         getTokensAvailable
         getTotalTokensAllocated
