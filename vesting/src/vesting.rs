@@ -91,9 +91,10 @@ pub trait VestingContract {
             &self.token_identifier().get(),
             0,
         );
+        let total_tokens_claimable =
+            self.total_tokens_allocated().get() - self.total_tokens_claimed().get();
         require!(
-            contract_balance
-                >= self.total_tokens_allocated().get() - self.total_tokens_claimed().get(),
+            contract_balance >= total_tokens_claimable,
             "not enough tokens in vesting contract"
         );
 
