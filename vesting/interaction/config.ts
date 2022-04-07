@@ -6,4 +6,4 @@ export const OWNER_WALLET =
 export const EXPLORER = "https://testnet-explorer.elrond.com";
 export const PROXY = "https://testnet-api.elrond.com";
 export const VESTING_SC_ADDRESS =
-  "erd1qqqqqqqqqqqqqpgqc3k0cqares9ejj26pfqhgfqklammpy208x5qa83dzd";
+  "erd1qqqqqqqqqqqqqpgqfzcsgq4xd0afs2gp32ga9zmvnntyl0ta8x5qc2g5fh";

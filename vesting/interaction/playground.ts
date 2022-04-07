@@ -232,18 +232,6 @@ const main = async () => {
     console.log(YELLOW, decodedResponse, "\n");
   }
 
-  {
-    console.log("Getting multisig address...");
-    let response = await contract.runQuery(provider, {
-      func: new ContractFunction("getMultisigAddress"),
-    });
-
-    let decodedResponse = codec
-      .decodeTopLevel(response.outputUntyped()[0], new AddressType())
-      .valueOf()
-      .bech32();
-    console.log(YELLOW, decodedResponse, "\n");
-  }
   // ---------------------- CONTRACT CHECK ---------------------
 
   const action = process.argv.length > 2 ? process.argv[2] : undefined;
