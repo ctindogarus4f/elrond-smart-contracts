@@ -84,28 +84,31 @@ pub trait VestingContract {
             "specified group is not set up",
         );
 
-        self.total_tokens_allocated()
-            .update(|tokens| *tokens += &tokens_allocated);
+        let new_total_tokens_allocated = self.total_tokens_allocated().get() + &tokens_allocated;
+        let total_tokens_claimable =
+            &new_total_tokens_allocated - &self.total_tokens_claimed().get();
         let contract_balance = self.blockchain().get_esdt_balance(
             &self.blockchain().get_sc_address(),
             &self.token_identifier().get(),
             0,
         );
-        let total_tokens_claimable =
-            self.total_tokens_allocated().get() - self.total_tokens_claimed().get();
         require!(
             contract_balance >= total_tokens_claimable,
             "not enough tokens in vesting contract"
         );
 
         let group_info = self.group_info(&group_name).get();
-        self.group_info(&group_name).update(|group| {
-            group.current_allocation += &tokens_allocated;
-        });
+        let new_group_current_allocation = group_info.current_allocation + &tokens_allocated;
         require!(
-            group_info.current_allocation <= group_info.max_allocation,
+            new_group_current_allocation <= group_info.max_allocation,
             "group exceeds max allocation"
         );
+
+        self.group_info(&group_name).update(|group| {
+            group.current_allocation = new_group_current_allocation;
+        });
+        self.total_tokens_allocated()
+            .set(&new_total_tokens_allocated);
 
         let beneficiary_info = BeneficiaryInfo {
             can_be_revoked,
