@@ -61,7 +61,7 @@ pub trait VestingContract {
     ) {
         require!(
             self.group_info(&group_name).is_empty(),
-            "group has already been defined",
+            "group has already been defined"
         );
         require!(
             release_percentage > 0 && release_percentage <= 100,
@@ -106,7 +106,7 @@ pub trait VestingContract {
 
         require!(
             !self.group_info(&group_name).is_empty(),
-            "specified group is not set up",
+            "specified group is not set up"
         );
 
         let new_total_tokens_allocated = self.total_tokens_allocated().get() + &tokens_allocated;
@@ -157,7 +157,7 @@ pub trait VestingContract {
     fn remove_beneficiary(&self, addr: ManagedAddress, id: u64) {
         require!(
             !self.beneficiary_ids(&addr).is_empty(),
-            "beneficiary does not exist",
+            "beneficiary does not exist"
         );
         let beneficiary_ids = self.beneficiary_ids(&addr).get();
         require!(
@@ -166,10 +166,10 @@ pub trait VestingContract {
         );
 
         let beneficiary_info = self.beneficiary_info(id).get();
-        require!(!beneficiary_info.is_revoked, "beneficiary already removed",);
+        require!(!beneficiary_info.is_revoked, "beneficiary already removed");
         require!(
             beneficiary_info.can_be_revoked,
-            "beneficiary cannot be removed",
+            "beneficiary cannot be removed"
         );
 
         let tokens_available = self.get_tokens_available(id);
@@ -210,6 +210,15 @@ pub trait VestingContract {
         let beneficiary_info = self.beneficiary_info(id).get();
         let group_info = self.group_info(&beneficiary_info.group_name).get();
 
+        require!(!beneficiary_info.is_revoked, "beneficiary has been removed");
+
+        let current_timestamp = self.blockchain().get_block_timestamp();
+        let first_release = beneficiary_info.start + group_info.release_cliff;
+        require!(
+            current_timestamp < first_release,
+            "prestake can be called only before the first release"
+        );
+
         let total_tokens_prestaked = beneficiary_info.tokens_prestaked + amount;
         let tokens_first_release =
             &beneficiary_info.tokens_allocated * group_info.release_percentage as u64 / 100u64;
@@ -220,13 +229,6 @@ pub trait VestingContract {
         require!(
             total_tokens_prestaked <= beneficiary_info.tokens_allocated,
             "prestaked amount exceeds the allocated amount"
-        );
-
-        let current_timestamp = self.blockchain().get_block_timestamp();
-        let first_release = beneficiary_info.start + group_info.release_cliff;
-        require!(
-            current_timestamp < first_release,
-            "prestake can be called only before the first release"
         );
 
         self.beneficiary_info(id)
