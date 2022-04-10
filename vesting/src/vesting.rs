@@ -277,8 +277,15 @@ pub trait VestingContract {
             "beneficiary does not exist"
         );
 
-        let tokens_claimed = self.beneficiary_info(id).get().tokens_claimed;
+        let beneficiary_info = self.beneficiary_info(id).get();
+        let tokens_claimed = beneficiary_info.tokens_claimed;
+        let tokens_prestaked = beneficiary_info.tokens_prestaked;
         let tokens_vested = self.get_tokens_vested(id);
+
+        require!(
+            tokens_vested >= tokens_prestaked,
+            "prestaked amount is not vested yet"
+        );
 
         tokens_vested - tokens_claimed
     }
