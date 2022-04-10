@@ -25,6 +25,31 @@ pub trait VestingContract {
     // endpoints
 
     #[only_owner]
+    #[endpoint(claimTokensUnallocated)]
+    fn claim_tokens_unallocated(&self) {
+        let caller = self.blockchain().get_caller();
+        let total_tokens_claimable =
+            self.total_tokens_allocated().get() - self.total_tokens_claimed().get();
+        let contract_balance = self.blockchain().get_esdt_balance(
+            &self.blockchain().get_sc_address(),
+            &self.token_identifier().get(),
+            0,
+        );
+        require!(
+            contract_balance > total_tokens_claimable,
+            "nothing to claim. all the tokens in the sc are allocated"
+        );
+
+        self.send().direct(
+            &caller,
+            &self.token_identifier().get(),
+            0,
+            &(contract_balance - total_tokens_claimable),
+            b"successful claim by the owner",
+        );
+    }
+
+    #[only_owner]
     #[endpoint(addGroup)]
     fn add_group(
         &self,
