@@ -9,6 +9,7 @@
         "deploy":{
             "verbose": true,
             "bytecode": "output/vesting.wasm",
+            "metadata-not-upgradeable": true,
             "metadata-payable": true,
             "recall-nonce": true,
             "pem": "../../../elrond-wallet/wallet-owner.pem",
