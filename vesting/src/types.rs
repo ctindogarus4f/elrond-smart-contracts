@@ -10,6 +10,7 @@ pub struct BeneficiaryInfo<M: ManagedTypeApi> {
     pub start: u64,       // start of the vesting scheme as a unix timestamp
     pub tokens_allocated: BigUint<M>, // amount of tokens allocated to this beneficiary
     pub tokens_claimed: BigUint<M>, // amount of tokens claimed by this beneficiary
+    pub tokens_prestaked: BigUint<M>, // amount of tokens prestaked by this beneficiary
 }
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]

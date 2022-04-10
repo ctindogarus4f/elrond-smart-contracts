@@ -142,6 +142,7 @@ pub trait VestingContract {
             start,
             tokens_allocated,
             tokens_claimed: BigUint::zero(),
+            tokens_prestaked: BigUint::zero(),
         };
         let beneficiary_counter = self.get_and_increase_beneficiary_counter();
         beneficiary_ids.push(beneficiary_counter);
