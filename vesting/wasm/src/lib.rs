@@ -20,6 +20,7 @@ elrond_wasm_node::wasm_endpoints! {
         getTokensAvailable
         getTotalTokensAllocated
         getTotalTokensClaimed
+        prestake
         removeBeneficiary
     )
 }

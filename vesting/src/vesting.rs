@@ -194,6 +194,46 @@ pub trait VestingContract {
     }
 
     #[endpoint]
+    fn prestake(&self, id: u64, amount: BigUint) {
+        let caller = self.blockchain().get_caller();
+        require!(
+            !self.beneficiary_ids(&caller).is_empty(),
+            "beneficiary does not exist"
+        );
+
+        let beneficiary_ids = self.beneficiary_ids(&caller).get();
+        require!(
+            beneficiary_ids.contains(&id),
+            "id is not defined for the beneficiary"
+        );
+
+        let beneficiary_info = self.beneficiary_info(id).get();
+        let group_info = self.group_info(&beneficiary_info.group_name).get();
+
+        let total_tokens_prestaked = beneficiary_info.tokens_prestaked + amount;
+        let tokens_first_release =
+            &beneficiary_info.tokens_allocated * group_info.release_percentage as u64 / 100u64;
+        require!(
+            total_tokens_prestaked > tokens_first_release,
+            "prestaked amount must be higher than the first release"
+        );
+        require!(
+            total_tokens_prestaked <= beneficiary_info.tokens_allocated,
+            "prestaked amount exceeds the allocated amount"
+        );
+
+        let current_timestamp = self.blockchain().get_block_timestamp();
+        let first_release = beneficiary_info.start + group_info.release_cliff;
+        require!(
+            current_timestamp < first_release,
+            "prestake can be called only before the first release"
+        );
+
+        self.beneficiary_info(id)
+            .update(|beneficiary| beneficiary.tokens_prestaked = total_tokens_prestaked);
+    }
+
+    #[endpoint]
     fn claim(&self, id: u64) {
         let caller = self.blockchain().get_caller();
         require!(
