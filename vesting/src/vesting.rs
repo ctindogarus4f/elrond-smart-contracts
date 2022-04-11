@@ -31,7 +31,7 @@ pub trait VestingContract {
     fn set_prestake_limit(&self, new_limit: BigUint) {
         require!(
             new_limit > self.total_tokens_prestaked().get(),
-            "the new amount must cover the existing prestake"
+            "the new limit must cover the existing prestake"
         );
         self.prestake_limit().set(&new_limit);
     }
