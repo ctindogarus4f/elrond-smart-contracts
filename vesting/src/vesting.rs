@@ -186,9 +186,15 @@ pub trait VestingContract {
                     + &new_tokens_allocated;
             });
 
+        let new_tokens_prestaked = if beneficiary_info.tokens_prestaked <= new_tokens_allocated {
+            beneficiary_info.tokens_prestaked
+        } else {
+            new_tokens_allocated.clone()
+        };
         self.beneficiary_info(id).update(|beneficiary| {
             beneficiary.is_revoked = true;
             beneficiary.tokens_allocated = new_tokens_allocated;
+            beneficiary.tokens_prestaked = new_tokens_prestaked;
         });
         self.remove_beneficiary_event(&addr);
     }
