@@ -16,12 +16,16 @@ elrond_wasm_node::wasm_endpoints! {
         getBeneficiaryIds
         getBeneficiaryInfo
         getGroupInfo
+        getPrestakeLimit
         getTokenIdentifier
         getTokensAvailable
+        getTokensUnallocated
         getTotalTokensAllocated
         getTotalTokensClaimed
+        getTotalTokensPrestaked
         prestake
         removeBeneficiary
+        setPrestakeLimit
     )
 }
 

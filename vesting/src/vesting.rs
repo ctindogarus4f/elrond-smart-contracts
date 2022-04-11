@@ -19,32 +19,33 @@ pub trait VestingContract {
         self.token_identifier().set_if_empty(&token_identifier);
         self.total_tokens_allocated().set_if_empty(&BigUint::zero());
         self.total_tokens_claimed().set_if_empty(&BigUint::zero());
+        self.total_tokens_prestaked().set_if_empty(&BigUint::zero());
+        self.prestake_limit().set_if_empty(&BigUint::zero());
         self.beneficiary_counter().set_if_empty(&0);
     }
 
     // endpoints
 
     #[only_owner]
+    #[endpoint(setPrestakeLimit)]
+    fn set_prestake_limit(&self, new_limit: BigUint) {
+        require!(
+            new_limit > self.total_tokens_prestaked().get(),
+            "the new amount must cover the existing prestake"
+        );
+        self.prestake_limit().set(&new_limit);
+    }
+
+    #[only_owner]
     #[endpoint(claimTokensUnallocated)]
     fn claim_tokens_unallocated(&self) {
         let caller = self.blockchain().get_caller();
-        let total_tokens_claimable =
-            self.total_tokens_allocated().get() - self.total_tokens_claimed().get();
-        let contract_balance = self.blockchain().get_esdt_balance(
-            &self.blockchain().get_sc_address(),
-            &self.token_identifier().get(),
-            0,
-        );
-        require!(
-            contract_balance > total_tokens_claimable,
-            "nothing to claim. all the tokens in the sc are allocated"
-        );
-
+        let tokens_unallocated = self.get_tokens_unallocated();
         self.send().direct(
             &caller,
             &self.token_identifier().get(),
             0,
-            &(contract_balance - total_tokens_claimable),
+            &tokens_unallocated,
             b"successful claim by the owner",
         );
     }
@@ -295,7 +296,26 @@ pub trait VestingContract {
             "prestaked amount is not vested yet"
         );
 
-        tokens_vested - tokens_claimed
+        let prestake_rewards = tokens_prestaked / 2 as u64; // APR of 50%
+        tokens_vested + prestake_rewards - tokens_claimed
+    }
+
+    #[view(getTokensUnallocated)]
+    fn get_tokens_unallocated(&self) -> BigUint {
+        let total_rewards_allocated = self.total_tokens_prestaked().get() / 2 as u64; // APR of 50%
+        let total_tokens_claimable = self.total_tokens_allocated().get() + total_rewards_allocated
+            - self.total_tokens_claimed().get();
+        let contract_balance = self.blockchain().get_esdt_balance(
+            &self.blockchain().get_sc_address(),
+            &self.token_identifier().get(),
+            0,
+        );
+        require!(
+            contract_balance > total_tokens_claimable,
+            "all the tokens inside the sc are allocated"
+        );
+
+        contract_balance - total_tokens_claimable
     }
 
     #[view(getAllBeneficiaryDeals)]
@@ -389,6 +409,14 @@ pub trait VestingContract {
     #[view(getTotalTokensClaimed)]
     #[storage_mapper("totalTokensClaimed")]
     fn total_tokens_claimed(&self) -> SingleValueMapper<BigUint>;
+
+    #[view(getTotalTokensPrestaked)]
+    #[storage_mapper("totalTokensPrestaked")]
+    fn total_tokens_prestaked(&self) -> SingleValueMapper<BigUint>;
+
+    #[view(getPrestakeLimit)]
+    #[storage_mapper("prestakeLimit")]
+    fn prestake_limit(&self) -> SingleValueMapper<BigUint>;
 
     #[view(getTokenIdentifier)]
     #[storage_mapper("tokenIdentifier")]
