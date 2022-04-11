@@ -226,7 +226,7 @@ pub trait VestingContract {
             "prestake can be called only before the first release"
         );
 
-        let total_tokens_prestaked = beneficiary_info.tokens_prestaked + amount;
+        let total_tokens_prestaked = &beneficiary_info.tokens_prestaked + &amount;
         let tokens_first_release =
             &beneficiary_info.tokens_allocated * group_info.release_percentage as u64 / 100u64;
         require!(
@@ -236,6 +236,10 @@ pub trait VestingContract {
         require!(
             total_tokens_prestaked <= beneficiary_info.tokens_allocated,
             "prestaked amount exceeds the allocated amount"
+        );
+        require!(
+            self.total_tokens_prestaked().get() + amount <= self.prestake_limit().get(),
+            "the prestake limit has been reached"
         );
 
         self.beneficiary_info(id)
