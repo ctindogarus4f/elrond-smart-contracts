@@ -223,15 +223,15 @@ pub trait VestingContract {
             "prestake is available only for those who did not claim their tokens"
         );
 
-        let total_tokens_prestaked = &beneficiary_info.tokens_prestaked + &amount;
+        let new_tokens_prestaked = &beneficiary_info.tokens_prestaked + &amount;
         let tokens_first_release =
             &beneficiary_info.tokens_allocated * group_info.release_percentage as u64 / 100u64;
         require!(
-            total_tokens_prestaked > tokens_first_release,
+            new_tokens_prestaked > tokens_first_release,
             "prestaked amount must be higher than the first release"
         );
         require!(
-            total_tokens_prestaked <= beneficiary_info.tokens_allocated,
+            new_tokens_prestaked <= beneficiary_info.tokens_allocated,
             "prestaked amount exceeds the allocated amount"
         );
         require!(
@@ -240,7 +240,7 @@ pub trait VestingContract {
         );
 
         self.beneficiary_info(id)
-            .update(|beneficiary| beneficiary.tokens_prestaked = total_tokens_prestaked);
+            .update(|beneficiary| beneficiary.tokens_prestaked = new_tokens_prestaked);
     }
 
     #[endpoint]
