@@ -218,12 +218,9 @@ pub trait VestingContract {
         let group_info = self.group_info(&beneficiary_info.group_name).get();
 
         require!(!beneficiary_info.is_revoked, "beneficiary has been removed");
-
-        let current_timestamp = self.blockchain().get_block_timestamp();
-        let first_release = beneficiary_info.start + group_info.release_cliff;
         require!(
-            current_timestamp < first_release,
-            "prestake can be called only before the first release"
+            beneficiary_info.tokens_claimed == BigUint::zero(),
+            "prestake is available only for those who did not claim their tokens"
         );
 
         let total_tokens_prestaked = &beneficiary_info.tokens_prestaked + &amount;
