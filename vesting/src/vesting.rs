@@ -170,7 +170,7 @@ pub trait VestingContract {
             "beneficiary cannot be removed"
         );
 
-        let tokens_available = self.get_tokens_available(id);
+        let tokens_available = self.get_tokens_vested(id) - &beneficiary_info.tokens_claimed;
         let new_tokens_allocated = &beneficiary_info.tokens_claimed + &tokens_available;
 
         self.total_tokens_allocated().update(|tokens| {
