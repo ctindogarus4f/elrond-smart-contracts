@@ -110,9 +110,7 @@ pub trait VestingContract {
             "specified group is not set up"
         );
 
-        let new_total_tokens_allocated = self.total_tokens_allocated().get() + &tokens_allocated;
-        let total_tokens_claimable =
-            &new_total_tokens_allocated - &self.total_tokens_claimed().get();
+        let total_tokens_claimable = self.get_tokens_claimable() + &tokens_allocated;
         let contract_balance = self.blockchain().get_esdt_balance(
             &self.blockchain().get_sc_address(),
             &self.token_identifier().get(),
@@ -124,17 +122,16 @@ pub trait VestingContract {
         );
 
         let group_info = self.group_info(&group_name).get();
-        let new_group_current_allocation = group_info.current_allocation + &tokens_allocated;
         require!(
-            new_group_current_allocation <= group_info.max_allocation,
+            group_info.current_allocation + &tokens_allocated <= group_info.max_allocation,
             "group exceeds max allocation"
         );
 
         self.group_info(&group_name).update(|group| {
-            group.current_allocation = new_group_current_allocation;
+            group.current_allocation += &tokens_allocated;
         });
         self.total_tokens_allocated()
-            .set(&new_total_tokens_allocated);
+            .update(|tokens| *tokens += &tokens_allocated);
 
         let beneficiary_info = BeneficiaryInfo {
             can_be_revoked,
@@ -301,11 +298,17 @@ pub trait VestingContract {
         tokens_vested + prestake_rewards - tokens_claimed
     }
 
-    #[view(getTokensUnallocated)]
-    fn get_tokens_unallocated(&self) -> BigUint {
+    #[view(getTokensClaimable)]
+    fn get_tokens_claimable(&self) -> BigUint {
         let total_rewards_allocated = self.total_tokens_prestaked().get() / 2 as u64; // APR of 50%
         let total_tokens_claimable = self.total_tokens_allocated().get() + total_rewards_allocated
             - self.total_tokens_claimed().get();
+        total_tokens_claimable
+    }
+
+    #[view(getTokensUnallocated)]
+    fn get_tokens_unallocated(&self) -> BigUint {
+        let total_tokens_claimable = self.get_tokens_claimable();
         let contract_balance = self.blockchain().get_esdt_balance(
             &self.blockchain().get_sc_address(),
             &self.token_identifier().get(),
