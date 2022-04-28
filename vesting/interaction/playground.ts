@@ -12,7 +12,6 @@ import {
   AbiRegistry,
   Account,
   Address,
-  AddressType,
   AddressValue,
   BigUIntValue,
   BinaryCodec,
