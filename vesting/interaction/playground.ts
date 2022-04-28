@@ -1,5 +1,6 @@
 import {
   ABI_PATH,
+  CHAIN_ID,
   DECIMALS_SUFFIX,
   EXPLORER,
   GAS_LIMIT,
@@ -13,35 +14,33 @@ import {
   Account,
   Address,
   AddressValue,
+  ArrayVec,
   BigUIntValue,
-  BinaryCodec,
   BooleanValue,
   BytesValue,
   ContractFunction,
-  GasLimit,
-  ListType,
-  NetworkConfig,
-  ProxyProvider,
+  ResultsParser,
   SmartContract,
-  TokenIdentifierType,
+  SmartContractAbi,
+  Struct,
+  TokenIdentifierValue,
+  TransactionWatcher,
   U8Value,
   U64Value,
-  U64Type,
-  UserSigner,
 } from "@elrondnetwork/erdjs";
-import axios from "axios";
+import { UserSigner } from "@elrondnetwork/erdjs-walletcore";
+import { ProxyNetworkProvider } from "@elrondnetwork/erdjs-network-providers";
+
 const fs = require("fs");
 
 const addGroups = async (
   contract: SmartContract,
   owner: Account,
   signer: UserSigner,
-  provider: ProxyProvider,
-  abi: AbiRegistry,
-  codec: BinaryCodec,
+  provider: ProxyNetworkProvider,
+  watcher: TransactionWatcher,
+  resultsParser: ResultsParser,
 ) => {
-  let groupInfoType = abi.getStruct("GroupInfo");
-
   let data = fs.readFileSync("../data/groups.txt", { encoding: "utf8" });
   let lines = data.split(/\r?\n/);
 
@@ -57,7 +56,7 @@ const addGroups = async (
 
     let tx = contract.call({
       func: new ContractFunction("addGroup"),
-      gasLimit: new GasLimit(GAS_LIMIT),
+      gasLimit: GAS_LIMIT,
       args: [
         BytesValue.fromUTF8(name),
         new BigUIntValue(maxAllocation),
@@ -65,17 +64,21 @@ const addGroups = async (
         new U64Value(frequency),
         new U8Value(percentage),
       ],
+      chainID: CHAIN_ID,
     });
 
     console.log(`Adding group ${name}...`);
-    tx.setNonce(owner.nonce);
-    owner.incrementNonce();
+    tx.setNonce(owner.getNonceThenIncrement());
     await signer.sign(tx);
-    await tx.send(provider);
-    await tx.awaitExecuted(provider);
+    await provider.sendTransaction(tx);
+    let transactionOnNetwork = await watcher.awaitCompleted(tx);
+    let endpointDefinition = contract.getEndpoint("addGroup");
+    let { returnCode, returnMessage } = resultsParser.parseOutcome(
+      transactionOnNetwork,
+      endpointDefinition,
+    );
 
-    let result = await getTransaction(`${tx.getHash()}`);
-    if (result.success) {
+    if (returnCode.isSuccess()) {
       console.log(
         GREEN,
         `SUCCESS! Group added: ${name}, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`,
@@ -83,24 +86,23 @@ const addGroups = async (
     } else {
       console.log(
         RED,
-        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${
-          result.errorMessage
-        }.`,
+        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${returnMessage}.`,
       );
     }
 
     console.log(`Fetching group ${name}...`);
-    let response = await contract.runQuery(provider, {
+    let query = contract.createQuery({
       func: new ContractFunction("getGroupInfo"),
       args: [BytesValue.fromUTF8(name)],
     });
+    let queryResponse = await provider.queryContract(query);
+    endpointDefinition = contract.getEndpoint("getGroupInfo");
+    let { firstValue } = resultsParser.parseQueryResponse(
+      queryResponse,
+      endpointDefinition,
+    );
+    let decodedResponse = (<Struct>firstValue).valueOf();
 
-    let decodedResponse = codec
-      .decodeTopLevel(response.outputUntyped()[0], groupInfoType)
-      .valueOf();
-    Object.keys(decodedResponse).forEach(key => {
-      decodedResponse[key] = decodedResponse[key].toString();
-    });
     console.log(YELLOW, decodedResponse, "\n");
   }
 };
@@ -109,12 +111,10 @@ const addBeneficiaries = async (
   contract: SmartContract,
   owner: Account,
   signer: UserSigner,
-  provider: ProxyProvider,
-  abi: AbiRegistry,
-  codec: BinaryCodec,
+  provider: ProxyNetworkProvider,
+  watcher: TransactionWatcher,
+  resultsParser: ResultsParser,
 ) => {
-  let beneficiaryInfoType = abi.getStruct("BeneficiaryInfo");
-
   let data = fs.readFileSync("../data/beneficiaries.txt", { encoding: "utf8" });
   let lines = data.split(/\r?\n/);
 
@@ -131,7 +131,7 @@ const addBeneficiaries = async (
 
     let tx = contract.call({
       func: new ContractFunction("addBeneficiary"),
-      gasLimit: new GasLimit(GAS_LIMIT),
+      gasLimit: GAS_LIMIT,
       args: [
         new AddressValue(addrObj),
         new BooleanValue(canBeRevoked),
@@ -139,17 +139,21 @@ const addBeneficiaries = async (
         new U64Value(startTimestamp),
         new BigUIntValue(tokensAllocated),
       ],
+      chainID: CHAIN_ID,
     });
 
     console.log(`Adding beneficiary ${addr}...`);
-    tx.setNonce(owner.nonce);
-    owner.incrementNonce();
+    tx.setNonce(owner.getNonceThenIncrement());
     await signer.sign(tx);
-    await tx.send(provider);
-    await tx.awaitExecuted(provider);
+    await provider.sendTransaction(tx);
+    let transactionOnNetwork = await watcher.awaitCompleted(tx);
+    let endpointDefinition = contract.getEndpoint("addBeneficiary");
+    let { returnCode, returnMessage } = resultsParser.parseOutcome(
+      transactionOnNetwork,
+      endpointDefinition,
+    );
 
-    let result = await getTransaction(`${tx.getHash()}`);
-    if (result.success) {
+    if (returnCode.isSuccess()) {
       console.log(
         GREEN,
         `SUCCESS! Beneficiary added: ${addr}, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`,
@@ -157,60 +161,54 @@ const addBeneficiaries = async (
     } else {
       console.log(
         RED,
-        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${
-          result.errorMessage
-        }.`,
+        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${returnMessage}.`,
       );
     }
 
     console.log(`Fetching ids for beneficiary ${addr}...`);
-    let response = await contract.runQuery(provider, {
+    let query = contract.createQuery({
       func: new ContractFunction("getBeneficiaryIds"),
       args: [new AddressValue(addrObj)],
     });
+    let queryResponse = await provider.queryContract(query);
+    endpointDefinition = contract.getEndpoint("getBeneficiaryIds");
+    let { firstValue } = resultsParser.parseQueryResponse(
+      queryResponse,
+      endpointDefinition,
+    );
+    let decodedResponse = (<ArrayVec>firstValue).valueOf();
 
-    let beneficiaryIds = codec
-      .decodeTopLevel(response.outputUntyped()[0], new ListType(new U64Type()))
-      .valueOf();
-    for (const beneficiaryId of beneficiaryIds) {
-      console.log(YELLOW, beneficiaryId, "\n");
-    }
+    console.log(YELLOW, decodedResponse, "\n");
   }
-};
-
-const getTransaction = async (txHash: string) => {
-  const { data } = await axios.get(`${PROXY}/transactions/${txHash}`, {
-    timeout: 4000,
-  });
-
-  const success = data.status === "success";
-  return {
-    success,
-    errorMessage: success ? "" : data.operations[0].message,
-  };
 };
 
 const main = async () => {
   // ----------------------- CODEC SETUP -----------------------
-  let abi = await AbiRegistry.load({ files: [ABI_PATH] });
-  let codec = new BinaryCodec();
+  let jsonContent: string = fs.readFileSync(ABI_PATH, { encoding: "utf8" });
+  let json = JSON.parse(jsonContent);
+  let abiRegistry = AbiRegistry.create(json);
+  let abi = new SmartContractAbi(abiRegistry, ["VestingContract"]);
+  let resultsParser = new ResultsParser();
   // ----------------------- CODEC SETUP -----------------------
 
   // ---------------------- NETWORK SETUP ----------------------
-  const provider = new ProxyProvider(PROXY, { timeout: 4000 });
-  await NetworkConfig.getDefault().sync(provider);
+  const provider = new ProxyNetworkProvider(PROXY, { timeout: 4000 });
+  const watcher = new TransactionWatcher(provider);
   // ---------------------- NETWORK SETUP ----------------------
 
   // ----------------- SIGNER AND OWNER SETUP ------------------
   const privateKey = fs.readFileSync(OWNER_WALLET, { encoding: "utf8" });
   const signer = UserSigner.fromPem(privateKey);
   const owner = new Account(signer.getAddress());
-  await owner.sync(provider);
+  const ownerOnNetwork = await provider.getAccount(owner.address);
+  owner.update(ownerOnNetwork);
+
   // ----------------- SIGNER AND OWNER SETUP ------------------
 
   // ------------------------ SC SETUP -------------------------
   let contract = new SmartContract({
     address: new Address(VESTING_SC_ADDRESS),
+    abi: abi,
   });
   // ------------------------ SC SETUP -------------------------
 
@@ -220,14 +218,17 @@ const main = async () => {
     console.log(YELLOW, VESTING_SC_ADDRESS, "\n");
 
     console.log("Getting token identifier...");
-    let response = await contract.runQuery(provider, {
+    let query = contract.createQuery({
       func: new ContractFunction("getTokenIdentifier"),
     });
+    let queryResponse = await provider.queryContract(query);
+    let endpointDefinition = contract.getEndpoint("getTokenIdentifier");
+    let { firstValue } = resultsParser.parseQueryResponse(
+      queryResponse,
+      endpointDefinition,
+    );
 
-    let decodedResponse = codec
-      .decodeTopLevel(response.outputUntyped()[0], new TokenIdentifierType())
-      .valueOf()
-      .toString();
+    let decodedResponse = <TokenIdentifierValue>firstValue;
     console.log(YELLOW, decodedResponse, "\n");
   }
 
@@ -240,13 +241,20 @@ const main = async () => {
 
   // ------------------------ ADD GROUPS -----------------------
   if (shouldAddGroups) {
-    await addGroups(contract, owner, signer, provider, abi, codec);
+    await addGroups(contract, owner, signer, provider, watcher, resultsParser);
   }
   // ------------------------ ADD GROUPS -----------------------
 
   // -------------------- ADD BENEFICIARIES --------------------
   if (shouldAddBeneficiaries) {
-    await addBeneficiaries(contract, owner, signer, provider, abi, codec);
+    await addBeneficiaries(
+      contract,
+      owner,
+      signer,
+      provider,
+      watcher,
+      resultsParser,
+    );
   }
   // -------------------- ADD BENEFICIARIES --------------------
 };
