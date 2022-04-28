@@ -6,9 +6,9 @@
     "add_beneficiaries": "ts-node playground.ts add_beneficiaries"
   },
   "dependencies": {
-    "@elrondnetwork/erdjs": "^9.2.4",
-    "prettier": "^2.5.1",
+    "@elrondnetwork/erdjs": "^10.1.2",
+    "prettier": "^2.6.2",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.2"
+    "typescript": "^4.6.3"
   }
 }
