@@ -8,4 +8,4 @@ export const EXPLORER = "https://testnet-explorer.elrond.com";
 export const PROXY = "https://testnet-gateway.elrond.com";
 export const CHAIN_ID = "T";
 export const VESTING_SC_ADDRESS =
-  "erd1qqqqqqqqqqqqqpgqy06eumttcvkhspxapm9q84kf8rhp60hxzjcq6nyeve";
+  "erd1qqqqqqqqqqqqqpgqyt7244tcm4jfdmmt67zz0gzzth54kgnwzjcq8yn6vc";
