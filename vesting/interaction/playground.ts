@@ -3,7 +3,7 @@ import {
   CHAIN_ID,
   DECIMALS_SUFFIX,
   EXPLORER,
-  GAS_LIMIT,
+  MAX_GAS_LIMIT,
   OWNER_WALLET,
   PROXY,
   VESTING_SC_ADDRESS,
@@ -56,7 +56,7 @@ const addGroups = async (
 
     let tx = contract.call({
       func: new ContractFunction("addGroup"),
-      gasLimit: GAS_LIMIT,
+      gasLimit: MAX_GAS_LIMIT,
       args: [
         BytesValue.fromUTF8(name),
         new BigUIntValue(maxAllocation),
@@ -134,7 +134,7 @@ const addBeneficiaries = async (
 
     let tx = contract.call({
       func: new ContractFunction("addBeneficiary"),
-      gasLimit: GAS_LIMIT,
+      gasLimit: MAX_GAS_LIMIT,
       args: [
         new AddressValue(addrObj),
         new BooleanValue(canBeRevoked),
