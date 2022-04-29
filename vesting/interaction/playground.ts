@@ -102,6 +102,9 @@ const addGroups = async (
       endpointDefinition,
     );
     let decodedResponse = (<Struct>firstValue).valueOf();
+    Object.keys(decodedResponse).forEach(key => {
+      decodedResponse[key] = decodedResponse[key].toString();
+    });
 
     console.log(YELLOW, decodedResponse, "\n");
   }
@@ -177,8 +180,9 @@ const addBeneficiaries = async (
       endpointDefinition,
     );
     let decodedResponse = (<ArrayVec>firstValue).valueOf();
-
-    console.log(YELLOW, decodedResponse, "\n");
+    for (const beneficiaryId of decodedResponse) {
+      console.log(YELLOW, beneficiaryId, "\n");
+    }
   }
 };
 
