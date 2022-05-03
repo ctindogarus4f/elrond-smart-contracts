@@ -7,7 +7,7 @@ mod types;
 use types::*;
 
 /// A staking contract. Users can stake ESDT tokens and gradually receive ESDT token rewards.
-#[elrond_wasm::derive::contract]
+#[elrond_wasm::contract]
 pub trait StakingContract {
     #[init]
     fn init(&self, token_identifier: TokenIdentifier) {
@@ -16,18 +16,21 @@ pub trait StakingContract {
             "invalid esdt token"
         );
         self.token_identifier().set_if_empty(&token_identifier);
-
-        let caller = self.blockchain().get_caller();
-        self.multisig_address().set_if_empty(&caller);
         self.total_tokens_allocated().set_if_empty(&BigUint::zero());
     }
 
     // endpoints
 
-    #[endpoint(addPackage)]
-    fn add_package(&self, package_name: ManagedBuffer, apr_percentage: u8, locking_period: u64) {
-        self.assert_multisig_wallet();
-
+    #[only_owner]
+    #[endpoint(addPackageWithPenaltyFee)]
+    fn add_package_with_penalty_fee(
+        &self,
+        package_name: ManagedBuffer,
+        apr_percentage: u8,
+        duration: u64,
+        daily_rewards: bool,
+        penalty_fee: u8,
+    ) {
         require!(
             self.package_info(&package_name).is_empty(),
             "package has already been defined",
@@ -39,16 +42,93 @@ pub trait StakingContract {
 
         let package_info = PackageInfo {
             apr_percentage,
-            locking_period,
+            duration,
+            daily_rewards,
+            penalty_type: PenaltyType::FeePercentage { fee: penalty_fee },
         };
 
         self.package_info(&package_name).set(&package_info);
     }
 
+    #[only_owner]
+    #[endpoint(addPackageWithPenaltyDays)]
+    fn add_package_with_penalty_days(
+        &self,
+        package_name: ManagedBuffer,
+        apr_percentage: u8,
+        duration: u64,
+        daily_rewards: bool,
+        penalty_days: u8,
+    ) {
+        require!(
+            self.package_info(&package_name).is_empty(),
+            "package has already been defined",
+        );
+        require!(
+            apr_percentage > 0 && apr_percentage <= 100,
+            "apr percentage should be between (0, 100]"
+        );
+
+        let package_info = PackageInfo {
+            apr_percentage,
+            duration,
+            daily_rewards,
+            penalty_type: PenaltyType::DaysUntilUnlocked { days: penalty_days },
+        };
+
+        self.package_info(&package_name).set(&package_info);
+    }
+
+    #[endpoint(claimRewards)]
+    fn claim_rewards(&self) {
+        let caller = self.blockchain().get_caller();
+        require!(
+            !self.staker_info(&caller).is_empty(),
+            "staker does not exist",
+        );
+
+        let staker_info = self.staker_info(&caller).get();
+        let package_info = self.package_info(&staker_info.package_name).get();
+
+        require!(
+            package_info.daily_rewards,
+            "this package does not offer daily rewards"
+        );
+
+        require!(
+            staker_info.start + package_info.duration >= self.blockchain().get_block_timestamp(),
+            "this package has expired. you need to unstake your tokens"
+        );
+
+        let hours_since_last_claim =
+            self.blockchain().get_block_timestamp() - staker_info.last_claim / 3600;
+        let rewards_per_hour: BigUint = staker_info.tokens_staked
+            * package_info.apr_percentage as u64
+            / 100u64
+            / 365u64
+            / 3600u64;
+        let claimable_rewards = rewards_per_hour * hours_since_last_claim;
+
+        require!(claimable_rewards > 0, "no rewards to be claimed");
+
+        self.send().direct(
+            &caller,
+            &self.token_identifier().get(),
+            0,
+            &claimable_rewards,
+            b"successful claim",
+        );
+
+        self.staker_info(&caller).update(|info| {
+            info.last_claim = self.blockchain().get_block_timestamp();
+        });
+
+        self.staker_info(&caller).clear();
+    }
+
+    #[only_owner]
     #[endpoint(claimTokensUnallocated)]
     fn claim_tokens_unallocated(&self) {
-        self.assert_multisig_wallet();
-
         let esdt_balance = self.blockchain().get_esdt_balance(
             &self.blockchain().get_sc_address(),
             &self.token_identifier().get(),
@@ -56,8 +136,9 @@ pub trait StakingContract {
         );
         let tokens_unallocated = esdt_balance - self.total_tokens_allocated().get();
 
+        let caller = self.blockchain().get_caller();
         self.send().direct(
-            &self.multisig_address().get(),
+            &caller,
             &self.token_identifier().get(),
             0,
             &tokens_unallocated,
@@ -102,6 +183,11 @@ pub trait StakingContract {
         );
 
         let staker_info = StakerInfo {
+            last_claim: if package_info.daily_rewards {
+                self.blockchain().get_block_timestamp()
+            } else {
+                0
+            },
             package_name,
             start: self.blockchain().get_block_timestamp(),
             tokens_staked: payment_amount,
@@ -122,8 +208,7 @@ pub trait StakingContract {
         let package_info = self.package_info(&staker_info.package_name).get();
 
         require!(
-            staker_info.start + package_info.locking_period
-                >= self.blockchain().get_block_timestamp(),
+            staker_info.start + package_info.duration >= self.blockchain().get_block_timestamp(),
             "cannot unstake sooner than the locking period"
         );
 
@@ -142,14 +227,6 @@ pub trait StakingContract {
 
     // private functions
 
-    fn assert_multisig_wallet(&self) {
-        let multisig_address = self.multisig_address().get();
-        require!(
-            self.blockchain().get_caller() == multisig_address,
-            "caller not authorized",
-        );
-    }
-
     fn compute_unstake_amount(&self, staked_amount: &BigUint, apr_percentage: u8) -> BigUint {
         staked_amount * (100 + apr_percentage) as u64 / 100u64
     }
@@ -163,10 +240,6 @@ pub trait StakingContract {
     #[view(getTokenIdentifier)]
     #[storage_mapper("tokenIdentifier")]
     fn token_identifier(&self) -> SingleValueMapper<TokenIdentifier>;
-
-    #[view(getMultisigAddress)]
-    #[storage_mapper("multisigAddress")]
-    fn multisig_address(&self) -> SingleValueMapper<ManagedAddress>;
 
     #[view(getStakerInfo)]
     #[storage_mapper("stakerInfo")]

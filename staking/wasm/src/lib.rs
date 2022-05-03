@@ -7,9 +7,10 @@
 elrond_wasm_node::wasm_endpoints! {
     staking
     (
-        addPackage
+        addPackageWithPenaltyDays
+        addPackageWithPenaltyFee
+        claimRewards
         claimTokensUnallocated
-        getMultisigAddress
         getPackageInfo
         getStakerInfo
         getTokenIdentifier
