@@ -106,7 +106,7 @@ pub trait StakingContract {
             * package_info.apr_percentage as u64
             / 100u64
             / 365u64
-            / 3600u64;
+            / 24u64;
         let claimable_rewards = rewards_per_hour * hours_since_last_claim;
 
         require!(claimable_rewards > 0, "no rewards to be claimed");
@@ -122,8 +122,6 @@ pub trait StakingContract {
         self.staker_info(&caller).update(|info| {
             info.last_claim = self.blockchain().get_block_timestamp();
         });
-
-        self.staker_info(&caller).clear();
     }
 
     #[only_owner]
