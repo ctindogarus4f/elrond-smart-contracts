@@ -124,35 +124,9 @@ pub trait StakingContract {
         });
     }
 
-    #[only_owner]
-    #[endpoint(claimTokensUnallocated)]
-    fn claim_tokens_unallocated(&self) {
-        let esdt_balance = self.blockchain().get_esdt_balance(
-            &self.blockchain().get_sc_address(),
-            &self.token_identifier().get(),
-            0,
-        );
-        let tokens_unallocated = esdt_balance - self.total_tokens_allocated().get();
-
-        let caller = self.blockchain().get_caller();
-        self.send().direct(
-            &caller,
-            &self.token_identifier().get(),
-            0,
-            &tokens_unallocated,
-            b"successful claim",
-        );
-    }
-
     #[payable("*")]
     #[endpoint]
     fn stake(&self, package_name: ManagedBuffer) {
-        let caller = self.blockchain().get_caller();
-        require!(
-            self.staker_info(&caller).is_empty(),
-            "staker has already been added",
-        );
-
         require!(
             !self.package_info(&package_name).is_empty(),
             "specified package is not set up",
@@ -164,7 +138,15 @@ pub trait StakingContract {
             "invalid staked token"
         );
 
+        let caller = self.blockchain().get_caller();
+        require!(
+            self.staker_info(&caller).is_empty(),
+            "staker has already been added",
+        );
+
         let package_info = self.package_info(&package_name).get();
+
+
         let unstake_amount =
             self.compute_unstake_amount(&payment_amount, package_info.apr_percentage);
         self.total_tokens_allocated()
