@@ -9,13 +9,15 @@ elrond_wasm_node::wasm_endpoints! {
     (
         addPackageWithPenaltyDays
         addPackageWithPenaltyFee
+        add_to_existing_stake
         claimRewards
-        claimTokensUnallocated
+        create_new_stake
         getPackageInfo
+        getStakerCounter
+        getStakerIds
         getStakerInfo
         getTokenIdentifier
         getTotalTokensAllocated
-        stake
         unstake
     )
 }
