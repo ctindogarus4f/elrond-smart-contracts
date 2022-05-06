@@ -8,7 +8,7 @@ mod types;
 use types::*;
 
 /// A vesting contract that can release its token balance gradually like a typical vesting scheme.
-#[elrond_wasm::derive::contract]
+#[elrond_wasm::contract]
 pub trait VestingContract {
     #[init]
     fn init(&self, token_identifier: TokenIdentifier) {
