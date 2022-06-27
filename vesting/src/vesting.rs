@@ -242,25 +242,6 @@ pub trait VestingContract {
         tokens_vested - tokens_claimed
     }
 
-    #[view(getAllBeneficiaryDeals)]
-    fn get_all_beneficiary_deals(
-        &self,
-        beneficiary: ManagedAddress,
-    ) -> MultiValueManagedVec<BeneficiaryInfo<Self::Api>> {
-        require!(
-            !self.beneficiary_ids(&beneficiary).is_empty(),
-            "beneficiary does not exist"
-        );
-
-        let beneficiary_ids = self.beneficiary_ids(&beneficiary).get();
-        let mut beneficiary_deals = MultiValueManagedVec::new();
-        for beneficiary_id in beneficiary_ids.iter() {
-            beneficiary_deals.push(self.beneficiary_info(beneficiary_id).get());
-        }
-
-        beneficiary_deals
-    }
-
     // private functions
 
     fn get_tokens_vested(&self, id: u64) -> BigUint {

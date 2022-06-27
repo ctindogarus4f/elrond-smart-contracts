@@ -11,7 +11,6 @@ elrond_wasm_node::wasm_endpoints! {
         addGroup
         claim
         claimTokensUnallocated
-        getAllBeneficiaryDeals
         getBeneficiaryCounter
         getBeneficiaryIds
         getBeneficiaryInfo
