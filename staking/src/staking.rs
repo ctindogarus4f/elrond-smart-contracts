@@ -26,7 +26,7 @@ pub trait StakingContract {
     fn add_package(
         &self,
         package_name: ManagedBuffer,
-        valid_until_timestamp: u64,
+        lock_period: u64,
         apr_percentage: u8,
         rewards_frequency: u64,
     ) {
@@ -40,7 +40,7 @@ pub trait StakingContract {
         );
 
         let package_info = PackageInfo {
-            valid_until_timestamp,
+            lock_period,
             apr_percentage,
             rewards_frequency,
         };
@@ -77,12 +77,6 @@ pub trait StakingContract {
             "invalid staked token"
         );
 
-        let package_info = self.package_info(&package_name).get();
-        require!(
-            self.blockchain().get_block_timestamp() <= package_info.valid_until_timestamp,
-            "this package is no longer valid"
-        );
-
         let staker_info = StakerInfo {
             package_name,
             stake_timestamp: self.blockchain().get_block_timestamp(),
@@ -105,13 +99,6 @@ pub trait StakingContract {
         require!(
             payment_token == self.token_identifier().get(),
             "invalid staked token"
-        );
-
-        let staker_info = self.staker_info(id).get();
-        let package_info = self.package_info(&staker_info.package_name).get();
-        require!(
-            self.blockchain().get_block_timestamp() <= package_info.valid_until_timestamp,
-            "this package is no longer valid"
         );
 
         self.staker_info(id).update(|staker| {
@@ -170,6 +157,12 @@ pub trait StakingContract {
 
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
+
+        let locked_until = staker_info.stake_timestamp + package_info.lock_period * 86400;
+        require!(
+            self.blockchain().get_block_timestamp() > locked_until,
+            "tokens are under locking period"
+        );
 
         let claimable_rewards = self.compute_claimable_rewards(
             &staker_info.tokens_staked,
