@@ -15,4 +15,5 @@ pub struct PackageInfo {
     pub lock_period: u64,       // in days
     pub apr_percentage: u8,     // for 365 days
     pub rewards_frequency: u64, // in days
+    pub min_stake_amount: u64,  // in tokens
 }

@@ -29,6 +29,7 @@ pub trait StakingContract {
         lock_period: u64,
         apr_percentage: u8,
         rewards_frequency: u64,
+        min_stake_amount: u64,
     ) {
         require!(
             self.package_info(&package_name).is_empty(),
@@ -43,6 +44,7 @@ pub trait StakingContract {
             lock_period,
             apr_percentage,
             rewards_frequency,
+            min_stake_amount,
         };
 
         self.package_info(&package_name).set(&package_info);
@@ -56,6 +58,7 @@ pub trait StakingContract {
             "specified package is not set up",
         );
 
+        let package_info = self.package_info(&package_name).get();
         let caller = self.blockchain().get_caller();
         let mut staker_ids;
         if self.staker_ids(&caller).is_empty() {
@@ -63,18 +66,15 @@ pub trait StakingContract {
         } else {
             staker_ids = self.staker_ids(&caller).get();
         }
-        for staker_id in staker_ids.iter() {
-            let info = self.staker_info(staker_id).get();
-            require!(
-                info.package_name != package_name,
-                "the package is already defined for this staker. use add_to_existing_stake to add more stake"
-            );
-        }
 
         let (payment_amount, payment_token) = self.call_value().payment_token_pair();
         require!(
             payment_token == self.token_identifier().get(),
             "invalid staked token"
+        );
+        require!(
+            payment_amount >= package_info.min_stake_amount,
+            "stake amount too small"
         );
 
         let staker_info = StakerInfo {
