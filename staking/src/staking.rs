@@ -141,8 +141,17 @@ pub trait StakingContract {
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
         );
-
         require!(claimable_rewards > 0, "no rewards to be claimed");
+
+        let contract_balance = self.blockchain().get_esdt_balance(
+            &self.blockchain().get_sc_address(),
+            &self.token_identifier().get(),
+            0,
+        );
+        require!(
+            contract_balance > claimable_rewards,
+            "not enough tokens in the staking contract"
+        );
 
         self.send().direct(
             &caller,
@@ -184,6 +193,17 @@ pub trait StakingContract {
             staker_info.last_claim_of_rewards,
         );
         let unstake_amount = staker_info.tokens_staked + claimable_rewards;
+
+        let contract_balance = self.blockchain().get_esdt_balance(
+            &self.blockchain().get_sc_address(),
+            &self.token_identifier().get(),
+            0,
+        );
+        require!(
+            contract_balance > unstake_amount,
+            "not enough tokens in the staking contract"
+        );
+
         self.send().direct(
             &caller,
             &self.token_identifier().get(),
