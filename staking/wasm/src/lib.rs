@@ -8,15 +8,17 @@ elrond_wasm_node::wasm_endpoints! {
     staking
     (
         addPackage
-        add_to_existing_stake
         claimRewards
         create_new_stake
         getPackageInfo
+        getPaused
         getStakerCounter
         getStakerIds
         getStakerInfo
         getTokenIdentifier
         getTotalTokensAllocated
+        pause
+        unpause
         unstake
     )
 }

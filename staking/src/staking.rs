@@ -17,9 +17,22 @@ pub trait StakingContract {
         );
         self.token_identifier().set_if_empty(&token_identifier);
         self.total_tokens_allocated().set_if_empty(&BigUint::zero());
+        self.paused().set_if_empty(&false);
     }
 
     // endpoints
+
+    #[only_owner]
+    #[endpoint(pause)]
+    fn pause(&self) {
+        self.paused().set(&true);
+    }
+
+    #[only_owner]
+    #[endpoint(unpause)]
+    fn unpause(&self) {
+        self.paused().set(&false);
+    }
 
     #[only_owner]
     #[endpoint(addPackage)]
@@ -53,6 +66,7 @@ pub trait StakingContract {
     #[payable("*")]
     #[endpoint]
     fn create_new_stake(&self, package_name: ManagedBuffer) {
+        require!(!self.paused().get(), "the staking is paused",);
         require!(
             !self.package_info(&package_name).is_empty(),
             "specified package is not set up",
@@ -90,22 +104,22 @@ pub trait StakingContract {
         self.staker_info(staker_counter).set(&staker_info);
     }
 
-    #[payable("*")]
-    #[endpoint]
-    fn add_to_existing_stake(&self, id: u64) {
-        require!(!self.staker_info(id).is_empty(), "stake does not exist",);
+    // #[payable("*")]
+    // #[endpoint]
+    // fn add_to_existing_stake(&self, id: u64) {
+    //     require!(!self.staker_info(id).is_empty(), "stake does not exist",);
 
-        let (payment_amount, payment_token) = self.call_value().payment_token_pair();
-        require!(
-            payment_token == self.token_identifier().get(),
-            "invalid staked token"
-        );
+    //     let (payment_amount, payment_token) = self.call_value().payment_token_pair();
+    //     require!(
+    //         payment_token == self.token_identifier().get(),
+    //         "invalid staked token"
+    //     );
 
-        self.staker_info(id).update(|staker| {
-            staker.tokens_staked += payment_amount;
-            staker.last_claim_of_rewards = self.blockchain().get_block_timestamp();
-        });
-    }
+    //     self.staker_info(id).update(|staker| {
+    //         staker.tokens_staked += payment_amount;
+    //         staker.last_claim_of_rewards = self.blockchain().get_block_timestamp();
+    //     });
+    // }
 
     #[endpoint(claimRewards)]
     fn claim_rewards(&self, id: u64) {
@@ -231,6 +245,10 @@ pub trait StakingContract {
     #[view(getTokenIdentifier)]
     #[storage_mapper("tokenIdentifier")]
     fn token_identifier(&self) -> SingleValueMapper<TokenIdentifier>;
+
+    #[view(getPaused)]
+    #[storage_mapper("paused")]
+    fn paused(&self) -> SingleValueMapper<bool>;
 
     #[view(getStakerCounter)]
     #[storage_mapper("stakerCounter")]
