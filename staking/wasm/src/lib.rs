@@ -9,7 +9,7 @@ elrond_wasm_node::wasm_endpoints! {
     (
         addPackage
         claimRewards
-        create_new_stake
+        createNewStake
         getPackageInfo
         getPaused
         getStakerCounter

@@ -64,7 +64,7 @@ pub trait StakingContract {
     }
 
     #[payable("*")]
-    #[endpoint]
+    #[endpoint(createNewStake)]
     fn create_new_stake(&self, package_name: ManagedBuffer) {
         require!(!self.paused().get(), "the staking is paused",);
         require!(
