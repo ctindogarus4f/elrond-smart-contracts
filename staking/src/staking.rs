@@ -102,7 +102,6 @@ pub trait StakingContract {
         );
 
         self.staker_info(id).update(|staker| {
-            staker.stake_timestamp = self.blockchain().get_block_timestamp();
             staker.tokens_staked += payment_amount;
             staker.last_claim_of_rewards = self.blockchain().get_block_timestamp();
         });
@@ -179,8 +178,7 @@ pub trait StakingContract {
             b"successful unstake",
         );
 
-        // TODO: clean it from staker_ids as well
-        self.staker_info(id).clear();
+        // TODO: clean staker_info and staker_ids
     }
 
     // private functions
