@@ -15,11 +15,4 @@ pub struct PackageInfo {
     pub valid_until_timestamp: u64,
     pub apr_percentage: u8,
     pub rewards_frequency: u64, // in days
-    pub penalty_type: PenaltyType,
-}
-
-#[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
-pub enum PenaltyType {
-    FeePercentage { fee: u8 },
-    DaysUntilUnlocked { days: u8 },
 }

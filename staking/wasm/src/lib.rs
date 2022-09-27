@@ -7,8 +7,7 @@
 elrond_wasm_node::wasm_endpoints! {
     staking
     (
-        addPackageWithPenaltyDays
-        addPackageWithPenaltyFee
+        addPackage
         add_to_existing_stake
         claimRewards
         create_new_stake

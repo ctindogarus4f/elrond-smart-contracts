@@ -22,14 +22,13 @@ pub trait StakingContract {
     // endpoints
 
     #[only_owner]
-    #[endpoint(addPackageWithPenaltyFee)]
-    fn add_package_with_penalty_fee(
+    #[endpoint(addPackage)]
+    fn add_package(
         &self,
         package_name: ManagedBuffer,
         valid_until_timestamp: u64,
         apr_percentage: u8,
         rewards_frequency: u64,
-        penalty_fee: u8,
     ) {
         require!(
             self.package_info(&package_name).is_empty(),
@@ -44,36 +43,6 @@ pub trait StakingContract {
             valid_until_timestamp,
             apr_percentage,
             rewards_frequency,
-            penalty_type: PenaltyType::FeePercentage { fee: penalty_fee },
-        };
-
-        self.package_info(&package_name).set(&package_info);
-    }
-
-    #[only_owner]
-    #[endpoint(addPackageWithPenaltyDays)]
-    fn add_package_with_penalty_days(
-        &self,
-        package_name: ManagedBuffer,
-        valid_until_timestamp: u64,
-        apr_percentage: u8,
-        rewards_frequency: u64,
-        penalty_days: u8,
-    ) {
-        require!(
-            self.package_info(&package_name).is_empty(),
-            "package has already been defined",
-        );
-        require!(
-            apr_percentage > 0 && apr_percentage <= 100,
-            "apr percentage should be between (0, 100]"
-        );
-
-        let package_info = PackageInfo {
-            valid_until_timestamp,
-            apr_percentage,
-            rewards_frequency,
-            penalty_type: PenaltyType::DaysUntilUnlocked { days: penalty_days },
         };
 
         self.package_info(&package_name).set(&package_info);
@@ -201,8 +170,6 @@ pub trait StakingContract {
 
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
-
-        // TODO: use penalty type
 
         let claimable_rewards = self.compute_claimable_rewards(
             &staker_info.tokens_staked,
