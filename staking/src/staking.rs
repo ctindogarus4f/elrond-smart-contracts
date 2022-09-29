@@ -17,21 +17,35 @@ pub trait StakingContract {
         );
         self.token_identifier().set_if_empty(&token_identifier);
         self.total_tokens_allocated().set_if_empty(&BigUint::zero());
-        self.paused().set_if_empty(&false);
+        self.paused_stake().set_if_empty(&false);
+        self.paused_rewards_timestamp().set_if_empty(&0);
     }
 
     // endpoints
 
     #[only_owner]
-    #[endpoint(pause)]
-    fn pause(&self) {
-        self.paused().set(&true);
+    #[endpoint(pauseStake)]
+    fn pause_stake(&self) {
+        self.paused_stake().set(&true);
     }
 
     #[only_owner]
-    #[endpoint(unpause)]
-    fn unpause(&self) {
-        self.paused().set(&false);
+    #[endpoint(unpauseStake)]
+    fn unpause_stake(&self) {
+        self.paused_stake().set(&false);
+    }
+
+    #[only_owner]
+    #[endpoint(pauseRewards)]
+    fn pause_rewards(&self) {
+        self.paused_rewards_timestamp()
+            .set(&self.blockchain().get_block_timestamp());
+    }
+
+    #[only_owner]
+    #[endpoint(unpauseRewards)]
+    fn unpause_rewards(&self) {
+        self.paused_rewards_timestamp().set(&0);
     }
 
     #[only_owner]
@@ -66,7 +80,7 @@ pub trait StakingContract {
     #[payable("*")]
     #[endpoint(createNewStake)]
     fn create_new_stake(&self, package_name: ManagedBuffer) {
-        require!(!self.paused().get(), "the staking is paused",);
+        require!(!self.paused_stake().get(), "the staking is paused",);
         require!(
             !self.package_info(&package_name).is_empty(),
             "specified package is not set up",
@@ -100,7 +114,7 @@ pub trait StakingContract {
 
         let staker_counter = self.get_and_increase_staker_counter();
         staker_ids.push(staker_counter);
-        self.staker_ids(&caller).set(staker_ids);
+        self.staker_ids(&caller).set(&staker_ids);
         self.staker_info(staker_counter).set(&staker_info);
     }
 
@@ -251,7 +265,14 @@ pub trait StakingContract {
     }
 
     fn compute_cycles_since_last_claim(&self, rewards_frequency: u64, last_claim: u64) -> u64 {
-        let days_since_last_claim = (self.blockchain().get_block_timestamp() - last_claim) / 86400;
+        let mut days_since_last_claim =
+            (self.blockchain().get_block_timestamp() - last_claim) / 86400;
+
+        let paused_rewards_timestamp = self.paused_rewards_timestamp().get();
+        if paused_rewards_timestamp != 0 {
+            days_since_last_claim = (paused_rewards_timestamp - last_claim) / 86400;
+        }
+
         let cycles_since_last_claim = days_since_last_claim / rewards_frequency;
         cycles_since_last_claim
     }
@@ -266,9 +287,13 @@ pub trait StakingContract {
     #[storage_mapper("tokenIdentifier")]
     fn token_identifier(&self) -> SingleValueMapper<TokenIdentifier>;
 
-    #[view(getPaused)]
-    #[storage_mapper("paused")]
-    fn paused(&self) -> SingleValueMapper<bool>;
+    #[view(getPausedStake)]
+    #[storage_mapper("pausedStake")]
+    fn paused_stake(&self) -> SingleValueMapper<bool>;
+
+    #[view(getPausedRewardsTimestamp)]
+    #[storage_mapper("pausedRewardsTimestamp")]
+    fn paused_rewards_timestamp(&self) -> SingleValueMapper<u64>;
 
     #[view(getStakerCounter)]
     #[storage_mapper("stakerCounter")]

@@ -11,14 +11,17 @@ elrond_wasm_node::wasm_endpoints! {
         claimRewards
         createNewStake
         getPackageInfo
-        getPaused
+        getPausedRewardsTimestamp
+        getPausedStake
         getStakerCounter
         getStakerIds
         getStakerInfo
         getTokenIdentifier
         getTotalTokensAllocated
-        pause
-        unpause
+        pauseRewards
+        pauseStake
+        unpauseRewards
+        unpauseStake
         unstake
     )
 }
