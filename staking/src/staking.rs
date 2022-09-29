@@ -56,7 +56,7 @@ pub trait StakingContract {
         lock_period: u64,
         apr_percentage: u8,
         rewards_frequency: u64,
-        min_stake_amount: u64,
+        min_stake_amount: BigUint,
     ) {
         require!(
             self.package_info(&package_name).is_empty(),
@@ -118,22 +118,34 @@ pub trait StakingContract {
         self.staker_info(staker_counter).set(&staker_info);
     }
 
-    // #[payable("*")]
-    // #[endpoint]
-    // fn add_to_existing_stake(&self, id: u64) {
-    //     require!(!self.staker_info(id).is_empty(), "stake does not exist",);
+    #[payable("*")]
+    #[endpoint(reinvestRewardsToExistingStake)]
+    fn reinvest_rewards_to_existing_stake(&self, id: u64) {
+        let caller = self.blockchain().get_caller();
+        require!(
+            !self.staker_ids(&caller).is_empty(),
+            "staker does not exist"
+        );
 
-    //     let (payment_amount, payment_token) = self.call_value().payment_token_pair();
-    //     require!(
-    //         payment_token == self.token_identifier().get(),
-    //         "invalid staked token"
-    //     );
+        let staker_ids = self.staker_ids(&caller).get();
+        require!(staker_ids.contains(&id), "id is not defined for the staker");
 
-    //     self.staker_info(id).update(|staker| {
-    //         staker.tokens_staked += payment_amount;
-    //         staker.last_claim_of_rewards = self.blockchain().get_block_timestamp();
-    //     });
-    // }
+        let staker_info = self.staker_info(id).get();
+        let package_info = self.package_info(&staker_info.package_name).get();
+
+        let claimable_rewards = self.compute_claimable_rewards(
+            &staker_info.tokens_staked,
+            package_info.apr_percentage,
+            package_info.rewards_frequency,
+            staker_info.last_claim_of_rewards,
+        );
+        require!(claimable_rewards > 0, "no rewards to be claimed");
+
+        self.staker_info(id).update(|staker| {
+            staker.tokens_staked += claimable_rewards;
+            staker.last_claim_of_rewards = self.blockchain().get_block_timestamp();
+        });
+    }
 
     #[endpoint(claimRewards)]
     fn claim_rewards(&self, id: u64) {
@@ -309,5 +321,8 @@ pub trait StakingContract {
 
     #[view(getPackageInfo)]
     #[storage_mapper("packageInfo")]
-    fn package_info(&self, package_name: &ManagedBuffer) -> SingleValueMapper<PackageInfo>;
+    fn package_info(
+        &self,
+        package_name: &ManagedBuffer,
+    ) -> SingleValueMapper<PackageInfo<Self::Api>>;
 }
