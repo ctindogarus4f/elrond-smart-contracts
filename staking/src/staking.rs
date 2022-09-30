@@ -105,6 +105,9 @@ pub trait StakingContract {
             "stake amount too small"
         );
 
+        self.total_tokens_allocated()
+            .update(|tokens| *tokens += &payment_amount);
+
         let staker_info = StakerInfo {
             package_name,
             stake_timestamp: self.blockchain().get_block_timestamp(),
