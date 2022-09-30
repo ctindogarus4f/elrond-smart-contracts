@@ -166,11 +166,13 @@ pub trait StakingContract {
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
 
+        let locked_until = staker_info.stake_timestamp + package_info.lock_period * 86400;
         let claimable_rewards = self.compute_claimable_rewards(
             &staker_info.tokens_staked,
             package_info.apr_percentage,
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
+            locked_until,
         );
         require!(claimable_rewards > 0, "no rewards to be claimed");
 
@@ -194,11 +196,13 @@ pub trait StakingContract {
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
 
+        let locked_until = staker_info.stake_timestamp + package_info.lock_period * 86400;
         let claimable_rewards = self.compute_claimable_rewards(
             &staker_info.tokens_staked,
             package_info.apr_percentage,
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
+            locked_until,
         );
         require!(claimable_rewards > 0, "no rewards to be claimed");
 
@@ -250,6 +254,7 @@ pub trait StakingContract {
             package_info.apr_percentage,
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
+            locked_until,
         );
         let unstake_amount = staker_info.tokens_staked + claimable_rewards;
 
@@ -288,11 +293,13 @@ pub trait StakingContract {
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
 
+        let locked_until = staker_info.stake_timestamp + package_info.lock_period * 86400;
         let claimable_rewards = self.compute_claimable_rewards(
             &staker_info.tokens_staked,
             package_info.apr_percentage,
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
+            locked_until,
         );
 
         claimable_rewards
@@ -312,11 +319,12 @@ pub trait StakingContract {
         apr_percentage: u8,
         rewards_frequency: u64,
         last_claim: u64,
+        locked_until: u64,
     ) -> BigUint {
         let rewards_per_cycle: BigUint =
             self.compute_rewards_per_cycle(staked_amount, apr_percentage, rewards_frequency);
         let cycles_since_last_claim =
-            self.compute_cycles_since_last_claim(rewards_frequency, last_claim);
+            self.compute_cycles_since_last_claim(rewards_frequency, last_claim, locked_until);
         let claimable_rewards = rewards_per_cycle * cycles_since_last_claim;
         claimable_rewards
     }
@@ -333,15 +341,28 @@ pub trait StakingContract {
         rewards_per_cycle
     }
 
-    fn compute_cycles_since_last_claim(&self, rewards_frequency: u64, last_claim: u64) -> u64 {
-        let mut days_since_last_claim =
-            (self.blockchain().get_block_timestamp() - last_claim) / 86400;
+    fn compute_cycles_since_last_claim(
+        &self,
+        rewards_frequency: u64,
+        last_claim: u64,
+        locked_until: u64,
+    ) -> u64 {
+        let mut last_eligible_timestamp = self.blockchain().get_block_timestamp();
 
         let paused_rewards_timestamp = self.paused_rewards_timestamp().get();
         if paused_rewards_timestamp != 0 {
-            days_since_last_claim = (paused_rewards_timestamp - last_claim) / 86400;
+            last_eligible_timestamp = paused_rewards_timestamp;
         }
 
+        if last_eligible_timestamp > locked_until {
+            last_eligible_timestamp = locked_until;
+        }
+
+        if last_eligible_timestamp < last_claim {
+            return 0;
+        }
+
+        let days_since_last_claim = (last_eligible_timestamp - last_claim) / 86400;
         let cycles_since_last_claim = days_since_last_claim / rewards_frequency;
         cycles_since_last_claim
     }
