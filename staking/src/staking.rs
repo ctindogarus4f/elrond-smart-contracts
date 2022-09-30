@@ -243,7 +243,11 @@ pub trait StakingContract {
 
         let index = staker_ids.iter().position(|elem| elem == id).unwrap();
         staker_ids.remove(index);
-        self.staker_ids(&caller).set(&staker_ids);
+        if staker_ids.is_empty() {
+            self.staker_ids(&caller).clear();
+        } else {
+            self.staker_ids(&caller).set(&staker_ids);
+        }
         self.staker_info(id).clear();
     }
 
