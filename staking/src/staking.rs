@@ -178,7 +178,7 @@ pub trait StakingContract {
             0,
         );
         require!(
-            contract_balance > claimable_rewards,
+            contract_balance >= claimable_rewards,
             "not enough tokens in the staking contract"
         );
 
@@ -203,7 +203,7 @@ pub trait StakingContract {
             "staker does not exist"
         );
 
-        let staker_ids = self.staker_ids(&caller).get();
+        let mut staker_ids = self.staker_ids(&caller).get();
         require!(staker_ids.contains(&id), "id is not defined for the staker");
 
         let staker_info = self.staker_info(id).get();
@@ -229,7 +229,7 @@ pub trait StakingContract {
             0,
         );
         require!(
-            contract_balance > unstake_amount,
+            contract_balance >= unstake_amount,
             "not enough tokens in the staking contract"
         );
 
@@ -241,7 +241,10 @@ pub trait StakingContract {
             b"successful unstake",
         );
 
-        // TODO: clean staker_info and staker_ids
+        let index = staker_ids.iter().position(|elem| elem == id).unwrap();
+        staker_ids.remove(index);
+        self.staker_ids(&caller).set(&staker_ids);
+        self.staker_info(id).clear();
     }
 
     // private functions
