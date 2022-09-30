@@ -7,17 +7,23 @@
 elrond_wasm_node::wasm_endpoints! {
     staking
     (
-        addPackageWithPenaltyDays
-        addPackageWithPenaltyFee
-        add_to_existing_stake
+        addPackage
         claimRewards
-        create_new_stake
+        createNewStake
+        getAvailableRewards
         getPackageInfo
+        getPausedRewardsTimestamp
+        getPausedStake
         getStakerCounter
         getStakerIds
         getStakerInfo
         getTokenIdentifier
         getTotalTokensAllocated
+        pauseRewards
+        pauseStake
+        reinvestRewardsToExistingStake
+        unpauseRewards
+        unpauseStake
         unstake
     )
 }
