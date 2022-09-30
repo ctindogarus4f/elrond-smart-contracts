@@ -12,8 +12,9 @@ pub struct StakerInfo<M: ManagedTypeApi> {
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub struct PackageInfo<M: ManagedTypeApi> {
-    pub lock_period: u64,             // in days
-    pub apr_percentage: u8,           // for 365 days
-    pub rewards_frequency: u64,       // in days
-    pub min_stake_amount: BigUint<M>, // in tokens
+    pub lock_period: u64,               // in days
+    pub apr_percentage: u8,             // for 365 days
+    pub rewards_frequency: u64,         // in days
+    pub min_stake_amount: BigUint<M>,   // in tokens
+    pub total_staked_amunt: BigUint<M>, // tokens staked to this package so far
 }

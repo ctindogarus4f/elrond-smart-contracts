@@ -72,6 +72,7 @@ pub trait StakingContract {
             apr_percentage,
             rewards_frequency,
             min_stake_amount,
+            total_staked_amunt: BigUint::zero(),
         };
 
         self.package_info(&package_name).set(&package_info);
@@ -105,6 +106,9 @@ pub trait StakingContract {
             "stake amount too small"
         );
 
+        self.package_info(&package_name).update(|package| {
+            package.total_staked_amunt += &payment_amount;
+        });
         self.total_tokens_allocated()
             .update(|tokens| *tokens += &payment_amount);
 
