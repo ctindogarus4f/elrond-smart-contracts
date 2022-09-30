@@ -10,6 +10,8 @@ elrond_wasm_node::wasm_endpoints! {
         addPackage
         claimRewards
         createNewStake
+        disablePackage
+        enablePackage
         getAvailableRewards
         getPackageInfo
         getPausedRewardsTimestamp

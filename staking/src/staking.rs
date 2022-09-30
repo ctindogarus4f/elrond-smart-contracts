@@ -68,6 +68,7 @@ pub trait StakingContract {
         );
 
         let package_info = PackageInfo {
+            enabled: true,
             lock_period,
             apr_percentage,
             rewards_frequency,
@@ -76,6 +77,30 @@ pub trait StakingContract {
         };
 
         self.package_info(&package_name).set(&package_info);
+    }
+
+    #[only_owner]
+    #[endpoint(enablePackage)]
+    fn enable_package(&self, package_name: ManagedBuffer) {
+        require!(
+            !self.package_info(&package_name).is_empty(),
+            "specified package is not set up",
+        );
+        self.package_info(&package_name).update(|package| {
+            package.enabled = true;
+        });
+    }
+
+    #[only_owner]
+    #[endpoint(disablePackage)]
+    fn disable_package(&self, package_name: ManagedBuffer) {
+        require!(
+            !self.package_info(&package_name).is_empty(),
+            "specified package is not set up",
+        );
+        self.package_info(&package_name).update(|package| {
+            package.enabled = false;
+        });
     }
 
     #[payable("*")]
@@ -88,6 +113,8 @@ pub trait StakingContract {
         );
 
         let package_info = self.package_info(&package_name).get();
+        require!(package_info.enabled, "this package is disabled",);
+
         let caller = self.blockchain().get_caller();
         let mut staker_ids;
         if self.staker_ids(&caller).is_empty() {
@@ -125,7 +152,6 @@ pub trait StakingContract {
         self.staker_info(staker_counter).set(&staker_info);
     }
 
-    #[payable("*")]
     #[endpoint(reinvestRewardsToExistingStake)]
     fn reinvest_rewards_to_existing_stake(&self, id: u64) {
         let caller = self.blockchain().get_caller();
