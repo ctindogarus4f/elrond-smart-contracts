@@ -247,6 +247,23 @@ pub trait StakingContract {
         self.staker_info(id).clear();
     }
 
+    #[endpoint(getAvailableRewards)]
+    fn get_available_rewards(&self, id: u64) -> BigUint {
+        require!(!self.staker_info(id).is_empty(), "stake does not exist");
+
+        let staker_info = self.staker_info(id).get();
+        let package_info = self.package_info(&staker_info.package_name).get();
+
+        let claimable_rewards = self.compute_claimable_rewards(
+            &staker_info.tokens_staked,
+            package_info.apr_percentage,
+            package_info.rewards_frequency,
+            staker_info.last_claim_of_rewards,
+        );
+
+        claimable_rewards
+    }
+
     // private functions
 
     fn get_and_increase_staker_counter(&self) -> u64 {
