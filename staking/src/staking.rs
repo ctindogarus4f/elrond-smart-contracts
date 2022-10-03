@@ -16,7 +16,7 @@ pub trait StakingContract {
             "invalid esdt token"
         );
         self.token_identifier().set_if_empty(&token_identifier);
-        self.total_tokens_allocated().set_if_empty(&BigUint::zero());
+        self.total_tokens_staked().set_if_empty(&BigUint::zero());
         self.paused_stake().set_if_empty(&false);
         self.paused_rewards_timestamp().set_if_empty(&0);
     }
@@ -136,7 +136,7 @@ pub trait StakingContract {
         self.package_info(&package_name).update(|package| {
             package.total_staked_amunt += &payment_amount;
         });
-        self.total_tokens_allocated()
+        self.total_tokens_staked()
             .update(|tokens| *tokens += &payment_amount);
 
         let staker_info = StakerInfo {
@@ -369,9 +369,9 @@ pub trait StakingContract {
 
     // storage
 
-    #[view(getTotalTokensAllocated)]
-    #[storage_mapper("totalTokensAllocated")]
-    fn total_tokens_allocated(&self) -> SingleValueMapper<BigUint>;
+    #[view(getTotalTokensStaked)]
+    #[storage_mapper("totalTokensStaked")]
+    fn total_tokens_staked(&self) -> SingleValueMapper<BigUint>;
 
     #[view(getTokenIdentifier)]
     #[storage_mapper("tokenIdentifier")]

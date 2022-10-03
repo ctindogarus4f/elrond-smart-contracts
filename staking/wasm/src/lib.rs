@@ -20,7 +20,7 @@ elrond_wasm_node::wasm_endpoints! {
         getStakerIds
         getStakerInfo
         getTokenIdentifier
-        getTotalTokensAllocated
+        getTotalTokensStaked
         pauseRewards
         pauseStake
         reinvestRewardsToExistingStake
