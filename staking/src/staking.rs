@@ -358,7 +358,7 @@ pub trait StakingContract {
             last_eligible_timestamp = locked_until;
         }
 
-        if last_eligible_timestamp < last_claim {
+        if last_eligible_timestamp <= last_claim {
             return 0;
         }
 
