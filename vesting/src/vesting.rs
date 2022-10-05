@@ -242,8 +242,7 @@ pub trait VestingContract {
         tokens_vested - tokens_claimed
     }
 
-    // private functions
-
+    #[view(getTokensVested)]
     fn get_tokens_vested(&self, id: u64) -> BigUint {
         let beneficiary_info = self.beneficiary_info(id).get();
         let group_info = self.group_info(&beneficiary_info.group_name).get();
@@ -269,6 +268,8 @@ pub trait VestingContract {
                 / 100u64;
         }
     }
+
+    // private functions
 
     fn get_no_of_releases_after_cliff(&self, release_percentage: u8) -> u8 {
         if 100 % release_percentage == 0 {

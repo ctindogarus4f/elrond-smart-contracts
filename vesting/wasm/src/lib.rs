@@ -17,6 +17,7 @@ elrond_wasm_node::wasm_endpoints! {
         getGroupInfo
         getTokenIdentifier
         getTokensAvailable
+        getTokensVested
         getTotalTokensAllocated
         getTotalTokensClaimed
         removeBeneficiary
