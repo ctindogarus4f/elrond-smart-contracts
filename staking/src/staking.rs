@@ -18,7 +18,6 @@ pub trait StakingContract {
         self.token_identifier().set_if_empty(&token_identifier);
         self.total_tokens_staked().set_if_empty(&BigUint::zero());
         self.paused_stake().set_if_empty(&false);
-        self.paused_rewards_timestamp().set_if_empty(&0);
     }
 
     // endpoints
@@ -33,19 +32,6 @@ pub trait StakingContract {
     #[endpoint(unpauseStake)]
     fn unpause_stake(&self) {
         self.paused_stake().set(&false);
-    }
-
-    #[only_owner]
-    #[endpoint(pauseRewards)]
-    fn pause_rewards(&self) {
-        self.paused_rewards_timestamp()
-            .set(&self.blockchain().get_block_timestamp());
-    }
-
-    #[only_owner]
-    #[endpoint(unpauseRewards)]
-    fn unpause_rewards(&self) {
-        self.paused_rewards_timestamp().set(&0);
     }
 
     #[only_owner]
@@ -349,11 +335,6 @@ pub trait StakingContract {
     ) -> u64 {
         let mut last_eligible_timestamp = self.blockchain().get_block_timestamp();
 
-        let paused_rewards_timestamp = self.paused_rewards_timestamp().get();
-        if paused_rewards_timestamp != 0 {
-            last_eligible_timestamp = paused_rewards_timestamp;
-        }
-
         if last_eligible_timestamp > locked_until {
             last_eligible_timestamp = locked_until;
         }
@@ -380,10 +361,6 @@ pub trait StakingContract {
     #[view(getPausedStake)]
     #[storage_mapper("pausedStake")]
     fn paused_stake(&self) -> SingleValueMapper<bool>;
-
-    #[view(getPausedRewardsTimestamp)]
-    #[storage_mapper("pausedRewardsTimestamp")]
-    fn paused_rewards_timestamp(&self) -> SingleValueMapper<u64>;
 
     #[view(getStakerCounter)]
     #[storage_mapper("stakerCounter")]

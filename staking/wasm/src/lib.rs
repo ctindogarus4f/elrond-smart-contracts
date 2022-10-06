@@ -14,17 +14,14 @@ elrond_wasm_node::wasm_endpoints! {
         enablePackage
         getAvailableRewards
         getPackageInfo
-        getPausedRewardsTimestamp
         getPausedStake
         getStakerCounter
         getStakerIds
         getStakerInfo
         getTokenIdentifier
         getTotalTokensStaked
-        pauseRewards
         pauseStake
         reinvestRewardsToExistingStake
-        unpauseRewards
         unpauseStake
         unstake
     )
