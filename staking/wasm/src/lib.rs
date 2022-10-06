@@ -19,11 +19,13 @@ elrond_wasm_node::wasm_endpoints! {
         getStakerIds
         getStakerInfo
         getTokenIdentifier
+        getTotalStakeLimit
         getTotalTokensStaked
         pauseStake
         reinvestRewardsToExistingStake
         unpauseStake
         unstake
+        updateStakeLimit
     )
 }
 

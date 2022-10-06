@@ -10,13 +10,14 @@ use types::*;
 #[elrond_wasm::contract]
 pub trait StakingContract {
     #[init]
-    fn init(&self, token_identifier: TokenIdentifier) {
+    fn init(&self, token_identifier: TokenIdentifier, total_stake_limit: BigUint) {
         require!(
             token_identifier.is_valid_esdt_identifier(),
             "invalid esdt token"
         );
         self.token_identifier().set_if_empty(&token_identifier);
         self.total_tokens_staked().set_if_empty(&BigUint::zero());
+        self.total_stake_limit().set_if_empty(&total_stake_limit);
         self.paused_stake().set_if_empty(&false);
     }
 
@@ -32,6 +33,12 @@ pub trait StakingContract {
     #[endpoint(unpauseStake)]
     fn unpause_stake(&self) {
         self.paused_stake().set(&false);
+    }
+
+    #[only_owner]
+    #[endpoint(updateStakeLimit)]
+    fn update_stake_limit(&self, new_limit: BigUint) {
+        self.total_stake_limit().set(&new_limit);
     }
 
     #[only_owner]
@@ -122,11 +129,17 @@ pub trait StakingContract {
             "stake amount too small"
         );
 
+        let total_stake_limit = self.total_stake_limit().get();
+        let new_total_tokens_staked = self.total_tokens_staked().get() + &payment_amount;
+        require!(
+            new_total_tokens_staked <= total_stake_limit,
+            "stake limit exceeded"
+        );
+
         self.package_info(&package_name).update(|package| {
             package.total_staked_amunt += &payment_amount;
         });
-        self.total_tokens_staked()
-            .update(|tokens| *tokens += &payment_amount);
+        self.total_tokens_staked().set(&new_total_tokens_staked);
 
         let staker_info = StakerInfo {
             package_name,
@@ -356,6 +369,10 @@ pub trait StakingContract {
     #[view(getTotalTokensStaked)]
     #[storage_mapper("totalTokensStaked")]
     fn total_tokens_staked(&self) -> SingleValueMapper<BigUint>;
+
+    #[view(getTotalStakeLimit)]
+    #[storage_mapper("totalStakeLimit")]
+    fn total_stake_limit(&self) -> SingleValueMapper<BigUint>;
 
     #[view(getTokenIdentifier)]
     #[storage_mapper("tokenIdentifier")]
