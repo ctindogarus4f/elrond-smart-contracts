@@ -109,10 +109,13 @@ pub trait StakingContract {
             staker_ids = self.staker_ids(&caller).get();
         }
 
+        let token_identifier = self.token_identifier().get();
         let (payment_amount, payment_token) = self.call_value().payment_token_pair();
         require!(
-            payment_token == self.token_identifier().get(),
-            "invalid staked token"
+            payment_token == token_identifier,
+            "invalid staked token, expected: {}, actual: {}",
+            token_identifier,
+            payment_token
         );
         require!(
             payment_amount >= package_info.min_stake_amount,
