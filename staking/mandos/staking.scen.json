@@ -7,7 +7,7 @@
                 "address:owner": {
                     "nonce": "0",
                     "esdt": {
-                        "str:TOK-abcd01": "100,000,000,000"
+                        "str:TOK-abcd01": "1,000,000,000"
                     }
                 }
             },
@@ -28,6 +28,9 @@
                 "arguments": [
                     {
                         "token_identifier": "str:TOK-abcd01"
+                    },
+                    {
+                        "total_stake_limit": "biguint:1,000,000"
                     }
                 ],
                 "gasLimit": "5,000,000",
