@@ -337,7 +337,7 @@ pub trait StakingContract {
         apr_percentage: u8,
         rewards_frequency: u64,
     ) -> BigUint {
-        let cycles_in_one_year = 365 / rewards_frequency;
+        let cycles_in_one_year = 365 * 86400 / rewards_frequency;
         let rewards_per_cycle: BigUint =
             staked_amount * apr_percentage as u64 / 100u64 / cycles_in_one_year;
         rewards_per_cycle
@@ -359,8 +359,8 @@ pub trait StakingContract {
             return 0;
         }
 
-        let days_since_last_claim = (last_eligible_timestamp - last_claim) / 86400;
-        let cycles_since_last_claim = days_since_last_claim / rewards_frequency;
+        let seconds_since_last_claim = last_eligible_timestamp - last_claim;
+        let cycles_since_last_claim = seconds_since_last_claim / rewards_frequency;
         cycles_since_last_claim
     }
 

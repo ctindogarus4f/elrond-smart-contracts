@@ -8,4 +8,4 @@ export const EXPLORER = "https://devnet-explorer.elrond.com";
 export const PROXY = "https://devnet-gateway.elrond.com";
 export const CHAIN_ID = "D";
 export const STAKING_SC_ADDRESS =
-  "erd1qqqqqqqqqqqqqpgqddtkcv8t6e9u4z3g9s2dfdg268zfx5ntzjcqz2mcqj";
+  "erd1qqqqqqqqqqqqqpgq2hhhqede5uy3cdqc2uwgtjnf2r0k6d95zjcq5ngt0w";
