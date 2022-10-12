@@ -44,12 +44,16 @@
                                 "addr": "address:beneficiary_charlie"
                             },
                             {
-                                "0-can_be_revoked": "u8:1",
-                                "1-is_revoked": "u8:0",
-                                "2-group_name": "nested:str:idoinvestor",
-                                "3-start": "u64:1000",
-                                "4-tokens_allocated": "biguint:1,000,000",
-                                "5-tokens_claimed": "biguint:0"
+                                "id": "0"
+                            },
+                            {
+                                "group_name": "str:idoinvestor"
+                            },
+                            {
+                                "start": "1000"
+                            },
+                            {
+                                "amount": "1000000"
                             }
                         ],
                         "data": ""
@@ -125,12 +129,16 @@
                                 "addr": "address:beneficiary_bob"
                             },
                             {
-                                "0-can_be_revoked": "u8:0",
-                                "1-is_revoked": "u8:0",
-                                "2-group_name": "nested:str:idoinvestor",
-                                "3-start": "u64:1000",
-                                "4-tokens_allocated": "biguint:1,000,000",
-                                "5-tokens_claimed": "biguint:0"
+                                "id": "1"
+                            },
+                            {
+                                "group_name": "str:idoinvestor"
+                            },
+                            {
+                                "start": "1000"
+                            },
+                            {
+                                "amount": "1000000"
                             }
                         ],
                         "data": ""

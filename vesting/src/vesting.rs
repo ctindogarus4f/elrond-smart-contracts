@@ -40,13 +40,15 @@ pub trait VestingContract {
             "nothing to claim. all the tokens in the sc are allocated"
         );
 
+        let unallocated_tokens = contract_balance - total_tokens_claimable;
         self.send().direct(
             &caller,
             &self.token_identifier().get(),
             0,
-            &(contract_balance - total_tokens_claimable),
+            &unallocated_tokens,
             b"successful claim by the owner",
         );
+        self.claim_tokens_unallocated_event(&unallocated_tokens);
     }
 
     #[only_owner]
@@ -90,12 +92,7 @@ pub trait VestingContract {
         start: u64,
         tokens_allocated: BigUint,
     ) {
-        let mut beneficiary_ids;
-        if self.beneficiary_ids(&addr).is_empty() {
-            beneficiary_ids = ManagedVec::new();
-        } else {
-            beneficiary_ids = self.beneficiary_ids(&addr).get();
-        }
+        let mut beneficiary_ids = self.beneficiary_ids(&addr).get();
         for beneficiary_id in beneficiary_ids.iter() {
             let info = self.beneficiary_info(beneficiary_id).get();
             require!(
@@ -138,9 +135,9 @@ pub trait VestingContract {
         let beneficiary_info = BeneficiaryInfo {
             can_be_revoked,
             is_revoked: false,
-            group_name,
+            group_name: group_name.clone(),
             start,
-            tokens_allocated,
+            tokens_allocated: tokens_allocated.clone(),
             tokens_claimed: BigUint::zero(),
         };
         let beneficiary_counter = self.get_and_increase_beneficiary_counter();
@@ -148,7 +145,13 @@ pub trait VestingContract {
         self.beneficiary_ids(&addr).set(beneficiary_ids);
         self.beneficiary_info(beneficiary_counter)
             .set(&beneficiary_info);
-        self.add_beneficiary_event(&addr, &beneficiary_info)
+        self.add_beneficiary_event(
+            &addr,
+            beneficiary_counter,
+            &group_name,
+            start,
+            &tokens_allocated,
+        )
     }
 
     #[only_owner]
@@ -189,7 +192,7 @@ pub trait VestingContract {
             beneficiary.is_revoked = true;
             beneficiary.tokens_allocated = new_tokens_allocated;
         });
-        self.remove_beneficiary_event(&addr);
+        self.remove_beneficiary_event(&addr, id, &beneficiary_info.group_name);
     }
 
     #[endpoint]
@@ -212,6 +215,11 @@ pub trait VestingContract {
             "no tokens are available to be claimed"
         );
 
+        self.total_tokens_claimed()
+            .update(|tokens| *tokens += &tokens_available);
+        self.beneficiary_info(id)
+            .update(|beneficiary| beneficiary.tokens_claimed += &tokens_available);
+
         self.send().direct(
             &caller,
             &self.token_identifier().get(),
@@ -219,12 +227,7 @@ pub trait VestingContract {
             &tokens_available,
             b"successful claim",
         );
-
-        self.total_tokens_claimed()
-            .update(|tokens| *tokens += &tokens_available);
-        self.beneficiary_info(id)
-            .update(|beneficiary| beneficiary.tokens_claimed += &tokens_available);
-        self.claim_event(&caller, &tokens_available);
+        self.claim_event(&caller, id, &tokens_available);
     }
 
     // view functions
@@ -256,16 +259,14 @@ pub trait VestingContract {
 
         let current_timestamp = self.blockchain().get_block_timestamp();
         if current_timestamp < first_release {
-            return BigUint::zero();
+            BigUint::zero()
         } else if current_timestamp >= last_release || beneficiary_info.is_revoked {
-            return tokens_allocated.clone();
+            tokens_allocated
         } else {
             let no_of_releases_until_now =
                 1 + (current_timestamp - first_release) / group_info.release_frequency;
-            return tokens_allocated
-                * group_info.release_percentage as u64
-                * no_of_releases_until_now
-                / 100u64;
+            tokens_allocated * group_info.release_percentage as u64 * no_of_releases_until_now
+                / 100u64
         }
     }
 
@@ -286,18 +287,34 @@ pub trait VestingContract {
 
     // events
 
+    #[event("claim_tokens_unallocated")]
+    fn claim_tokens_unallocated_event(&self, #[indexed] amount: &BigUint);
+
     #[event("claim")]
-    fn claim_event(&self, #[indexed] to: &ManagedAddress, #[indexed] amount: &BigUint);
+    fn claim_event(
+        &self,
+        #[indexed] to: &ManagedAddress,
+        #[indexed] id: u64,
+        #[indexed] amount: &BigUint,
+    );
 
     #[event("add_beneficiary")]
     fn add_beneficiary_event(
         &self,
         #[indexed] addr: &ManagedAddress,
-        #[indexed] beneficiary_info: &BeneficiaryInfo<Self::Api>,
+        #[indexed] id: u64,
+        #[indexed] group_name: &ManagedBuffer,
+        #[indexed] start: u64,
+        #[indexed] amount: &BigUint,
     );
 
     #[event("remove_beneficiary")]
-    fn remove_beneficiary_event(&self, #[indexed] addr: &ManagedAddress);
+    fn remove_beneficiary_event(
+        &self,
+        #[indexed] addr: &ManagedAddress,
+        #[indexed] id: u64,
+        #[indexed] group_name: &ManagedBuffer,
+    );
 
     #[event("add_group")]
     fn add_group_event(

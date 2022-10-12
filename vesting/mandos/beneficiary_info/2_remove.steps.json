@@ -84,6 +84,12 @@
                             },
                             {
                                 "addr": "address:beneficiary_charlie"
+                            },
+                            {
+                                "id": "0"
+                            },
+                            {
+                                "group_name": "str:idoinvestor"
                             }
                         ],
                         "data": ""

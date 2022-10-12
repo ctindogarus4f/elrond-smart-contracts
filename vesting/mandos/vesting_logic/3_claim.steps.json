@@ -169,6 +169,9 @@
                                 "addr": "address:beneficiary_charlie"
                             },
                             {
+                                "id": "2"
+                            },
+                            {
                                 "amount": "200,000"
                             }
                         ],
@@ -264,6 +267,9 @@
                                 "addr": "address:beneficiary_charlie"
                             },
                             {
+                                "id": "2"
+                            },
+                            {
                                 "amount": "400,000"
                             }
                         ],
@@ -324,6 +330,12 @@
                             },
                             {
                                 "addr": "address:beneficiary_charlie"
+                            },
+                            {
+                                "id": "2"
+                            },
+                            {
+                                "group_name": "str:privateinvestor"
                             }
                         ],
                         "data": ""
@@ -377,6 +389,9 @@
                             },
                             {
                                 "addr": "address:beneficiary_charlie"
+                            },
+                            {
+                                "id": "2"
                             },
                             {
                                 "amount": "200,000"
