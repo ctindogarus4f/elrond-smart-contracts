@@ -9,6 +9,7 @@ elrond_wasm_node::wasm_endpoints! {
     (
         addPackage
         claimRewards
+        compoundRewardsToExistingStake
         createNewStake
         disablePackage
         enablePackage
@@ -22,7 +23,6 @@ elrond_wasm_node::wasm_endpoints! {
         getTotalStakeLimit
         getTotalTokensStaked
         pauseStake
-        reinvestRewardsToExistingStake
         unpauseStake
         unstake
         updateStakeLimit

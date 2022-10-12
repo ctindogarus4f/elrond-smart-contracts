@@ -6,6 +6,9 @@ mod types;
 
 use types::*;
 
+const SECONDS_IN_DAY: u64 = 86_400;
+const SECONDS_IN_YEAR: u64 = 31_536_000;
+
 /// A staking contract. Users can stake ESDT tokens and gradually receive ESDT token rewards.
 #[elrond_wasm::contract]
 pub trait StakingContract {
@@ -27,18 +30,21 @@ pub trait StakingContract {
     #[endpoint(pauseStake)]
     fn pause_stake(&self) {
         self.paused_stake().set(&true);
+        self.pause_stake_event();
     }
 
     #[only_owner]
     #[endpoint(unpauseStake)]
     fn unpause_stake(&self) {
         self.paused_stake().set(&false);
+        self.unpause_stake_event();
     }
 
     #[only_owner]
     #[endpoint(updateStakeLimit)]
     fn update_stake_limit(&self, new_limit: BigUint) {
         self.total_stake_limit().set(&new_limit);
+        self.update_stake_limit_event(&new_limit);
     }
 
     #[only_owner]
@@ -47,7 +53,7 @@ pub trait StakingContract {
         &self,
         package_name: ManagedBuffer,
         lock_period: u64,
-        apr_percentage: u8,
+        apr_percentage: u64,
         rewards_frequency: u64,
         min_stake_amount: BigUint,
     ) {
@@ -55,9 +61,18 @@ pub trait StakingContract {
             self.package_info(&package_name).is_empty(),
             "package has already been defined",
         );
+        require!(lock_period > 0, "lock period cannot be zero");
         require!(
-            apr_percentage > 0 && apr_percentage <= 100,
-            "apr percentage should be between (0, 100]"
+            apr_percentage > 0 && apr_percentage <= 1_000,
+            "apr percentage should be between (0, 1000]"
+        );
+        require!(
+            rewards_frequency <= SECONDS_IN_YEAR,
+            "rewards frequency should be less than 365 days"
+        );
+        require!(
+            (lock_period * SECONDS_IN_DAY) % rewards_frequency == 0,
+            "the lock period should be divisible with the rewards frequency"
         );
 
         let package_info = PackageInfo {
@@ -66,10 +81,11 @@ pub trait StakingContract {
             apr_percentage,
             rewards_frequency,
             min_stake_amount,
-            total_staked_amunt: BigUint::zero(),
+            total_staked_amount: BigUint::zero(),
         };
 
         self.package_info(&package_name).set(&package_info);
+        self.add_package_event(&package_name, &package_info);
     }
 
     #[only_owner]
@@ -82,6 +98,7 @@ pub trait StakingContract {
         self.package_info(&package_name).update(|package| {
             package.enabled = true;
         });
+        self.enable_package_event(&package_name);
     }
 
     #[only_owner]
@@ -94,6 +111,7 @@ pub trait StakingContract {
         self.package_info(&package_name).update(|package| {
             package.enabled = false;
         });
+        self.disable_package_event(&package_name);
     }
 
     #[payable("*")]
@@ -109,12 +127,7 @@ pub trait StakingContract {
         require!(package_info.enabled, "this package is disabled",);
 
         let caller = self.blockchain().get_caller();
-        let mut staker_ids;
-        if self.staker_ids(&caller).is_empty() {
-            staker_ids = ManagedVec::new();
-        } else {
-            staker_ids = self.staker_ids(&caller).get();
-        }
+        let mut staker_ids = self.staker_ids(&caller).get();
 
         let token_identifier = self.token_identifier().get();
         let (payment_amount, payment_token) = self.call_value().payment_token_pair();
@@ -137,14 +150,16 @@ pub trait StakingContract {
         );
 
         self.package_info(&package_name).update(|package| {
-            package.total_staked_amunt += &payment_amount;
+            package.total_staked_amount += &payment_amount;
         });
         self.total_tokens_staked().set(&new_total_tokens_staked);
 
         let staker_info = StakerInfo {
-            package_name,
+            package_name: package_name.clone(),
             stake_timestamp: self.blockchain().get_block_timestamp(),
-            tokens_staked: payment_amount,
+            locked_until: self.blockchain().get_block_timestamp()
+                + package_info.lock_period * SECONDS_IN_DAY,
+            tokens_staked: payment_amount.clone(),
             last_claim_of_rewards: self.blockchain().get_block_timestamp(),
         };
 
@@ -152,10 +167,17 @@ pub trait StakingContract {
         staker_ids.push(staker_counter);
         self.staker_ids(&caller).set(&staker_ids);
         self.staker_info(staker_counter).set(&staker_info);
+        self.create_new_stake_event(
+            &caller,
+            staker_counter,
+            self.blockchain().get_block_timestamp(),
+            &package_name,
+            &payment_amount,
+        );
     }
 
-    #[endpoint(reinvestRewardsToExistingStake)]
-    fn reinvest_rewards_to_existing_stake(&self, id: u64) {
+    #[endpoint(compoundRewardsToExistingStake)]
+    fn compound_rewards_to_existing_stake(&self, id: u64) {
         let caller = self.blockchain().get_caller();
         require!(
             !self.staker_ids(&caller).is_empty(),
@@ -168,20 +190,24 @@ pub trait StakingContract {
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
 
-        let locked_until = staker_info.stake_timestamp + package_info.lock_period * 86400;
         let claimable_rewards = self.compute_claimable_rewards(
             &staker_info.tokens_staked,
             package_info.apr_percentage,
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
-            locked_until,
+            staker_info.locked_until,
         );
         require!(claimable_rewards > 0, "no rewards to be claimed");
 
         self.staker_info(id).update(|staker| {
-            staker.tokens_staked += claimable_rewards;
+            staker.tokens_staked += &claimable_rewards;
             staker.last_claim_of_rewards = self.blockchain().get_block_timestamp();
         });
+        self.compound_rewards_to_existing_stake_event(
+            id,
+            self.blockchain().get_block_timestamp(),
+            &claimable_rewards,
+        );
     }
 
     #[endpoint(claimRewards)]
@@ -198,13 +224,12 @@ pub trait StakingContract {
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
 
-        let locked_until = staker_info.stake_timestamp + package_info.lock_period * 86400;
         let claimable_rewards = self.compute_claimable_rewards(
             &staker_info.tokens_staked,
             package_info.apr_percentage,
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
-            locked_until,
+            staker_info.locked_until,
         );
         require!(claimable_rewards > 0, "no rewards to be claimed");
 
@@ -218,6 +243,10 @@ pub trait StakingContract {
             "not enough tokens in the staking contract"
         );
 
+        self.staker_info(id).update(|info| {
+            info.last_claim_of_rewards = self.blockchain().get_block_timestamp();
+        });
+
         self.send().direct(
             &caller,
             &self.token_identifier().get(),
@@ -225,10 +254,11 @@ pub trait StakingContract {
             &claimable_rewards,
             b"successful claim",
         );
-
-        self.staker_info(id).update(|info| {
-            info.last_claim_of_rewards = self.blockchain().get_block_timestamp();
-        });
+        self.claim_rewards_event(
+            id,
+            self.blockchain().get_block_timestamp(),
+            &claimable_rewards,
+        );
     }
 
     #[endpoint]
@@ -245,9 +275,8 @@ pub trait StakingContract {
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
 
-        let locked_until = staker_info.stake_timestamp + package_info.lock_period * 86400;
         require!(
-            self.blockchain().get_block_timestamp() > locked_until,
+            self.blockchain().get_block_timestamp() > staker_info.locked_until,
             "tokens are under locking period"
         );
 
@@ -256,7 +285,7 @@ pub trait StakingContract {
             package_info.apr_percentage,
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
-            locked_until,
+            staker_info.locked_until,
         );
         let unstake_amount = staker_info.tokens_staked + claimable_rewards;
 
@@ -270,14 +299,6 @@ pub trait StakingContract {
             "not enough tokens in the staking contract"
         );
 
-        self.send().direct(
-            &caller,
-            &self.token_identifier().get(),
-            0,
-            &unstake_amount,
-            b"successful unstake",
-        );
-
         let index = staker_ids.iter().position(|elem| elem == id).unwrap();
         staker_ids.remove(index);
         if staker_ids.is_empty() {
@@ -286,25 +307,31 @@ pub trait StakingContract {
             self.staker_ids(&caller).set(&staker_ids);
         }
         self.staker_info(id).clear();
+
+        self.send().direct(
+            &caller,
+            &self.token_identifier().get(),
+            0,
+            &unstake_amount,
+            b"successful unstake",
+        );
+        self.unstake_event(id, self.blockchain().get_block_timestamp(), &unstake_amount);
     }
 
-    #[endpoint(getAvailableRewards)]
+    #[view(getAvailableRewards)]
     fn get_available_rewards(&self, id: u64) -> BigUint {
         require!(!self.staker_info(id).is_empty(), "stake does not exist");
 
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
 
-        let locked_until = staker_info.stake_timestamp + package_info.lock_period * 86400;
-        let claimable_rewards = self.compute_claimable_rewards(
+        self.compute_claimable_rewards(
             &staker_info.tokens_staked,
             package_info.apr_percentage,
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
-            locked_until,
-        );
-
-        claimable_rewards
+            staker_info.locked_until,
+        )
     }
 
     // private functions
@@ -318,7 +345,7 @@ pub trait StakingContract {
     fn compute_claimable_rewards(
         &self,
         staked_amount: &BigUint,
-        apr_percentage: u8,
+        apr_percentage: u64,
         rewards_frequency: u64,
         last_claim: u64,
         locked_until: u64,
@@ -327,19 +354,18 @@ pub trait StakingContract {
             self.compute_rewards_per_cycle(staked_amount, apr_percentage, rewards_frequency);
         let cycles_since_last_claim =
             self.compute_cycles_since_last_claim(rewards_frequency, last_claim, locked_until);
-        let claimable_rewards = rewards_per_cycle * cycles_since_last_claim;
-        claimable_rewards
+        rewards_per_cycle * cycles_since_last_claim
     }
 
     fn compute_rewards_per_cycle(
         &self,
         staked_amount: &BigUint,
-        apr_percentage: u8,
+        apr_percentage: u64,
         rewards_frequency: u64,
     ) -> BigUint {
-        let cycles_in_one_year = 365 * 86400 / rewards_frequency;
+        let cycles_in_one_year = SECONDS_IN_YEAR / rewards_frequency;
         let rewards_per_cycle: BigUint =
-            staked_amount * apr_percentage as u64 / 100u64 / cycles_in_one_year;
+            staked_amount * apr_percentage / 100u64 / cycles_in_one_year;
         rewards_per_cycle
     }
 
@@ -360,9 +386,66 @@ pub trait StakingContract {
         }
 
         let seconds_since_last_claim = last_eligible_timestamp - last_claim;
-        let cycles_since_last_claim = seconds_since_last_claim / rewards_frequency;
-        cycles_since_last_claim
+        seconds_since_last_claim / rewards_frequency
     }
+
+    // events
+
+    #[event("pause_stake")]
+    fn pause_stake_event(&self);
+
+    #[event("unpause_stake")]
+    fn unpause_stake_event(&self);
+
+    #[event("update_stake_limit")]
+    fn update_stake_limit_event(&self, #[indexed] new_limit: &BigUint);
+
+    #[event("add_package")]
+    fn add_package_event(
+        &self,
+        #[indexed] package_name: &ManagedBuffer,
+        #[indexed] package_info: &PackageInfo<Self::Api>,
+    );
+
+    #[event("enable_package")]
+    fn enable_package_event(&self, #[indexed] package_name: &ManagedBuffer);
+
+    #[event("disable_package")]
+    fn disable_package_event(&self, #[indexed] package_name: &ManagedBuffer);
+
+    #[event("create_new_stake")]
+    fn create_new_stake_event(
+        &self,
+        #[indexed] staker: &ManagedAddress,
+        #[indexed] stake_id: u64,
+        #[indexed] timestamp: u64,
+        #[indexed] package_name: &ManagedBuffer,
+        #[indexed] amount: &BigUint,
+    );
+
+    #[event("compound_rewards_to_existing_stake")]
+    fn compound_rewards_to_existing_stake_event(
+        &self,
+        #[indexed] stake_id: u64,
+        #[indexed] timestamp: u64,
+        #[indexed] rewards: &BigUint,
+    );
+
+    #[event("claim_rewards")]
+    fn claim_rewards_event(
+        &self,
+        #[indexed] stake_id: u64,
+        #[indexed] timestamp: u64,
+        #[indexed] rewards: &BigUint,
+    );
+
+    #[event("unstake")]
+    fn unstake_event(
+        &self,
+        #[indexed] stake_id: u64,
+        #[indexed] timestamp: u64,
+        #[indexed] amount: &BigUint,
+    );
 
     // storage
 
