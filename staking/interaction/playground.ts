@@ -46,8 +46,8 @@ const addPackages = async (
     const name = info[0];
     const lock_period_days = info[1];
     const apr_percentage = info[2];
-    const frequency = info[3];
     // remove thousand separator from numbers
+    const frequency = info[3].replace(/,/g, "");
     const minStakingAmountWithDecimals = info[4] + DECIMALS_SUFFIX;
     const minStakingAmount = minStakingAmountWithDecimals.replace(/,/g, "");
 
@@ -57,7 +57,7 @@ const addPackages = async (
       args: [
         BytesValue.fromUTF8(name),
         new U64Value(lock_period_days),
-        new U8Value(apr_percentage),
+        new U64Value(apr_percentage),
         new U64Value(frequency),
         new BigUIntValue(minStakingAmount),
       ],
