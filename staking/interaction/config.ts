@@ -4,8 +4,8 @@ export const REGULAR_GAS_LIMIT = 60_000_000;
 export const MAX_GAS_LIMIT = 600_000_000;
 export const OWNER_WALLET =
   "/Users/constantindogaru/elrond-wallet/wallet-owner.pem";
-export const EXPLORER = "https://devnet-explorer.elrond.com";
-export const PROXY = "https://devnet-gateway.elrond.com";
-export const CHAIN_ID = "D";
+export const EXPLORER = "https://testnet-explorer.elrond.com";
+export const PROXY = "https://testnet-gateway.elrond.com";
+export const CHAIN_ID = "T";
 export const STAKING_SC_ADDRESS =
-  "erd1qqqqqqqqqqqqqpgq2hhhqede5uy3cdqc2uwgtjnf2r0k6d95zjcq5ngt0w";
+  "erd1qqqqqqqqqqqqqpgq4umd8nwa0mm4frea7d0ph0khk8ny6weyzjcqx6va6w";
