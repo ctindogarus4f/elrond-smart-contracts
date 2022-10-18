@@ -27,6 +27,31 @@ pub trait StakingContract {
     // endpoints
 
     #[only_owner]
+    #[endpoint(withdrawRewards)]
+    fn withdraw_rewards(&self, amount: BigUint) {
+        let contract_balance = self.blockchain().get_esdt_balance(
+            &self.blockchain().get_sc_address(),
+            &self.token_identifier().get(),
+            0,
+        );
+        require!(
+            contract_balance >= amount,
+            "not enough tokens in the staking contract"
+        );
+
+        let caller = self.blockchain().get_caller();
+        self.send().direct(
+            &caller,
+            &self.token_identifier().get(),
+            0,
+            &amount,
+            b"successful withdraw",
+        );
+
+        self.withdraw_rewards_event(&amount);
+    }
+
+    #[only_owner]
     #[endpoint(pauseStake)]
     fn pause_stake(&self) {
         self.paused_stake().set(&true);
@@ -390,6 +415,9 @@ pub trait StakingContract {
     }
 
     // events
+
+    #[event("withdraw_rewards")]
+    fn withdraw_rewards_event(&self, #[indexed] amount: &BigUint);
 
     #[event("pause_stake")]
     fn pause_stake_event(&self);
