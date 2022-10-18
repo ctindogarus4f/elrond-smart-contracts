@@ -171,10 +171,13 @@ pub trait StakingContract {
         );
 
         let total_stake_limit = self.total_stake_limit().get();
-        let new_total_tokens_staked = self.total_tokens_staked().get() + &payment_amount;
+        let total_tokens_staked = self.total_tokens_staked().get();
+        let new_total_tokens_staked = &total_tokens_staked + &payment_amount;
         require!(
             new_total_tokens_staked <= total_stake_limit,
-            "stake limit exceeded"
+            "stake limit exceeded, current staked amount: {}, stake limit: {}",
+            total_tokens_staked,
+            total_stake_limit
         );
 
         self.package_info(&package_name).update(|package| {
