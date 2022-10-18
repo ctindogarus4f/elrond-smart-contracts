@@ -159,12 +159,7 @@ pub trait StakingContract {
 
         let token_identifier = self.token_identifier().get();
         let (payment_amount, payment_token) = self.call_value().payment_token_pair();
-        require!(
-            payment_token == token_identifier,
-            "invalid staked token, expected: {}, actual: {}",
-            token_identifier,
-            payment_token
-        );
+        require!(payment_token == token_identifier, "invalid staked token");
         require!(
             payment_amount >= package_info.min_stake_amount,
             "stake amount too small"
@@ -175,9 +170,7 @@ pub trait StakingContract {
         let new_total_tokens_staked = &total_tokens_staked + &payment_amount;
         require!(
             new_total_tokens_staked <= total_stake_limit,
-            "stake limit exceeded, current staked amount: {}, stake limit: {}",
-            total_tokens_staked,
-            total_stake_limit
+            "stake limit exceeded"
         );
 
         self.package_info(&package_name).update(|package| {
