@@ -15,6 +15,7 @@ elrond_wasm_node::wasm_endpoints! {
         enablePackage
         getAvailableRewards
         getPackageInfo
+        getPackageNames
         getPausedStake
         getStakerCounter
         getStakerIds

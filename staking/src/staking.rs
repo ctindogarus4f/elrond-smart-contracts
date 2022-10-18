@@ -109,6 +109,9 @@ pub trait StakingContract {
             total_staked_amount: BigUint::zero(),
         };
 
+        self.package_names().update(|packages| {
+            packages.push(package_name.clone());
+        });
         self.package_info(&package_name).set(&package_info);
         self.add_package_event(&package_name, &package_info);
     }
@@ -504,6 +507,10 @@ pub trait StakingContract {
     #[view(getStakerIds)]
     #[storage_mapper("stakerIds")]
     fn staker_ids(&self, staker: &ManagedAddress) -> SingleValueMapper<ManagedVec<u64>>;
+
+    #[view(getPackageNames)]
+    #[storage_mapper("packageNames")]
+    fn package_names(&self) -> SingleValueMapper<ManagedVec<ManagedBuffer>>;
 
     #[view(getPackageInfo)]
     #[storage_mapper("packageInfo")]
