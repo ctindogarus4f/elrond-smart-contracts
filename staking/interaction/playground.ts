@@ -13,6 +13,7 @@ import {
   AbiRegistry,
   Account,
   Address,
+  ArrayVec,
   BigUIntValue,
   BytesValue,
   ContractFunction,
@@ -22,7 +23,6 @@ import {
   Struct,
   TokenIdentifierValue,
   TransactionWatcher,
-  U8Value,
   U64Value,
 } from "@elrondnetwork/erdjs";
 import { UserSigner } from "@elrondnetwork/erdjs-walletcore";
@@ -142,19 +142,38 @@ const main = async () => {
     console.log("Staking SC address:");
     console.log(YELLOW, STAKING_SC_ADDRESS, "\n");
 
-    console.log("Getting token identifier...");
-    let query = contract.createQuery({
-      func: new ContractFunction("getTokenIdentifier"),
-    });
-    let queryResponse = await provider.queryContract(query);
-    let endpointDefinition = contract.getEndpoint("getTokenIdentifier");
-    let { firstValue } = resultsParser.parseQueryResponse(
-      queryResponse,
-      endpointDefinition,
-    );
+    {
+      console.log("Getting token identifier...");
+      let query = contract.createQuery({
+        func: new ContractFunction("getTokenIdentifier"),
+      });
+      let queryResponse = await provider.queryContract(query);
+      let endpointDefinition = contract.getEndpoint("getTokenIdentifier");
+      let { firstValue } = resultsParser.parseQueryResponse(
+        queryResponse,
+        endpointDefinition,
+      );
 
-    let decodedResponse = <TokenIdentifierValue>firstValue;
-    console.log(YELLOW, decodedResponse, "\n");
+      let decodedResponse = <TokenIdentifierValue>firstValue;
+      console.log(YELLOW, decodedResponse, "\n");
+    }
+
+    {
+      console.log("Fetching package names...");
+      let query = contract.createQuery({
+        func: new ContractFunction("getPackageNames"),
+      });
+      let queryResponse = await provider.queryContract(query);
+      let endpointDefinition = contract.getEndpoint("getPackageNames");
+      let { firstValue } = resultsParser.parseQueryResponse(
+        queryResponse,
+        endpointDefinition,
+      );
+      let decodedResponse = (<ArrayVec>firstValue).valueOf();
+      for (const packageName of decodedResponse) {
+        console.log(YELLOW, packageName, "\n");
+      }
+    }
   }
 
   // ---------------------- CONTRACT CHECK ---------------------
