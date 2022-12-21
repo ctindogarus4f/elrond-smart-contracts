@@ -50,6 +50,8 @@ const addPackages = async (
     const frequency = info[3].replace(/,/g, "");
     const minStakingAmountWithDecimals = info[4] + DECIMALS_SUFFIX;
     const minStakingAmount = minStakingAmountWithDecimals.replace(/,/g, "");
+    const penaltySeconds = info[5].replace(/,/g, "");
+    const penaltyFee = info[6];
 
     let tx = contract.call({
       func: new ContractFunction("addPackage"),
@@ -60,6 +62,8 @@ const addPackages = async (
         new U64Value(apr_percentage),
         new U64Value(frequency),
         new BigUIntValue(minStakingAmount),
+        new U64Value(penaltySeconds),
+        new U64Value(penaltyFee),
       ],
       chainID: CHAIN_ID,
     });
