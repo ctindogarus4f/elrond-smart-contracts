@@ -24,6 +24,7 @@ elrond_wasm_node::wasm_endpoints! {
         getTotalStakeLimit
         getTotalTokensStaked
         pauseStake
+        prematureUnstake
         unpauseStake
         unstake
         updateStakeLimit

@@ -9,6 +9,7 @@ pub struct StakerInfo<M: ManagedTypeApi> {
     pub locked_until: u64,
     pub tokens_staked: BigUint<M>,
     pub last_claim_of_rewards: u64,
+    pub premature_unstake_timestamp: u64,
 }
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
@@ -19,4 +20,6 @@ pub struct PackageInfo<M: ManagedTypeApi> {
     pub rewards_frequency: u64,          // in seconds
     pub min_stake_amount: BigUint<M>,    // in tokens
     pub total_staked_amount: BigUint<M>, // tokens staked to this package so far
+    pub penalty_seconds: u64, // the number of seconds you need to wait if you prematurely unstake your tokens
+    pub penalty_fee: u64, // the fee in % that you need to pay if you prematurely unstake your tokens
 }

@@ -81,6 +81,8 @@ pub trait StakingContract {
         apr_percentage: u64,
         rewards_frequency: u64,
         min_stake_amount: BigUint,
+        penalty_seconds: u64,
+        penalty_fee: u64,
     ) {
         require!(
             self.package_info(&package_name).is_empty(),
@@ -107,6 +109,8 @@ pub trait StakingContract {
             rewards_frequency,
             min_stake_amount,
             total_staked_amount: BigUint::zero(),
+            penalty_seconds,
+            penalty_fee,
         };
 
         self.package_names().update(|packages| {
@@ -185,6 +189,7 @@ pub trait StakingContract {
                 + package_info.lock_period * SECONDS_IN_DAY,
             tokens_staked: payment_amount.clone(),
             last_claim_of_rewards: self.blockchain().get_block_timestamp(),
+            premature_unstake_timestamp: 0,
         };
 
         let staker_counter = self.get_and_increase_staker_counter();
@@ -285,6 +290,22 @@ pub trait StakingContract {
         );
     }
 
+    #[endpoint(prematureUnstake)]
+    fn premature_unstake(&self, id: u64) {
+        let caller = self.blockchain().get_caller();
+        require!(
+            !self.staker_ids(&caller).is_empty(),
+            "staker does not exist"
+        );
+
+        let staker_ids = self.staker_ids(&caller).get();
+        require!(staker_ids.contains(&id), "id is not defined for the staker");
+
+        self.staker_info(id).update(|staker| {
+            staker.premature_unstake_timestamp = self.blockchain().get_block_timestamp();
+        });
+    }
+
     #[endpoint]
     fn unstake(&self, id: u64) {
         let caller = self.blockchain().get_caller();
@@ -299,10 +320,19 @@ pub trait StakingContract {
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
 
-        require!(
-            self.blockchain().get_block_timestamp() > staker_info.locked_until,
-            "tokens are under locking period"
-        );
+        if staker_info.premature_unstake_timestamp != 0 {
+            let time_diff =
+                self.blockchain().get_block_timestamp() - staker_info.premature_unstake_timestamp;
+            require!(
+                time_diff > package_info.penalty_seconds,
+                "tokens are under locking period"
+            );
+        } else {
+            require!(
+                self.blockchain().get_block_timestamp() > staker_info.locked_until,
+                "tokens are under locking period"
+            );
+        }
 
         let claimable_rewards = self.compute_claimable_rewards(
             &staker_info.tokens_staked,
