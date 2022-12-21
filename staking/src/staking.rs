@@ -307,6 +307,8 @@ pub trait StakingContract {
         self.staker_info(id).update(|staker| {
             staker.premature_unstake_timestamp = self.blockchain().get_block_timestamp();
         });
+
+        self.premature_unstake_event(id, self.blockchain().get_block_timestamp());
     }
 
     #[endpoint]
@@ -514,6 +516,9 @@ pub trait StakingContract {
         #[indexed] timestamp: u64,
         #[indexed] rewards: &BigUint,
     );
+
+    #[event("premature_unstake")]
+    fn premature_unstake_event(&self, #[indexed] stake_id: u64, #[indexed] timestamp: u64);
 
     #[event("unstake")]
     fn unstake_event(
