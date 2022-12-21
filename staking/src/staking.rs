@@ -93,6 +93,7 @@ pub trait StakingContract {
             apr_percentage > 0 && apr_percentage <= 1_000,
             "apr percentage should be between (0, 1000]"
         );
+        require!(penalty_fee <= 100, "penalty fee should be between [0, 100]");
         require!(
             rewards_frequency <= SECONDS_IN_YEAR,
             "rewards frequency should be less than 365 days"
@@ -225,6 +226,7 @@ pub trait StakingContract {
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
             staker_info.locked_until,
+            staker_info.premature_unstake_timestamp,
         );
         require!(claimable_rewards > 0, "no rewards to be claimed");
 
@@ -259,6 +261,7 @@ pub trait StakingContract {
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
             staker_info.locked_until,
+            staker_info.premature_unstake_timestamp,
         );
         require!(claimable_rewards > 0, "no rewards to be claimed");
 
@@ -340,8 +343,13 @@ pub trait StakingContract {
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
             staker_info.locked_until,
+            staker_info.premature_unstake_timestamp,
         );
-        let unstake_amount = staker_info.tokens_staked + claimable_rewards;
+        let mut unstake_amount = staker_info.tokens_staked + claimable_rewards;
+        if staker_info.premature_unstake_timestamp != 0 {
+            let take_home_percentage = 100 - package_info.penalty_fee;
+            unstake_amount = unstake_amount * take_home_percentage / 100u64;
+        }
 
         let contract_balance = self.blockchain().get_esdt_balance(
             &self.blockchain().get_sc_address(),
@@ -385,6 +393,7 @@ pub trait StakingContract {
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
             staker_info.locked_until,
+            staker_info.premature_unstake_timestamp,
         )
     }
 
@@ -403,11 +412,16 @@ pub trait StakingContract {
         rewards_frequency: u64,
         last_claim: u64,
         locked_until: u64,
+        premature_unstake_timestamp: u64,
     ) -> BigUint {
         let rewards_per_cycle: BigUint =
             self.compute_rewards_per_cycle(staked_amount, apr_percentage, rewards_frequency);
-        let cycles_since_last_claim =
-            self.compute_cycles_since_last_claim(rewards_frequency, last_claim, locked_until);
+        let cycles_since_last_claim = self.compute_cycles_since_last_claim(
+            rewards_frequency,
+            last_claim,
+            locked_until,
+            premature_unstake_timestamp,
+        );
         rewards_per_cycle * cycles_since_last_claim
     }
 
@@ -428,11 +442,16 @@ pub trait StakingContract {
         rewards_frequency: u64,
         last_claim: u64,
         locked_until: u64,
+        premature_unstake_timestamp: u64,
     ) -> u64 {
         let mut last_eligible_timestamp = self.blockchain().get_block_timestamp();
 
         if last_eligible_timestamp > locked_until {
             last_eligible_timestamp = locked_until;
+        }
+
+        if premature_unstake_timestamp != 0 {
+            last_eligible_timestamp = premature_unstake_timestamp;
         }
 
         if last_eligible_timestamp <= last_claim {
