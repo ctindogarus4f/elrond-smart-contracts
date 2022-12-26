@@ -304,9 +304,44 @@ pub trait StakingContract {
         let staker_ids = self.staker_ids(&caller).get();
         require!(staker_ids.contains(&id), "id is not defined for the staker");
 
-        self.staker_info(id).update(|staker| {
-            staker.premature_unstake_timestamp = self.blockchain().get_block_timestamp();
-        });
+        let staker_info = self.staker_info(id).get();
+        let package_info = self.package_info(&staker_info.package_name).get();
+
+        let claimable_rewards = self.compute_claimable_rewards(
+            &staker_info.tokens_staked,
+            package_info.apr_percentage,
+            package_info.rewards_frequency,
+            staker_info.last_claim_of_rewards,
+            staker_info.locked_until,
+            staker_info.premature_unstake_timestamp,
+        );
+        if claimable_rewards > 0 {
+            let contract_balance = self.blockchain().get_esdt_balance(
+                &self.blockchain().get_sc_address(),
+                &self.token_identifier().get(),
+                0,
+            );
+            require!(
+                contract_balance >= claimable_rewards,
+                "not enough tokens in the staking contract"
+            );
+            self.staker_info(id).update(|info| {
+                info.last_claim_of_rewards = self.blockchain().get_block_timestamp();
+                info.premature_unstake_timestamp = self.blockchain().get_block_timestamp();
+            });
+
+            self.send().direct(
+                &caller,
+                &self.token_identifier().get(),
+                0,
+                &claimable_rewards,
+                b"successful claim",
+            );
+        } else {
+            self.staker_info(id).update(|info| {
+                info.premature_unstake_timestamp = self.blockchain().get_block_timestamp();
+            });
+        }
 
         self.premature_unstake_event(id, self.blockchain().get_block_timestamp());
     }
