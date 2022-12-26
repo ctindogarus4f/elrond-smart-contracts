@@ -328,6 +328,8 @@ pub trait StakingContract {
             self.staker_info(id).update(|info| {
                 info.last_claim_of_rewards = self.blockchain().get_block_timestamp();
                 info.premature_unstake_timestamp = self.blockchain().get_block_timestamp();
+                info.locked_until =
+                    self.blockchain().get_block_timestamp() + package_info.penalty_seconds;
             });
 
             self.send().direct(
@@ -340,6 +342,8 @@ pub trait StakingContract {
         } else {
             self.staker_info(id).update(|info| {
                 info.premature_unstake_timestamp = self.blockchain().get_block_timestamp();
+                info.locked_until =
+                    self.blockchain().get_block_timestamp() + package_info.penalty_seconds;
             });
         }
 
