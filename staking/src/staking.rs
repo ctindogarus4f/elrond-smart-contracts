@@ -364,19 +364,10 @@ pub trait StakingContract {
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
 
-        if staker_info.premature_unstake_timestamp != 0 {
-            let time_diff =
-                self.blockchain().get_block_timestamp() - staker_info.premature_unstake_timestamp;
-            require!(
-                time_diff > package_info.penalty_seconds,
-                "tokens are under locking period"
-            );
-        } else {
-            require!(
-                self.blockchain().get_block_timestamp() > staker_info.locked_until,
-                "tokens are under locking period"
-            );
-        }
+        require!(
+            self.blockchain().get_block_timestamp() > staker_info.locked_until,
+            "tokens are under locking period"
+        );
 
         let claimable_rewards = self.compute_claimable_rewards(
             &staker_info.tokens_staked,
