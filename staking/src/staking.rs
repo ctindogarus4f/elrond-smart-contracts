@@ -307,6 +307,11 @@ pub trait StakingContract {
         let staker_info = self.staker_info(id).get();
         let package_info = self.package_info(&staker_info.package_name).get();
 
+        require!(
+            staker_info.premature_unstake_timestamp == 0,
+            "cannot call premature unstake more than once"
+        );
+
         let claimable_rewards = self.compute_claimable_rewards(
             &staker_info.tokens_staked,
             package_info.apr_percentage,
