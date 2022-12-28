@@ -382,11 +382,12 @@ pub trait StakingContract {
             staker_info.locked_until,
             staker_info.premature_unstake_timestamp,
         );
-        let mut unstake_amount = staker_info.tokens_staked + claimable_rewards;
+        let mut unstake_amount = staker_info.tokens_staked;
         if staker_info.premature_unstake_timestamp != 0 {
             let take_home_percentage = 100 - package_info.penalty_fee;
             unstake_amount = unstake_amount * take_home_percentage / 100u64;
         }
+        unstake_amount += claimable_rewards;
 
         let contract_balance = self.blockchain().get_esdt_balance(
             &self.blockchain().get_sc_address(),
