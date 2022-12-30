@@ -312,6 +312,11 @@ pub trait StakingContract {
             "cannot call premature unstake more than once"
         );
 
+        require!(
+            package_info.penalty_seconds != 0 || package_info.penalty_fee != 0,
+            "the package has no penalties so premature unstake is not available"
+        );
+
         let rewards_per_cycle: BigUint = self.compute_rewards_per_cycle(
             &staker_info.tokens_staked,
             package_info.apr_percentage,
