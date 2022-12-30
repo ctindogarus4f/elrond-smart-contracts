@@ -289,6 +289,50 @@
                 ],
                 "status": "0"
             }
+        },
+        {
+            "step": "scCall",
+            "comment": "claim rewards",
+            "txId": "claim_rewards#40",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:staking",
+                "function": "claimRewards",
+                "arguments": [
+                    {
+                        "id": "u64:0"
+                    }
+                ],
+                "gasLimit": "10,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:no rewards to be claimed",
+                "gas": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "compound rewards",
+            "txId": "compound_rewards#45",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:staking",
+                "function": "compoundRewardsToExistingStake",
+                "arguments": [
+                    {
+                        "id": "u64:0"
+                    }
+                ],
+                "gasLimit": "10,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "4",
+                "message": "str:no rewards to be claimed",
+                "gas": "*"
+            }
         }
     ]
 }
