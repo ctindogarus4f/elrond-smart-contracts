@@ -317,14 +317,18 @@ pub trait StakingContract {
             "the package has no penalties so premature unstake is not available"
         );
 
-        let claimable_rewards = self.compute_claimable_rewards(
+        let rewards_per_cycle: BigUint = self.compute_rewards_per_cycle(
             &staker_info.tokens_staked,
             package_info.apr_percentage,
+            package_info.rewards_frequency,
+        );
+        let cycles_since_last_claim = self.compute_cycles_since_last_claim(
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
             staker_info.locked_until,
             staker_info.premature_unstake_timestamp,
         );
+        let claimable_rewards = rewards_per_cycle * cycles_since_last_claim;
         if claimable_rewards > 0 {
             let contract_balance = self.blockchain().get_esdt_balance(
                 &self.blockchain().get_sc_address(),
