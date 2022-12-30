@@ -249,6 +249,23 @@
             }
         },
         {
+            "step": "checkState",
+            "accounts": {
+                "address:owner": {
+                    "nonce": "*",
+                    "esdt": {
+                        "str:TOK-abcd01": "999,635,100"
+                    }
+                },
+                "sc:staking": {
+                    "esdt": {
+                        "str:TOK-abcd01": "364,900"
+                    },
+                    "code": "file:../output/staking.wasm"
+                }
+            }
+        },
+        {
             "step": "scQuery",
             "comment": "check staker info after premature unstake",
             "txId": "check_staker#35",
@@ -266,7 +283,7 @@
                         "1-stake_timestamp": "u64:0",
                         "2-locked_until": "u64:950400",
                         "3-tokens_staked": "biguint:365,000",
-                        "4-last_claim_of_rewards": "u64:0",
+                        "4-last_claim_of_rewards": "u64:86400",
                         "5-premature_unstake_timestamp": "u64:86400"
                     }
                 ],
