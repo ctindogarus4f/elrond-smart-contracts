@@ -308,11 +308,6 @@ pub trait StakingContract {
         let package_info = self.package_info(&staker_info.package_name).get();
 
         require!(
-            staker_info.premature_unstake_timestamp == 0,
-            "cannot call premature unstake more than once"
-        );
-
-        require!(
             package_info.penalty_seconds != 0 || package_info.penalty_fee != 0,
             "the package has no penalties so premature unstake is not available"
         );
