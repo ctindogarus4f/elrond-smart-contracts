@@ -12,7 +12,7 @@ where:
 - `release_frequency`: release frequency of the group, measured in seconds (ex: for releases that occur every 4 months we have `60 (seconds) * 60 (minutes) * 24 (hours) * 30 (days) * 4 (months)`=`10,368,000`)
 - `release_percentage`: release percentage of the group (ex: for 10% we have `10`)
 
-# beneficiaries.txt
+# advisor.txt
 
 Each line represents the following:
 
