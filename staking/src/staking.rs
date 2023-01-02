@@ -81,6 +81,8 @@ pub trait StakingContract {
         apr_percentage: u64,
         rewards_frequency: u64,
         min_stake_amount: BigUint,
+        penalty_seconds: u64,
+        penalty_fee: u64,
     ) {
         require!(
             self.package_info(&package_name).is_empty(),
@@ -91,6 +93,7 @@ pub trait StakingContract {
             apr_percentage > 0 && apr_percentage <= 1_000,
             "apr percentage should be between (0, 1000]"
         );
+        require!(penalty_fee <= 100, "penalty fee should be between [0, 100]");
         require!(
             rewards_frequency <= SECONDS_IN_YEAR,
             "rewards frequency should be less than 365 days"
@@ -107,6 +110,8 @@ pub trait StakingContract {
             rewards_frequency,
             min_stake_amount,
             total_staked_amount: BigUint::zero(),
+            penalty_seconds,
+            penalty_fee,
         };
 
         self.package_names().update(|packages| {
@@ -185,6 +190,7 @@ pub trait StakingContract {
                 + package_info.lock_period * SECONDS_IN_DAY,
             tokens_staked: payment_amount.clone(),
             last_claim_of_rewards: self.blockchain().get_block_timestamp(),
+            premature_unstake_timestamp: 0,
         };
 
         let staker_counter = self.get_and_increase_staker_counter();
@@ -220,6 +226,7 @@ pub trait StakingContract {
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
             staker_info.locked_until,
+            staker_info.premature_unstake_timestamp,
         );
         require!(claimable_rewards > 0, "no rewards to be claimed");
 
@@ -254,6 +261,7 @@ pub trait StakingContract {
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
             staker_info.locked_until,
+            staker_info.premature_unstake_timestamp,
         );
         require!(claimable_rewards > 0, "no rewards to be claimed");
 
@@ -285,6 +293,77 @@ pub trait StakingContract {
         );
     }
 
+    #[endpoint(prematureUnstake)]
+    fn premature_unstake(&self, id: u64) {
+        let caller = self.blockchain().get_caller();
+        require!(
+            !self.staker_ids(&caller).is_empty(),
+            "staker does not exist"
+        );
+
+        let staker_ids = self.staker_ids(&caller).get();
+        require!(staker_ids.contains(&id), "id is not defined for the staker");
+
+        let staker_info = self.staker_info(id).get();
+        let package_info = self.package_info(&staker_info.package_name).get();
+
+        require!(
+            staker_info.premature_unstake_timestamp == 0,
+            "cannot call premature unstake more than once"
+        );
+
+        require!(
+            package_info.penalty_seconds != 0 || package_info.penalty_fee != 0,
+            "the package has no penalties so premature unstake is not available"
+        );
+
+        let rewards_per_cycle: BigUint = self.compute_rewards_per_cycle(
+            &staker_info.tokens_staked,
+            package_info.apr_percentage,
+            package_info.rewards_frequency,
+        );
+        let cycles_since_last_claim = self.compute_cycles_since_last_claim(
+            package_info.rewards_frequency,
+            staker_info.last_claim_of_rewards,
+            staker_info.locked_until,
+            staker_info.premature_unstake_timestamp,
+        );
+        let claimable_rewards = rewards_per_cycle * cycles_since_last_claim;
+        if claimable_rewards > 0 {
+            let contract_balance = self.blockchain().get_esdt_balance(
+                &self.blockchain().get_sc_address(),
+                &self.token_identifier().get(),
+                0,
+            );
+            require!(
+                contract_balance >= claimable_rewards,
+                "not enough tokens in the staking contract"
+            );
+            self.staker_info(id).update(|info| {
+                info.last_claim_of_rewards = self.blockchain().get_block_timestamp();
+                info.premature_unstake_timestamp = self.blockchain().get_block_timestamp();
+                info.locked_until =
+                    self.blockchain().get_block_timestamp() + package_info.penalty_seconds;
+            });
+
+            self.send().direct(
+                &caller,
+                &self.token_identifier().get(),
+                0,
+                &claimable_rewards,
+                b"successful claim",
+            );
+        } else {
+            self.staker_info(id).update(|info| {
+                info.premature_unstake_timestamp = self.blockchain().get_block_timestamp();
+                info.locked_until =
+                    self.blockchain().get_block_timestamp() + package_info.penalty_seconds;
+            });
+        }
+
+        self.premature_unstake_event(id, self.blockchain().get_block_timestamp());
+    }
+
     #[endpoint]
     fn unstake(&self, id: u64) {
         let caller = self.blockchain().get_caller();
@@ -310,8 +389,14 @@ pub trait StakingContract {
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
             staker_info.locked_until,
+            staker_info.premature_unstake_timestamp,
         );
-        let unstake_amount = staker_info.tokens_staked + claimable_rewards;
+        let mut unstake_amount = staker_info.tokens_staked;
+        if staker_info.premature_unstake_timestamp != 0 {
+            let take_home_percentage = 100 - package_info.penalty_fee;
+            unstake_amount = unstake_amount * take_home_percentage / 100u64;
+        }
+        unstake_amount += claimable_rewards;
 
         let contract_balance = self.blockchain().get_esdt_balance(
             &self.blockchain().get_sc_address(),
@@ -355,6 +440,7 @@ pub trait StakingContract {
             package_info.rewards_frequency,
             staker_info.last_claim_of_rewards,
             staker_info.locked_until,
+            staker_info.premature_unstake_timestamp,
         )
     }
 
@@ -373,11 +459,16 @@ pub trait StakingContract {
         rewards_frequency: u64,
         last_claim: u64,
         locked_until: u64,
+        premature_unstake_timestamp: u64,
     ) -> BigUint {
         let rewards_per_cycle: BigUint =
             self.compute_rewards_per_cycle(staked_amount, apr_percentage, rewards_frequency);
-        let cycles_since_last_claim =
-            self.compute_cycles_since_last_claim(rewards_frequency, last_claim, locked_until);
+        let cycles_since_last_claim = self.compute_cycles_since_last_claim(
+            rewards_frequency,
+            last_claim,
+            locked_until,
+            premature_unstake_timestamp,
+        );
         rewards_per_cycle * cycles_since_last_claim
     }
 
@@ -398,11 +489,16 @@ pub trait StakingContract {
         rewards_frequency: u64,
         last_claim: u64,
         locked_until: u64,
+        premature_unstake_timestamp: u64,
     ) -> u64 {
         let mut last_eligible_timestamp = self.blockchain().get_block_timestamp();
 
         if last_eligible_timestamp > locked_until {
             last_eligible_timestamp = locked_until;
+        }
+
+        if premature_unstake_timestamp != 0 {
+            last_eligible_timestamp = premature_unstake_timestamp;
         }
 
         if last_eligible_timestamp <= last_claim {
@@ -465,6 +561,9 @@ pub trait StakingContract {
         #[indexed] timestamp: u64,
         #[indexed] rewards: &BigUint,
     );
+
+    #[event("premature_unstake")]
+    fn premature_unstake_event(&self, #[indexed] stake_id: u64, #[indexed] timestamp: u64);
 
     #[event("unstake")]
     fn unstake_event(
