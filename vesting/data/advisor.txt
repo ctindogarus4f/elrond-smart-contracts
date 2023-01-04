@@ -1,3 +1,3 @@
-erd1vvsv9kx057g4yukv2k6qytf3yp83dc2v92ztcn3ul45sccsashdqw6dqry permanent team 1,656,633,600 6,000,000
-erd1k3c53shaxhtcd5glpmu7xxhxsdf2pm0z3t8uv8gvpv2xxemy8x5q2ryn3s temporary team 1,656,633,600 1,000,000
-erd1vkhcyuamp5ev42n7j8ujpgag58rtwa4e3gna42vagxpl8n5qcd4sfs4yy2 permanent team 1,648,587,600 2,555,555
+erd1qhuh3lyz3e6urzrwexa3hldpp97evd9hcwvf6kdmvlzc7eytr4qqpv39ms temporary team 1664755200 500,000
+erd1qhuh3lyz3e6urzrwexa3hldpp97evd9hcwvf6kdmvlzc7eytr4qqpv39ms temporary privateinvestor 1664755200 1,000,000
+erd1qhuh3lyz3e6urzrwexa3hldpp97evd9hcwvf6kdmvlzc7eytr4qqpv39ms temporary seedinvestor 1664755200 100,555
