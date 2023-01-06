@@ -52,6 +52,21 @@ pub trait VestingContract {
     }
 
     #[only_owner]
+    #[endpoint(replaceWallet)]
+    fn replace_wallet(&self, old_wallet: ManagedAddress, new_wallet: ManagedAddress) {
+        require!(
+            !self.beneficiary_ids(&old_wallet).is_empty(),
+            "beneficiary does not exist"
+        );
+
+        let beneficiary_ids = self.beneficiary_ids(&old_wallet).get();
+        self.beneficiary_ids(&new_wallet).set(beneficiary_ids);
+        self.beneficiary_ids(&old_wallet).clear();
+
+        self.replace_wallet_event(&old_wallet, &new_wallet);
+    }
+
+    #[only_owner]
     #[endpoint(addGroup)]
     fn add_group(
         &self,
@@ -296,6 +311,13 @@ pub trait VestingContract {
         #[indexed] to: &ManagedAddress,
         #[indexed] id: u64,
         #[indexed] amount: &BigUint,
+    );
+
+    #[event("replace_wallet")]
+    fn replace_wallet_event(
+        &self,
+        #[indexed] old_wallet: &ManagedAddress,
+        #[indexed] new_wallet: &ManagedAddress,
     );
 
     #[event("add_beneficiary")]
