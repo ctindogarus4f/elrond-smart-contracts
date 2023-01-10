@@ -90,6 +90,48 @@
             }
         },
         {
+            "step": "scCall",
+            "comment": "add a staking package",
+            "txId": "add_package#6",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:staking",
+                "function": "addPackage",
+                "arguments": [
+                    {
+                        "package_name": "str:silver"
+                    },
+                    {
+                        "lock_period": "u64:365"
+                    },
+                    {
+                        "apr_percentage": "u64:20"
+                    },
+                    {
+                        "rewards_frequency": "u64:86400"
+                    },
+                    {
+                        "min_stake_amount": "10,000"
+                    },
+                    {
+                        "penalty_seconds": "u64:864000"
+                    },
+                    {
+                        "penalty_fee": "u64:10"
+                    }
+                ],
+                "gasLimit": "10,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "out": [],
+                "status": "0",
+                "message": "",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
             "step": "scQuery",
             "comment": "check package info",
             "txId": "check_package#10",
@@ -565,6 +607,126 @@
         {
             "step": "scCall",
             "comment": "add a new stake",
+            "txId": "add_stake#76",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:staking",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:TOK-abcd01",
+                        "value": "365,000"
+                    }
+                ],
+                "function": "createNewStake",
+                "arguments": [
+                    {
+                        "package_name": "str:silver"
+                    }
+                ],
+                "gasLimit": "10,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "out": [],
+                "status": "0",
+                "message": "",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "add a new stake",
+            "txId": "add_stake#77",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:staking",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:TOK-abcd01",
+                        "value": "365,000"
+                    }
+                ],
+                "function": "createNewStake",
+                "arguments": [
+                    {
+                        "package_name": "str:bronze"
+                    }
+                ],
+                "gasLimit": "10,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "out": [],
+                "status": "0",
+                "message": "",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "add a new stake",
+            "txId": "add_stake#78",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:staking",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:TOK-abcd01",
+                        "value": "365,000"
+                    }
+                ],
+                "function": "createNewStake",
+                "arguments": [
+                    {
+                        "package_name": "str:silver"
+                    }
+                ],
+                "gasLimit": "10,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "out": [],
+                "status": "0",
+                "message": "",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "add a new stake",
+            "txId": "add_stake#79",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:staking",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:TOK-abcd01",
+                        "value": "365,000"
+                    }
+                ],
+                "function": "createNewStake",
+                "arguments": [
+                    {
+                        "package_name": "str:silver"
+                    }
+                ],
+                "gasLimit": "10,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "out": [],
+                "status": "0",
+                "message": "",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "add a new stake",
             "txId": "add_stake#80",
             "tx": {
                 "from": "address:owner",
@@ -579,6 +741,36 @@
                 "arguments": [
                     {
                         "package_name": "str:bronze"
+                    }
+                ],
+                "gasLimit": "10,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "out": [],
+                "status": "0",
+                "message": "",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "comment": "add a new stake",
+            "txId": "add_stake#81",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:staking",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:TOK-abcd01",
+                        "value": "365,000"
+                    }
+                ],
+                "function": "createNewStake",
+                "arguments": [
+                    {
+                        "package_name": "str:silver"
                     }
                 ],
                 "gasLimit": "10,000,000",
@@ -611,9 +803,36 @@
                         "2-apr_percentage": "u64:10",
                         "3-rewards_frequency": "u64:86400",
                         "4-min_stake_amount": "biguint:1,000",
-                        "5-total_staked_amount": "biguint:2,190,000",
+                        "5-total_staked_amount": "biguint:2,555,000",
                         "6-penalty_seconds": "u64:864000",
                         "7-penalty_fee": "u64:5"
+                    }
+                ],
+                "status": "0"
+            }
+        },
+        {
+            "step": "scQuery",
+            "comment": "check package info",
+            "txId": "check_package#90",
+            "tx": {
+                "to": "sc:staking",
+                "function": "getPackageInfo",
+                "arguments": [
+                    "str:silver"
+                ]
+            },
+            "expect": {
+                "out": [
+                    {
+                        "0-enabled": "u8:1",
+                        "1-lock_period": "u64:365",
+                        "2-apr_percentage": "u64:20",
+                        "3-rewards_frequency": "u64:86400",
+                        "4-min_stake_amount": "biguint:10,000",
+                        "5-total_staked_amount": "biguint:1,460,000",
+                        "6-penalty_seconds": "u64:864000",
+                        "7-penalty_fee": "u64:10"
                     }
                 ],
                 "status": "0"
