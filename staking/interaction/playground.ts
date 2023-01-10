@@ -27,6 +27,7 @@ import {
 } from "@elrondnetwork/erdjs";
 import { UserSigner } from "@elrondnetwork/erdjs-walletcore";
 import { ProxyNetworkProvider } from "@elrondnetwork/erdjs-network-providers";
+import BigNumber from "bignumber.js";
 
 const fs = require("fs");
 
@@ -104,7 +105,13 @@ const addPackages = async (
     );
     let decodedResponse = (<Struct>firstValue).valueOf();
     Object.keys(decodedResponse).forEach(key => {
-      decodedResponse[key] = decodedResponse[key].toString();
+      if (key === "min_stake_amount" || key === "total_staked_amount") {
+        decodedResponse[key] = new BigNumber(decodedResponse[key])
+          .div(10 ** 18)
+          .toString();
+      } else {
+        decodedResponse[key] = decodedResponse[key].toString();
+      }
     });
 
     console.log(YELLOW, decodedResponse, "\n");
