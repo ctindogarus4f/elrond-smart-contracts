@@ -192,3 +192,4 @@ erd13t7qspvcl669jw2jxcna9cw0855a6m8mdafr52ssyppkun0fx93qqju2ny temporary private
 erd1xf8xug42ezgz5vqvjlya0r78gz599033awqc66kv4pkuhumu9rlqa00gru temporary privateinvestor 1,665,532,800 38,462
 erd139u79gwwhq68h3dz7yewpg07lps9jdgay0pxd20qeqrmhsjcay2qct7djr temporary privateinvestor 1,665,532,800 38,462
 erd1nh84evkm7zfzurv0st5wulp67mu6m0v5fvs76aw7nelq3k3dsneqlf2mqw temporary privateinvestor 1,665,532,800 250,000
+erd1x2x094uun7ykr70583z4trncd6czxdx2lk0tj7f4v00gukc4ydpqt73dvc temporary privateinvestor 1,665,532,800 38,462
