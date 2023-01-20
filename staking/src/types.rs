@@ -1,7 +1,7 @@
-elrond_wasm::imports!();
-elrond_wasm::derive_imports!();
+multiversx_sc::imports!();
+multiversx_sc::derive_imports!();
 
-use elrond_wasm::elrond_codec::NestedDecodeInput;
+use multiversx_sc::codec::NestedDecodeInput;
 
 #[derive(NestedEncode, NestedDecode, TopEncode, TypeAbi)]
 pub struct StakerInfo<M: ManagedTypeApi> {
@@ -28,7 +28,7 @@ pub struct PackageInfo<M: ManagedTypeApi> {
 impl<M: ManagedTypeApi> TopDecode for StakerInfo<M> {
     fn top_decode<I>(input: I) -> Result<Self, DecodeError>
     where
-        I: elrond_codec::TopDecodeInput,
+        I: codec::TopDecodeInput,
     {
         let mut input = input.into_nested_buffer();
         let package_name = ManagedBuffer::dep_decode(&mut input)?;
@@ -57,7 +57,7 @@ impl<M: ManagedTypeApi> TopDecode for StakerInfo<M> {
 impl<M: ManagedTypeApi> TopDecode for PackageInfo<M> {
     fn top_decode<I>(input: I) -> Result<Self, DecodeError>
     where
-        I: elrond_codec::TopDecodeInput,
+        I: codec::TopDecodeInput,
     {
         let mut input = input.into_nested_buffer();
         let enabled = bool::dep_decode(&mut input)?;

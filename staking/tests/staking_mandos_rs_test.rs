@@ -1,13 +1,13 @@
-use elrond_wasm_debug::*;
+use multiversx_sc_scenario::*;
 
-fn world() -> BlockchainMock {
-    let mut blockchain = BlockchainMock::new();
+fn world() -> ScenarioWorld {
+    let mut blockchain = ScenarioWorld::new();
 
-    blockchain.register_contract_builder("file:output/staking.wasm", staking::ContractBuilder);
+    blockchain.register_contract("file:output/staking.wasm", staking::ContractBuilder);
     blockchain
 }
 
 #[test]
 fn staking_rs() {
-    elrond_wasm_debug::mandos_rs("mandos/staking.scen.json", world());
+    multiversx_sc_scenario::run_rs("scenarios/staking.scen.json", world());
 }

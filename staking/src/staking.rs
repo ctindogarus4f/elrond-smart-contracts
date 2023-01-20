@@ -1,6 +1,6 @@
 #![no_std]
 
-elrond_wasm::imports!();
+multiversx_sc::imports!();
 
 mod types;
 
@@ -10,7 +10,7 @@ const SECONDS_IN_DAY: u64 = 86_400;
 const SECONDS_IN_YEAR: u64 = 31_536_000;
 
 /// A staking contract. Users can stake ESDT tokens and gradually receive ESDT token rewards.
-#[elrond_wasm::contract]
+#[multiversx_sc::contract]
 pub trait StakingContract {
     #[init]
     fn init(&self, token_identifier: TokenIdentifier, total_stake_limit: BigUint) {
@@ -42,10 +42,9 @@ pub trait StakingContract {
         let caller = self.blockchain().get_caller();
         self.send().direct(
             &caller,
-            &self.token_identifier().get(),
+            &EgldOrEsdtTokenIdentifier::esdt(self.token_identifier().get()),
             0,
             &amount,
-            b"successful withdraw",
         );
 
         self.withdraw_rewards_event(&amount);
@@ -163,7 +162,7 @@ pub trait StakingContract {
         let mut staker_ids = self.staker_ids(&caller).get();
 
         let token_identifier = self.token_identifier().get();
-        let (payment_amount, payment_token) = self.call_value().payment_token_pair();
+        let (payment_token, payment_amount) = self.call_value().single_fungible_esdt();
         require!(payment_token == token_identifier, "invalid staked token");
         require!(
             payment_amount >= package_info.min_stake_amount,
@@ -281,10 +280,9 @@ pub trait StakingContract {
 
         self.send().direct(
             &caller,
-            &self.token_identifier().get(),
+            &EgldOrEsdtTokenIdentifier::esdt(self.token_identifier().get()),
             0,
             &claimable_rewards,
-            b"successful claim",
         );
         self.claim_rewards_event(
             id,
@@ -344,10 +342,9 @@ pub trait StakingContract {
 
             self.send().direct(
                 &caller,
-                &self.token_identifier().get(),
+                &EgldOrEsdtTokenIdentifier::esdt(self.token_identifier().get()),
                 0,
                 &claimable_rewards,
-                b"successful claim",
             );
         } else {
             self.staker_info(id).update(|info| {
@@ -415,10 +412,9 @@ pub trait StakingContract {
 
         self.send().direct(
             &caller,
-            &self.token_identifier().get(),
+            &EgldOrEsdtTokenIdentifier::esdt(self.token_identifier().get()),
             0,
             &unstake_amount,
-            b"successful unstake",
         );
         self.unstake_event(id, self.blockchain().get_block_timestamp(), &unstake_amount);
     }
