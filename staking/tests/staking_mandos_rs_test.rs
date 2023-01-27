@@ -9,5 +9,5 @@ fn world() -> BlockchainMock {
 
 #[test]
 fn staking_rs() {
-    elrond_wasm_debug::mandos_rs("mandos/staking.scen.json", world());
+    elrond_wasm_debug::mandos_rs("scenarios/staking.scen.json", world());
 }
