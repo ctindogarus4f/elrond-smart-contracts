@@ -8,20 +8,20 @@ fn world() -> BlockchainMock {
 
 #[test]
 fn setup() {
-    elrond_wasm_debug::mandos_rs("mandos/setup.scen.json", world());
+    elrond_wasm_debug::mandos_rs("scenarios/setup.scen.json", world());
 }
 
 #[test]
 fn group_info() {
-    elrond_wasm_debug::mandos_rs("mandos/group_info.scen.json", world());
+    elrond_wasm_debug::mandos_rs("scenarios/group_info.scen.json", world());
 }
 
 #[test]
 fn beneficiary_info() {
-    elrond_wasm_debug::mandos_rs("mandos/beneficiary_info.scen.json", world());
+    elrond_wasm_debug::mandos_rs("scenarios/beneficiary_info.scen.json", world());
 }
 
 #[test]
 fn vesting_logic() {
-    elrond_wasm_debug::mandos_rs("mandos/vesting_logic.scen.json", world());
+    elrond_wasm_debug::mandos_rs("scenarios/vesting_logic.scen.json", world());
 }
