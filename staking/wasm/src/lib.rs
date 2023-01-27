@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           22
+// Endpoints:                            2
 // Async Callback (empty):               1
-// Total number of exported functions:  24
+// Total number of exported functions:   4
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -18,28 +18,8 @@ multiversx_sc_wasm_adapter::panic_handler!();
 multiversx_sc_wasm_adapter::endpoints! {
     staking
     (
-        withdrawRewards
-        pauseStake
-        unpauseStake
-        updateStakeLimit
-        addPackage
-        enablePackage
-        disablePackage
         createNewStake
-        compoundRewardsToExistingStake
-        claimRewards
-        prematureUnstake
-        unstake
-        getAvailableRewards
-        getTotalTokensStaked
-        getTotalStakeLimit
         getTokenIdentifier
-        getPausedStake
-        getStakerCounter
-        getStakerInfo
-        getStakerIds
-        getPackageNames
-        getPackageInfo
     )
 }
 
