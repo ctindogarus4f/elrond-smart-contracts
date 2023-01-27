@@ -12,4 +12,4 @@ deploy-devnet.interaction.json
 deploy-testnet.interaction.json
 
 .vscode
-elrond.workspace.json
+multiversx.workspace.json

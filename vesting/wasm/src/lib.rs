@@ -12,7 +12,6 @@ elrond_wasm_node::wasm_endpoints! {
         claim
         claimTokensUnallocated
         getBeneficiaryCounter
-        getBeneficiaryIds
         getBeneficiaryInfo
         getGroupInfo
         getTokenIdentifier
@@ -20,7 +19,6 @@ elrond_wasm_node::wasm_endpoints! {
         getTokensVested
         getTotalTokensAllocated
         getTotalTokensClaimed
-        removeBeneficiary
         replaceWallet
     )
 }
