@@ -48,21 +48,16 @@ const addGroups = async (
     const info = line.split(" ");
     const name = info[0];
     // remove thousand separator from numbers
-    const maxAllocationWithDecimals = info[1] + DECIMALS_SUFFIX;
-    const maxAllocation = maxAllocationWithDecimals.replace(/,/g, "");
-    const cliff = info[2].replace(/,/g, "");
-    const frequency = info[3].replace(/,/g, "");
-    const percentage = info[4];
+    const frequency = info[1].replace(/,/g, "");
+    const lockPeriod = info[2].replace(/,/g, "");
 
     let tx = contract.call({
       func: new ContractFunction("addGroup"),
       gasLimit: REGULAR_GAS_LIMIT,
       args: [
         BytesValue.fromUTF8(name),
-        new BigUIntValue(maxAllocation),
-        new U64Value(cliff),
         new U64Value(frequency),
-        new U8Value(percentage),
+        new U64Value(lockPeriod),
       ],
       chainID: CHAIN_ID,
     });
@@ -118,18 +113,17 @@ const addBeneficiaries = async (
   watcher: TransactionWatcher,
   resultsParser: ResultsParser,
 ) => {
-  let data = fs.readFileSync("../data/privateinvestor.txt", { encoding: "utf8" });
+  let data = fs.readFileSync("../data/beneficiaries.txt", { encoding: "utf8" });
   let lines = data.split(/\r?\n/);
 
   for (const line of lines) {
     const info = line.split(" ");
     const addr = info[0];
     const addrObj = new Address(addr);
-    const canBeRevoked = info[1] === "temporary";
-    const groupName = info[2];
+    const groupName = info[1];
     // remove thousand separator from numbers
-    const startTimestamp = info[3].replace(/,/g, "");
-    const tokensAllocatedWithDecimals = info[4] + DECIMALS_SUFFIX;
+    const startTimestamp = info[2].replace(/,/g, "");
+    const tokensAllocatedWithDecimals = info[3] + DECIMALS_SUFFIX;
     const tokensAllocated = tokensAllocatedWithDecimals.replace(/,/g, "");
 
     let tx = contract.call({
@@ -137,7 +131,6 @@ const addBeneficiaries = async (
       gasLimit: REGULAR_GAS_LIMIT,
       args: [
         new AddressValue(addrObj),
-        new BooleanValue(canBeRevoked),
         BytesValue.fromUTF8(groupName),
         new U64Value(startTimestamp),
         new BigUIntValue(tokensAllocated),
@@ -168,21 +161,23 @@ const addBeneficiaries = async (
       );
     }
 
-    console.log(`Fetching ids for beneficiary ${addr}...`);
+    console.log(`Fetching info for beneficiary ${addr}...`);
     let query = contract.createQuery({
-      func: new ContractFunction("getBeneficiaryIds"),
+      func: new ContractFunction("getBeneficiaryInfo"),
       args: [new AddressValue(addrObj)],
     });
     let queryResponse = await provider.queryContract(query);
-    endpointDefinition = contract.getEndpoint("getBeneficiaryIds");
+    endpointDefinition = contract.getEndpoint("getBeneficiaryInfo");
     let { firstValue } = resultsParser.parseQueryResponse(
       queryResponse,
       endpointDefinition,
     );
-    let decodedResponse = (<ArrayVec>firstValue).valueOf();
-    for (const beneficiaryId of decodedResponse) {
-      console.log(YELLOW, beneficiaryId, "\n");
-    }
+    let decodedResponse = (<Struct>firstValue).valueOf();
+    Object.keys(decodedResponse).forEach(key => {
+      decodedResponse[key] = decodedResponse[key].toString();
+    });
+
+    console.log(YELLOW, decodedResponse, "\n");
   }
 };
 
