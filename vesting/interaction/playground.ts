@@ -14,9 +14,7 @@ import {
   Account,
   Address,
   AddressValue,
-  ArrayVec,
   BigUIntValue,
-  BooleanValue,
   BytesValue,
   ContractFunction,
   ResultsParser,
@@ -25,7 +23,6 @@ import {
   Struct,
   TokenIdentifierValue,
   TransactionWatcher,
-  U8Value,
   U64Value,
 } from "@elrondnetwork/erdjs";
 import { UserSigner } from "@elrondnetwork/erdjs-walletcore";
