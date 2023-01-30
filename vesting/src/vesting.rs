@@ -87,6 +87,41 @@ pub trait VestingContract {
     }
 
     #[only_owner]
+    #[endpoint(addMultipleBeneficiaries)]
+    fn add_multiple_beneficiaries(
+        &self,
+        group_name: ManagedBuffer,
+        start: u64,
+        args: MultiValueEncoded<MultiValue2<ManagedAddress, BigUint>>,
+    ) {
+        require!(
+            !self.group_info(&group_name).is_empty(),
+            "specified group is not set up",
+        );
+
+        let mut total_tokens_allocated = self.total_tokens_allocated().get();
+        for beneficiary_pair in args.into_iter() {
+            let (addr, tokens_allocated) = beneficiary_pair.into_tuple();
+            require!(
+                self.beneficiary_info(&addr).is_empty(),
+                "beneficiary is already defined for this group",
+            );
+
+            let beneficiary_info = BeneficiaryInfo {
+                group_name: group_name.clone(),
+                start,
+                tokens_allocated: tokens_allocated.clone(),
+                tokens_claimed: BigUint::zero(),
+            };
+            self.beneficiary_info(&addr).set(&beneficiary_info);
+
+            total_tokens_allocated += &tokens_allocated;
+        }
+
+        self.total_tokens_allocated().set(&total_tokens_allocated);
+    }
+
+    #[only_owner]
     #[endpoint(addBeneficiary)]
     fn add_beneficiary(
         &self,
