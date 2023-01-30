@@ -102,6 +102,46 @@ const addGroups = async (
   }
 };
 
+const addBeneficiariesHelper = async (
+  contract: SmartContract,
+  owner: Account,
+  signer: UserSigner,
+  provider: ProxyNetworkProvider,
+  watcher: TransactionWatcher,
+  resultsParser: ResultsParser,
+  args: any,
+) => {
+  let tx = contract.call({
+    func: new ContractFunction("addMultipleBeneficiaries"),
+    gasLimit: REGULAR_GAS_LIMIT,
+    args: args,
+    chainID: CHAIN_ID,
+  });
+
+  console.log(`Adding beneficiaries...`);
+  tx.setNonce(owner.getNonceThenIncrement());
+  await signer.sign(tx);
+  await provider.sendTransaction(tx);
+  let transactionOnNetwork = await watcher.awaitCompleted(tx);
+  let endpointDefinition = contract.getEndpoint("addMultipleBeneficiaries");
+  let { returnCode, returnMessage } = resultsParser.parseOutcome(
+    transactionOnNetwork,
+    endpointDefinition,
+  );
+
+  if (returnCode.isSuccess()) {
+    console.log(
+      GREEN,
+      `SUCCESS! Beneficiaries added, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`,
+    );
+  } else {
+    console.log(
+      RED,
+      `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${returnMessage}.`,
+    );
+  }
+};
+
 const addBeneficiaries = async (
   contract: SmartContract,
   owner: Account,
@@ -113,6 +153,8 @@ const addBeneficiaries = async (
   let data = fs.readFileSync("../data/beneficiaries.txt", { encoding: "utf8" });
   let lines = data.split(/\r?\n/);
 
+  let idx = 0;
+  let args: any = [];
   for (const line of lines) {
     const info = line.split(" ");
     const addr = info[0];
@@ -123,58 +165,43 @@ const addBeneficiaries = async (
     const tokensAllocatedWithDecimals = info[3] + DECIMALS_SUFFIX;
     const tokensAllocated = tokensAllocatedWithDecimals.replace(/,/g, "");
 
-    let tx = contract.call({
-      func: new ContractFunction("addBeneficiary"),
-      gasLimit: REGULAR_GAS_LIMIT,
-      args: [
-        new AddressValue(addrObj),
-        BytesValue.fromUTF8(groupName),
-        new U64Value(startTimestamp),
-        new BigUIntValue(tokensAllocated),
-      ],
-      chainID: CHAIN_ID,
-    });
+    args.push(new AddressValue(addrObj));
+    args.push(new BigUIntValue(tokensAllocated));
 
-    console.log(`Adding beneficiary ${addr}...`);
-    tx.setNonce(owner.getNonceThenIncrement());
-    await signer.sign(tx);
-    await provider.sendTransaction(tx);
-    let transactionOnNetwork = await watcher.awaitCompleted(tx);
-    let endpointDefinition = contract.getEndpoint("addBeneficiary");
-    let { returnCode, returnMessage } = resultsParser.parseOutcome(
-      transactionOnNetwork,
-      endpointDefinition,
-    );
-
-    if (returnCode.isSuccess()) {
-      console.log(
-        GREEN,
-        `SUCCESS! Beneficiary added: ${addr}, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`,
-      );
-    } else {
-      console.log(
-        RED,
-        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${returnMessage}.`,
-      );
+    idx++;
+    if (idx % 100 !== 0) {
+      continue;
     }
 
-    console.log(`Fetching info for beneficiary ${addr}...`);
-    let query = contract.createQuery({
-      func: new ContractFunction("getBeneficiaryInfo"),
-      args: [new AddressValue(addrObj)],
-    });
-    let queryResponse = await provider.queryContract(query);
-    endpointDefinition = contract.getEndpoint("getBeneficiaryInfo");
-    let { firstValue } = resultsParser.parseQueryResponse(
-      queryResponse,
-      endpointDefinition,
-    );
-    let decodedResponse = (<Struct>firstValue).valueOf();
-    Object.keys(decodedResponse).forEach(key => {
-      decodedResponse[key] = decodedResponse[key].toString();
-    });
+    args = [
+      BytesValue.fromUTF8(groupName),
+      new U64Value(startTimestamp),
+      ...args,
+    ];
 
-    console.log(YELLOW, decodedResponse, "\n");
+    addBeneficiariesHelper(
+      contract,
+      owner,
+      signer,
+      provider,
+      watcher,
+      resultsParser,
+      args,
+    );
+
+    args = [];
+  }
+
+  if (args) {
+    addBeneficiariesHelper(
+      contract,
+      owner,
+      signer,
+      provider,
+      watcher,
+      resultsParser,
+      args,
+    );
   }
 };
 
