@@ -155,13 +155,15 @@ const addBeneficiaries = async (
 
   let idx = 0;
   let args: any = [];
+  let groupName;
+  let startTimestamp;
   for (const line of lines) {
     const info = line.split(" ");
     const addr = info[0];
     const addrObj = new Address(addr);
-    const groupName = info[1];
+    groupName = info[1];
     // remove thousand separator from numbers
-    const startTimestamp = info[2].replace(/,/g, "");
+    startTimestamp = info[2].replace(/,/g, "");
     const tokensAllocatedWithDecimals = info[3] + DECIMALS_SUFFIX;
     const tokensAllocated = tokensAllocatedWithDecimals.replace(/,/g, "");
 
@@ -169,7 +171,7 @@ const addBeneficiaries = async (
     args.push(new BigUIntValue(tokensAllocated));
 
     idx++;
-    if (idx % 100 !== 0) {
+    if (idx % 50 !== 0) {
       continue;
     }
 
@@ -179,7 +181,7 @@ const addBeneficiaries = async (
       ...args,
     ];
 
-    addBeneficiariesHelper(
+    await addBeneficiariesHelper(
       contract,
       owner,
       signer,
@@ -193,7 +195,13 @@ const addBeneficiaries = async (
   }
 
   if (args) {
-    addBeneficiariesHelper(
+    args = [
+      BytesValue.fromUTF8(groupName),
+      new U64Value(startTimestamp),
+      ...args,
+    ];
+
+    await addBeneficiariesHelper(
       contract,
       owner,
       signer,
