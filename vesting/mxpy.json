@@ -13,7 +13,7 @@
             "recall-nonce": true,
             "pem": "../../../elrond-wallet/wallet-owner.pem",
             "gas-limit": 60000000,
-            "arguments": ["str:SFIT-dc4b13"],
+            "arguments": ["str:SFIT-ea3162"],
             "send": true,
             "outfile": "deploy-testnet.interaction.json"
         }
