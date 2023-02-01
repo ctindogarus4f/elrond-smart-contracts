@@ -1,8 +1,8 @@
 {
     "configurations": {
         "default": {
-            "proxy": "https://testnet-api.multiversx.com",
-            "chainID": "T"
+            "proxy": "https://api.multiversx.com",
+            "chainID": "1"
         }
     },
     "contract":{
@@ -11,11 +11,11 @@
             "bytecode": "output/vesting.wasm",
             "metadata-payable": true,
             "recall-nonce": true,
-            "pem": "../../../elrond-wallet/wallet-owner.pem",
+            "pem": "../../../elrond-wallet/wallet-owner-v.pem",
             "gas-limit": 60000000,
-            "arguments": ["str:SFIT-ea3162"],
+            "arguments": ["str:SFIT-aebc90"],
             "send": true,
-            "outfile": "deploy-testnet.interaction.json"
+            "outfile": "deploy.interaction.json"
         }
      }
 }
