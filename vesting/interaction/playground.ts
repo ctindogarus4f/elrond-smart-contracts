@@ -118,7 +118,7 @@ const addBeneficiaries = async (
   watcher: TransactionWatcher,
   resultsParser: ResultsParser,
 ) => {
-  let data = fs.readFileSync("../data/privateinvestor.txt", { encoding: "utf8" });
+  let data = fs.readFileSync("../data/team.txt", { encoding: "utf8" });
   let lines = data.split(/\r?\n/);
 
   for (const line of lines) {
