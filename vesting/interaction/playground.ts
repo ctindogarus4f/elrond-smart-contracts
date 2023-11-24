@@ -31,6 +31,7 @@ import {
 import { UserSigner } from "@elrondnetwork/erdjs-walletcore";
 import { ProxyNetworkProvider } from "@elrondnetwork/erdjs-network-providers";
 import BigNumber from "bignumber.js";
+import axios from "axios";
 
 const fs = require("fs");
 
@@ -40,7 +41,7 @@ const addGroups = async (
   signer: UserSigner,
   provider: ProxyNetworkProvider,
   watcher: TransactionWatcher,
-  resultsParser: ResultsParser,
+  resultsParser: ResultsParser
 ) => {
   let data = fs.readFileSync("../data/groups.txt", { encoding: "utf8" });
   let lines = data.split(/\r?\n/);
@@ -76,18 +77,18 @@ const addGroups = async (
     let endpointDefinition = contract.getEndpoint("addGroup");
     let { returnCode, returnMessage } = resultsParser.parseOutcome(
       transactionOnNetwork,
-      endpointDefinition,
+      endpointDefinition
     );
 
     if (returnCode.isSuccess()) {
       console.log(
         GREEN,
-        `SUCCESS! Group added: ${name}, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`,
+        `SUCCESS! Group added: ${name}, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`
       );
     } else {
       console.log(
         RED,
-        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${returnMessage}.`,
+        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${returnMessage}.`
       );
     }
 
@@ -100,10 +101,10 @@ const addGroups = async (
     endpointDefinition = contract.getEndpoint("getGroupInfo");
     let { firstValue } = resultsParser.parseQueryResponse(
       queryResponse,
-      endpointDefinition,
+      endpointDefinition
     );
     let decodedResponse = (<Struct>firstValue).valueOf();
-    Object.keys(decodedResponse).forEach(key => {
+    Object.keys(decodedResponse).forEach((key) => {
       decodedResponse[key] = decodedResponse[key].toString();
     });
 
@@ -117,7 +118,7 @@ const addBeneficiaries = async (
   signer: UserSigner,
   provider: ProxyNetworkProvider,
   watcher: TransactionWatcher,
-  resultsParser: ResultsParser,
+  resultsParser: ResultsParser
 ) => {
   let data = fs.readFileSync("../data/team.txt", { encoding: "utf8" });
   let lines = data.split(/\r?\n/);
@@ -154,18 +155,18 @@ const addBeneficiaries = async (
     let endpointDefinition = contract.getEndpoint("addBeneficiary");
     let { returnCode, returnMessage } = resultsParser.parseOutcome(
       transactionOnNetwork,
-      endpointDefinition,
+      endpointDefinition
     );
 
     if (returnCode.isSuccess()) {
       console.log(
         GREEN,
-        `SUCCESS! Beneficiary added: ${addr}, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`,
+        `SUCCESS! Beneficiary added: ${addr}, tx hash: ${EXPLORER}/transactions/${tx.getHash()}.`
       );
     } else {
       console.log(
         RED,
-        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${returnMessage}.`,
+        `ERROR! tx hash: ${EXPLORER}/transactions/${tx.getHash()}, tx details: ${returnMessage}.`
       );
     }
 
@@ -178,7 +179,7 @@ const addBeneficiaries = async (
     endpointDefinition = contract.getEndpoint("getBeneficiaryIds");
     let { firstValue } = resultsParser.parseQueryResponse(
       queryResponse,
-      endpointDefinition,
+      endpointDefinition
     );
     let decodedResponse = (<ArrayVec>firstValue).valueOf();
     for (const beneficiaryId of decodedResponse) {
@@ -192,10 +193,10 @@ const addBeneficiaries = async (
       let endpointDefinition = contract.getEndpoint("getBeneficiaryInfo");
       let { firstValue } = resultsParser.parseQueryResponse(
         queryResponse,
-        endpointDefinition,
+        endpointDefinition
       );
       let decodedResponse = (<Struct>firstValue).valueOf();
-      Object.keys(decodedResponse).forEach(key => {
+      Object.keys(decodedResponse).forEach((key) => {
         if (key === "tokens_allocated" || key === "tokens_claimed") {
           decodedResponse[key] = new BigNumber(decodedResponse[key])
             .div(10 ** 18)
@@ -204,7 +205,139 @@ const addBeneficiaries = async (
           decodedResponse[key] = decodedResponse[key].toString();
         }
       });
-      console.log(decodedResponse)
+      console.log(decodedResponse);
+    }
+  }
+};
+
+const getAllBeneficiaries = async () => {
+  let all_beneficiaries = new Set<string>();
+  let offset = 0;
+  const SIZE = 50;
+
+  while (offset % SIZE === 0) {
+    const response = await axios.get(
+      `https://api.multiversx.com/transactions?from=${offset}&size=${SIZE}&receiver=erd1qqqqqqqqqqqqqpgqz88aj0jnyk2245qdckqlr0u3esrkm227up4sduprh7&function=addBeneficiary&withLogs=true`
+    );
+
+    for (const record of response.data) {
+      let events = record.logs?.events;
+      if (events) {
+        for (const event of events) {
+          if (event.identifier === "addBeneficiary") {
+            const address_in_base64 = event.topics[1];
+            const address_in_hex = Buffer.from(
+              address_in_base64,
+              "base64"
+            ).toString("hex");
+            const address_in_bech32 = Address.fromHex(address_in_hex).bech32();
+            all_beneficiaries.add(address_in_bech32);
+          }
+        }
+      }
+    }
+
+    offset += response.data.length;
+  }
+
+  return all_beneficiaries;
+};
+
+const getReplacementWallets = async () => {
+  let replacement_wallets = new Set<string>();
+  let offset = 0;
+  const SIZE = 50;
+
+  while (offset % SIZE === 0) {
+    const response = await axios.get(
+      `https://api.multiversx.com/transactions?from=${offset}&size=${SIZE}&receiver=erd1qqqqqqqqqqqqqpgqz88aj0jnyk2245qdckqlr0u3esrkm227up4sduprh7&function=replaceWallet&withLogs=true`
+    );
+
+    for (const record of response.data) {
+      let events = record.logs?.events;
+      if (events) {
+        for (const event of events) {
+          if (event.identifier === "replaceWallet") {
+            const address_in_base64 = event.topics[2];
+            const address_in_hex = Buffer.from(
+              address_in_base64,
+              "base64"
+            ).toString("hex");
+            const address_in_bech32 = Address.fromHex(address_in_hex).bech32();
+            replacement_wallets.add(address_in_bech32);
+          }
+        }
+      }
+    }
+
+    offset += response.data.length;
+  }
+
+  return replacement_wallets;
+};
+
+const getInfoForAllTheBeneficiaries = async (
+  contract: SmartContract,
+  provider: ProxyNetworkProvider,
+  resultsParser: ResultsParser
+) => {
+  const original_beneficiaries: Set<string> = await getAllBeneficiaries();
+  const replacement_wallets: Set<string> = await getReplacementWallets();
+  const beneficiaries = new Set([
+    ...original_beneficiaries,
+    ...replacement_wallets,
+  ]);
+
+  for (const addr of beneficiaries) {
+    // console.log(`Fetching ids for beneficiary ${addr}...`);
+
+    let query = contract.createQuery({
+      func: new ContractFunction("getBeneficiaryIds"),
+      args: [new AddressValue(new Address(addr))],
+    });
+    let queryResponse = await provider.queryContract(query);
+    let endpointDefinition = contract.getEndpoint("getBeneficiaryIds");
+    let { firstValue } = resultsParser.parseQueryResponse(
+      queryResponse,
+      endpointDefinition
+    );
+    let decodedResponse = (<ArrayVec>firstValue).valueOf();
+
+    for (const beneficiaryId of decodedResponse) {
+      // console.log(`Fetching id ${beneficiaryId}...`);
+
+      let query = contract.createQuery({
+        func: new ContractFunction("getBeneficiaryInfo"),
+        args: [new U64Value(beneficiaryId)],
+      });
+      let queryResponse = await provider.queryContract(query);
+      let endpointDefinition = contract.getEndpoint("getBeneficiaryInfo");
+      let { firstValue } = resultsParser.parseQueryResponse(
+        queryResponse,
+        endpointDefinition
+      );
+      let decodedResponse = (<Struct>firstValue).valueOf();
+      Object.keys(decodedResponse).forEach((key) => {
+        if (key === "tokens_allocated" || key === "tokens_claimed") {
+          decodedResponse[key] = new BigNumber(decodedResponse[key])
+            .div(10 ** 18)
+            .toString();
+        } else {
+          decodedResponse[key] = decodedResponse[key].toString();
+        }
+      });
+
+      let contentToWrite = `${beneficiaryId} ${addr} ${decodedResponse.group_name} ${decodedResponse.tokens_allocated} ${decodedResponse.tokens_claimed} ${decodedResponse.is_revoked}`;
+      console.log(contentToWrite);
+      // fs.appendFile("all_beneficiaries.txt", contentToWrite, (err: any) => {
+      //   if (err) {
+      //     console.error("Error writing to file:", err);
+      //   } else {
+      //     console.log("Successfully wrote to file");
+      //   }
+      // });
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
   }
 };
@@ -219,7 +352,7 @@ const main = async () => {
   // ----------------------- CODEC SETUP -----------------------
 
   // ---------------------- NETWORK SETUP ----------------------
-  const provider = new ProxyNetworkProvider(PROXY, { timeout: 4000 });
+  const provider = new ProxyNetworkProvider(PROXY, { timeout: 10000 });
   const watcher = new TransactionWatcher(provider);
   // ---------------------- NETWORK SETUP ----------------------
 
@@ -252,7 +385,7 @@ const main = async () => {
     let endpointDefinition = contract.getEndpoint("getTokenIdentifier");
     let { firstValue } = resultsParser.parseQueryResponse(
       queryResponse,
-      endpointDefinition,
+      endpointDefinition
     );
 
     let decodedResponse = <TokenIdentifierValue>firstValue;
@@ -265,6 +398,7 @@ const main = async () => {
   const shouldAddGroups = action === undefined || action === "add_groups";
   const shouldAddBeneficiaries =
     action === undefined || action === "add_beneficiaries";
+  const shouldGetInfo = action === undefined || action === "get_info";
 
   // ------------------------ ADD GROUPS -----------------------
   if (shouldAddGroups) {
@@ -280,10 +414,29 @@ const main = async () => {
       signer,
       provider,
       watcher,
-      resultsParser,
+      resultsParser
     );
   }
   // -------------------- ADD BENEFICIARIES --------------------
+
+  // -------------------- ADD BENEFICIARIES --------------------
+  if (shouldAddBeneficiaries) {
+    await addBeneficiaries(
+      contract,
+      owner,
+      signer,
+      provider,
+      watcher,
+      resultsParser
+    );
+  }
+  // -------------------- ADD BENEFICIARIES --------------------
+
+  // -------------------- GET INFO --------------------
+  if (shouldGetInfo) {
+    await getInfoForAllTheBeneficiaries(contract, provider, resultsParser);
+  }
+  // -------------------- GET INFO --------------------
 };
 
 (async () => {
