@@ -30,6 +30,7 @@ import {
 } from "@elrondnetwork/erdjs";
 import { UserSigner } from "@elrondnetwork/erdjs-walletcore";
 import { ProxyNetworkProvider } from "@elrondnetwork/erdjs-network-providers";
+import BigNumber from "bignumber.js";
 
 const fs = require("fs");
 
@@ -181,7 +182,29 @@ const addBeneficiaries = async (
     );
     let decodedResponse = (<ArrayVec>firstValue).valueOf();
     for (const beneficiaryId of decodedResponse) {
-      console.log(YELLOW, beneficiaryId, "\n");
+      console.log(`Fetching id ${beneficiaryId}...`);
+
+      let query = contract.createQuery({
+        func: new ContractFunction("getBeneficiaryInfo"),
+        args: [new U64Value(beneficiaryId)],
+      });
+      let queryResponse = await provider.queryContract(query);
+      let endpointDefinition = contract.getEndpoint("getBeneficiaryInfo");
+      let { firstValue } = resultsParser.parseQueryResponse(
+        queryResponse,
+        endpointDefinition,
+      );
+      let decodedResponse = (<Struct>firstValue).valueOf();
+      Object.keys(decodedResponse).forEach(key => {
+        if (key === "tokens_allocated" || key === "tokens_claimed") {
+          decodedResponse[key] = new BigNumber(decodedResponse[key])
+            .div(10 ** 18)
+            .toString();
+        } else {
+          decodedResponse[key] = decodedResponse[key].toString();
+        }
+      });
+      console.log(decodedResponse)
     }
   }
 };
