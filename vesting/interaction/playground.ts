@@ -105,7 +105,13 @@ const addGroups = async (
     );
     let decodedResponse = (<Struct>firstValue).valueOf();
     Object.keys(decodedResponse).forEach((key) => {
-      decodedResponse[key] = decodedResponse[key].toString();
+      if (key === "current_allocation" || key === "max_allocation") {
+        decodedResponse[key] = new BigNumber(decodedResponse[key])
+          .div(10 ** 18)
+          .toString();
+      } else {
+        decodedResponse[key] = decodedResponse[key].toString();
+      }
     });
 
     console.log(YELLOW, decodedResponse, "\n");
@@ -405,19 +411,6 @@ const main = async () => {
     await addGroups(contract, owner, signer, provider, watcher, resultsParser);
   }
   // ------------------------ ADD GROUPS -----------------------
-
-  // -------------------- ADD BENEFICIARIES --------------------
-  if (shouldAddBeneficiaries) {
-    await addBeneficiaries(
-      contract,
-      owner,
-      signer,
-      provider,
-      watcher,
-      resultsParser
-    );
-  }
-  // -------------------- ADD BENEFICIARIES --------------------
 
   // -------------------- ADD BENEFICIARIES --------------------
   if (shouldAddBeneficiaries) {
