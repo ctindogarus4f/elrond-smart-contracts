@@ -48,7 +48,6 @@ pub trait Dao {
         let staker_ids = self
             .staking_contract_proxy(staking_contract.clone())
             .staker_ids(address)
-            .with_gas_limit(60_000_000)
             .execute_on_dest_context::<ManagedVec<u64>>();
 
         let mut sum: BigUint = BigUint::zero();
@@ -56,7 +55,6 @@ pub trait Dao {
             let staker_info = self
                 .staking_contract_proxy(staking_contract.clone())
                 .staker_info(id)
-                .with_gas_limit(60_000_000)
                 .execute_on_dest_context::<StakerInfo<Self::Api>>();
 
             sum += staker_info.tokens_staked;
