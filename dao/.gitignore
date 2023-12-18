@@ -3,8 +3,14 @@
 /target/
 */target/
 
+*/node_modules/
+
 # The erdpy output
 output*
+
+deploy-devnet.interaction.json
+deploy-testnet.interaction.json
+deploy.interaction.json
 
 .vscode
 elrond.workspace.json

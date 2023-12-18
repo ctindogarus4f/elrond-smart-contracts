@@ -19,10 +19,10 @@
         },
         {
             "step": "scDeploy",
-            "txId": "deploy",
+            "id": "deploy",
             "tx": {
                 "from": "address:owner",
-                "contractCode": "file:../output/empty.wasm",
+                "contractCode": "file:../output/dao.wasm",
                 "arguments": [],
                 "gasLimit": "5,000,000",
                 "gasPrice": "0"
