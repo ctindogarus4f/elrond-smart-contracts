@@ -1,0 +1,22 @@
+{
+  "configurations": {
+    "default": {
+      "proxy": "https://testnet-api.multiversx.com",
+      "chainID": "T"
+    }
+  },
+  "contract": {
+    "deploy": {
+      "verbose": true,
+      "bytecode": "output/dao.wasm",
+      "recall-nonce": true,
+      "pem": "../../../elrond-wallet/wallet-owner.pem",
+      "gas-limit": 60000000,
+      "arguments": [
+        "0x0000000000000000050000e0be3ecb8a0f0e7fb78885228308dadf64c84414b0"
+      ],
+      "send": true,
+      "outfile": "deploy-testnet.interaction.json"
+    }
+  }
+}
