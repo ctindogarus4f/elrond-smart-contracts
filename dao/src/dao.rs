@@ -60,7 +60,7 @@ pub trait Dao {
             sum += staker_info.tokens_staked;
         }
 
-        sum
+        sum / 1000u64
     }
 
     #[view(getStakingContract)]
