@@ -1,0 +1,15 @@
+{
+  "contract": {
+    "deploy": {
+      "verbose": true,
+      "bytecode": "output/vesting.wasm",
+      "metadata-payable": true,
+      "recall-nonce": true,
+      "pem": "../../../elrond-wallet/wallet-owner.pem",
+      "gas-limit": 60000000,
+      "arguments": ["str:SFIT-0919b7"],
+      "send": true,
+      "outfile": "deploy.interaction.json"
+    }
+  }
+}

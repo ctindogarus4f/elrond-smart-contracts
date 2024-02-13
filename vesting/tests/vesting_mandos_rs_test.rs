@@ -1,27 +1,27 @@
-use elrond_wasm_debug::*;
+use multiversx_sc_scenario::*;
 
-fn world() -> BlockchainMock {
-    let mut blockchain = BlockchainMock::new();
-    blockchain.register_contract_builder("file:output/vesting.wasm", vesting::ContractBuilder);
+fn world() -> ScenarioWorld {
+    let mut blockchain = ScenarioWorld::new();
+    blockchain.register_contract("file:output/vesting.wasm", vesting::ContractBuilder);
     blockchain
 }
 
 #[test]
 fn setup() {
-    elrond_wasm_debug::mandos_rs("mandos/setup.scen.json", world());
+    world().run("mandos/setup.scen.json");
 }
 
 #[test]
 fn group_info() {
-    elrond_wasm_debug::mandos_rs("mandos/group_info.scen.json", world());
+    world().run("mandos/group_info.scen.json");
 }
 
 #[test]
 fn beneficiary_info() {
-    elrond_wasm_debug::mandos_rs("mandos/beneficiary_info.scen.json", world());
+    world().run("mandos/beneficiary_info.scen.json");
 }
 
 #[test]
 fn vesting_logic() {
-    elrond_wasm_debug::mandos_rs("mandos/vesting_logic.scen.json", world());
+    world().run("mandos/vesting_logic.scen.json");
 }

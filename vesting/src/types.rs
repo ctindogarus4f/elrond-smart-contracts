@@ -1,6 +1,6 @@
-use elrond_wasm::{api::ManagedTypeApi, types::BigUint, types::ManagedBuffer};
+use multiversx_sc::{api::ManagedTypeApi, types::BigUint, types::ManagedBuffer};
 
-elrond_wasm::derive_imports!();
+multiversx_sc::derive_imports!();
 
 #[derive(ManagedVecItem, NestedEncode, NestedDecode, TopEncode, TopDecode, TypeAbi)]
 pub struct BeneficiaryInfo<M: ManagedTypeApi> {
