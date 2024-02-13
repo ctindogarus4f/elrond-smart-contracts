@@ -224,7 +224,18 @@ pub trait VestingContract {
             "id is not defined for the beneficiary"
         );
 
-        let tokens_available = self.get_tokens_available(id);
+        let beneficiary_info = self.beneficiary_info(id).get();
+        let group_name = beneficiary_info.group_name;
+
+        let tokens_available;
+        if group_name == ManagedBuffer::from(b"seedinvestor")
+            || group_name == ManagedBuffer::from(b"privateinvestor")
+        {
+            tokens_available = beneficiary_info.tokens_allocated - beneficiary_info.tokens_claimed;
+        } else {
+            tokens_available = self.get_tokens_available(id);
+        }
+
         require!(
             tokens_available > 0,
             "no tokens are available to be claimed"
