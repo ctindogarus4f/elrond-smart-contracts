@@ -224,19 +224,7 @@ pub trait VestingContract {
             "id is not defined for the beneficiary"
         );
 
-        let beneficiary_info = self.beneficiary_info(id).get();
-        let group_name = beneficiary_info.group_name;
-
-        let tokens_available;
-        // unlock all the tokens for investors (see proposal https://peerme.io/proposals/mYOlgxJeLNyj)
-        if group_name == ManagedBuffer::from(b"seedinvestor")
-            || group_name == ManagedBuffer::from(b"privateinvestor")
-        {
-            tokens_available = beneficiary_info.tokens_allocated - beneficiary_info.tokens_claimed;
-        } else {
-            tokens_available = self.get_tokens_available(id);
-        }
-
+        let tokens_available = self.get_tokens_available(id);
         require!(
             tokens_available > 0,
             "no tokens are available to be claimed"
@@ -266,10 +254,21 @@ pub trait VestingContract {
             "beneficiary does not exist"
         );
 
-        let tokens_claimed = self.beneficiary_info(id).get().tokens_claimed;
-        let tokens_vested = self.get_tokens_vested(id);
+        let beneficiary_info = self.beneficiary_info(id).get();
+        let group_name = beneficiary_info.group_name;
 
-        tokens_vested - tokens_claimed
+        let tokens_available;
+        // unlock all the tokens for investors (see proposal https://peerme.io/proposals/mYOlgxJeLNyj)
+        if group_name == ManagedBuffer::from(b"seedinvestor")
+            || group_name == ManagedBuffer::from(b"privateinvestor")
+        {
+            tokens_available = beneficiary_info.tokens_allocated - beneficiary_info.tokens_claimed;
+        } else {
+            let tokens_vested = self.get_tokens_vested(id);
+            tokens_available = tokens_vested - beneficiary_info.tokens_claimed;
+        }
+
+        tokens_available
     }
 
     #[view(getTokensVested)]
