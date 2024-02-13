@@ -228,6 +228,7 @@ pub trait VestingContract {
         let group_name = beneficiary_info.group_name;
 
         let tokens_available;
+        // unlock all the tokens for investors (see proposal https://peerme.io/proposals/mYOlgxJeLNyj)
         if group_name == ManagedBuffer::from(b"seedinvestor")
             || group_name == ManagedBuffer::from(b"privateinvestor")
         {
