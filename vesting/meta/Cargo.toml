@@ -7,8 +7,6 @@ publish = false
 [dependencies.vesting]
 path = ".."
 
-[dependencies.elrond-wasm]
-version = "0.31.0"
-
-[dependencies.elrond-wasm-debug]
-version = "0.31.0"
+[dependencies.multiversx-sc-meta]
+version = "0.47.4"
+default-features = false

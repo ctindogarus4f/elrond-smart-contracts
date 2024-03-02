@@ -1,14 +1,13 @@
 #![no_std]
-#![feature(generic_associated_types)]
 
-elrond_wasm::imports!();
+multiversx_sc::imports!();
 
 mod types;
 
 use types::*;
 
 /// A vesting contract that can release its token balance gradually like a typical vesting scheme.
-#[elrond_wasm::contract]
+#[multiversx_sc::contract]
 pub trait VestingContract {
     #[init]
     fn init(&self, token_identifier: TokenIdentifier) {
@@ -20,6 +19,11 @@ pub trait VestingContract {
         self.total_tokens_allocated().set_if_empty(&BigUint::zero());
         self.total_tokens_claimed().set_if_empty(&BigUint::zero());
         self.beneficiary_counter().set_if_empty(&0);
+    }
+
+    #[upgrade]
+    fn upgrade(&self, token_identifier: TokenIdentifier) {
+        self.init(token_identifier);
     }
 
     // endpoints
@@ -43,10 +47,9 @@ pub trait VestingContract {
         let unallocated_tokens = contract_balance - total_tokens_claimable;
         self.send().direct(
             &caller,
-            &self.token_identifier().get(),
+            &EgldOrEsdtTokenIdentifier::esdt(self.token_identifier().get()),
             0,
             &unallocated_tokens,
-            b"successful claim by the owner",
         );
         self.claim_tokens_unallocated_event(&unallocated_tokens);
     }
@@ -237,10 +240,9 @@ pub trait VestingContract {
 
         self.send().direct(
             &caller,
-            &self.token_identifier().get(),
+            &EgldOrEsdtTokenIdentifier::esdt(self.token_identifier().get()),
             0,
             &tokens_available,
-            b"successful claim",
         );
         self.claim_event(&caller, id, &tokens_available);
     }
@@ -254,10 +256,21 @@ pub trait VestingContract {
             "beneficiary does not exist"
         );
 
-        let tokens_claimed = self.beneficiary_info(id).get().tokens_claimed;
-        let tokens_vested = self.get_tokens_vested(id);
+        let beneficiary_info = self.beneficiary_info(id).get();
+        let group_name = beneficiary_info.group_name;
 
-        tokens_vested - tokens_claimed
+        let tokens_available;
+        // unlock all the tokens for investors (see proposal https://peerme.io/proposals/mYOlgxJeLNyj)
+        if group_name == ManagedBuffer::from(b"seedinvestor")
+            || group_name == ManagedBuffer::from(b"privateinvestor")
+        {
+            tokens_available = beneficiary_info.tokens_allocated - beneficiary_info.tokens_claimed;
+        } else {
+            let tokens_vested = self.get_tokens_vested(id);
+            tokens_available = tokens_vested - beneficiary_info.tokens_claimed;
+        }
+
+        tokens_available
     }
 
     #[view(getTokensVested)]
